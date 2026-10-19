@@ -20,7 +20,7 @@ description: קריאה ל-OpenAI Images API ליצירת תמונה מ-prompt �
 ## קריאה
 ```bash
 set -euo pipefail
-OUT="workspace/images/<date>-<slug>.png"     # נתיב הפלט
+OUT="yuval/outputs/<date>-<slug>.png"     # נתיב הפלט
 PROMPT='<the prompt>'
 
 KEY=$(grep '^OPENAI_API_KEY=' .env | head -n1 | cut -d= -f2-)

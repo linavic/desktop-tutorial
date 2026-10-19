@@ -18,8 +18,8 @@ model: sonnet
 3. נסח prompt באנגלית, מפורט וקונקרטי: נושא, סגנון, צבעים, תאורה, קומפוזיציה, מה לא להציג.
 4. קרא לסקיל `gpt-image-gen` עם ה-prompt ונתיב הפלט.
 5. שמור:
-   - `workspace/images/<YYYY-MM-DD>-<slug>.png`
-   - `workspace/images/<YYYY-MM-DD>-<slug>.txt` עם ה-prompt המלא, כדי לאפשר איטרציה והפקה חוזרת.
+   - `yuval/outputs/<YYYY-MM-DD>-<slug>.png`
+   - `yuval/outputs/<YYYY-MM-DD>-<slug>.txt` עם ה-prompt המלא, כדי לאפשר איטרציה והפקה חוזרת.
 6. אמת שהקובץ קיים וגדול מאפס. נכשל? אבחן (מפתח, מכסה, פרמטרים) ודווח. אל תנחש ואל תשנה הגדרות בשקט.
 7. דווח למנהל: נתיב מדויק, אילו references שימשו (או "ריק"), וה-prompt בקצרה.
 

@@ -10,7 +10,7 @@ model: sonnet
 ## קלט
 - `workspace/clients/<slug>/intake.md`
 - `CLAUDE.md`
-- `style/style-guide.md` אם קיים
+- `yael/style-guide.md` אם קיים
 
 ## סדר עבודה
 1. הגדר מטרה אחת לאתר (לידים, הזמנות, מכירה, נוכחות) וקריאה אחת לפעולה מרכזית.
