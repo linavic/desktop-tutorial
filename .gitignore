@@ -1,0 +1,16 @@
+# סודות
+.env
+.env.local
+*.key
+*.pem
+
+# הגדרות מקומיות
+.claude/settings.local.json
+
+# תוצרי עבודה: מוסיפים אותם ל-git רק אם רוצים לשמור היסטוריה
+# workspace/*/*.md
+
+# מערכת
+.DS_Store
+Thumbs.db
+*.log
