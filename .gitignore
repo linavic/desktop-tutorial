@@ -14,3 +14,7 @@
 .DS_Store
 Thumbs.db
 *.log
+
+# מידע על לקוחות: פרטי, לא עולה ל-git
+workspace/clients/*
+!workspace/clients/.gitkeep
