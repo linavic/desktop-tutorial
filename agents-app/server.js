@@ -90,7 +90,8 @@ async function streamSearch(cfg, system, user, h, maxTokens = 2600) {
   if (!res.ok && (res.status === 400 || res.status === 404)) res = await open('web_search_preview');
   if (!res.ok) await fail('OpenAI Responses', res);
   let full = ''; const sources = new Map();
-  const addSource = a => { if (a?.url && !sources.has(a.url)) { const s = { url: a.url, title: a.title || a.url }; sources.set(a.url, s); h.onSource(s); } };
+  const cleanUrl = u => { try { const x = new URL(u); if (x.searchParams.get('utm_source') === 'openai') x.searchParams.delete('utm_source'); return x.toString(); } catch { return u; } };
+  const addSource = a => { const url = a?.url && cleanUrl(a.url); if (url && !sources.has(url)) { const s = { url, title: a.title || url }; sources.set(url, s); h.onSource(s); } };
   for await (const j of sse(res)) {
     const t = j.type;
     if (t === 'response.output_text.delta' && j.delta) { full += j.delta; h.onDelta(j.delta); }
@@ -161,8 +162,8 @@ const DEMO_SOURCES = [
 const NOTES = {
   chen: 'יש לך חיפוש חי ברשת. השתמשי בו: מצאי מקורות עדכניים ואמינים, וציטטי רק קישורים אמיתיים שהחיפוש החזיר. אל תמציאי כתובות, כותרים או ציטוטים. הגישה היא רק לחיפוש, בלי שמירת קבצים וזיכרון חיפושים. החזירי סיכום מאורגן של הממצאים עם הקישורים.',
   researcher: 'יש לך חיפוש חי ברשת. השתמשי בו כדי לאמת עובדות ולמצוא נתונים עדכניים. לכל טענה ציינו מקור אמיתי מהחיפוש, והפרידי בין עובדה מאומתת להערכה. אל תמציאי מקורות.',
-  yael: 'כתבי את המאמר המשוכתב ב-Markdown בלבד (ללא HTML ובלי שמירת קבצים). השאירי עד 2 placeholders בפורמט {{IMAGE_NEEDED: "תיאור מפורט"}} במקומות המתאימים. אל תוסיפי קישורים או CTA של מחבר מקורי.',
-  yuval: `החזירי רק שורות בפורמט "PROMPT <מספר>: <prompt באנגלית>", שורה לכל placeholder, עד ${MAX_IMAGES} שורות. בלי שום טקסט נוסף.`
+  yael: 'כתבי את המאמר המשוכתב ב-Markdown בלבד (ללא HTML ובלי שמירת קבצים). השאירי עד 2 placeholders בפורמט {{IMAGE_NEEDED: "תיאור מפורט"}} במקומות המתאימים. תיאור התמונה חייב להתאים למציאות של העסק לפי ההקשר: אווירה, צבעים ונושא. בלי טקסט, לוגו, שלטים או שמות מותג בתמונה (הלוגו האמיתי מתווסף בנפרד), ובלי להמציא אנשים, מוצרים או מקומות ספציפיים. אל תוסיפי קישורים או CTA של מחבר מקורי.',
+  yuval: `החזירי רק שורות בפורמט "PROMPT <מספר>: <prompt באנגלית>", שורה לכל placeholder, עד ${MAX_IMAGES} שורות. בלי שום טקסט נוסף. כל prompt חייב להתאים לעסק ולמציאות שלו לפי ההקשר (נושא, אווירה, צבעים). בלי טקסט, אותיות, לוגו, שלטים או שמות מותג בתמונה, כי הלוגו האמיתי של העסק מתווסף בנפרד. בלי להמציא אנשים, מוצרים או מקומות ספציפיים.`
 };
 
 function placeholders(text) {
@@ -227,7 +228,7 @@ async function runCrew(brief, emit) {
             save(rel, `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},45%,86%)"/><stop offset="1" stop-color="hsl(${hue + 20},35%,70%)"/></linearGradient></defs><rect width="640" height="400" fill="url(#g)"/><text x="320" y="190" text-anchor="middle" font-family="Georgia,serif" font-size="30" letter-spacing="6" fill="#fff">${biz.toUpperCase().replace(/[<&>"]/g, '')}</text><text x="320" y="230" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#ffffffcc">demo image ${i + 1}</text></svg>`);
           } else {
             emit({ type: 'step', agent: agent.id, text: `מייצר תמונה ${i + 1}/${prompts.length} (${IMAGE_MODEL})` });
-            save(rel, await genImage(cfg, style ? `${prompts[i]}\n\nStyle reference: ${style}` : prompts[i]));
+            save(rel, await genImage(cfg, `${prompts[i]}${style ? `\n\nStyle reference: ${style}` : ''}\n\nStrict: no text, no letters, no logos, no brand names, no signage, no watermarks anywhere in the image.`));
           }
           made.push({ rel, n: i + 1, prompt: prompts[i] });
           emit({ type: 'image', agent: agent.id, url: `/runs/${runId}/${rel}`, prompt: prompts[i], n: i + 1 });
@@ -265,6 +266,7 @@ async function runCrew(brief, emit) {
       await sleep(500);
     }
 
+    if (!/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(ctx)) text = text.replace(/[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/g, '');
     const file = { agent: agent.id, label: agent.label, path: outPath, content: text };
     byAgent[agent.id] = file; files.push(file);
     save(outPath, text);

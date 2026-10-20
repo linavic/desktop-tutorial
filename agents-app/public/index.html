@@ -53,6 +53,7 @@ textarea.f{min-height:110px}
 .note{font-size:.78rem;color:var(--muted);margin:10px 0 0}
 .cfggrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.cfggrid2 .wide{grid-column:1/-1}
 .pre{border-color:#e0b56788;color:var(--gold)}
+.kit{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}.kit>div{padding:12px;border:1px dashed var(--line);border-radius:12px}.logoprev img{max-height:48px;max-width:140px;background:#ffffff14;padding:6px;border-radius:8px;margin-top:8px;display:block}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumbs div{position:relative}.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 .thumbs button{position:absolute;top:-6px;inset-inline-end:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--err);color:#fff;cursor:pointer;line-height:1}
@@ -145,7 +146,7 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
 .hist .box{width:min(560px,92vw);max-height:80vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
 .hist li{padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer;list-style:none}.hist li:hover{color:var(--gold)}
 @media(max-width:900px){
- .grid{grid-template-columns:1fr}.cfggrid,.cfggrid2{grid-template-columns:1fr}
+ .grid{grid-template-columns:1fr}.cfggrid,.cfggrid2,.kit{grid-template-columns:1fr}
  .pipe{flex-direction:column;align-items:stretch;padding:10px 0}
  .node{width:auto;display:grid;grid-template-columns:60px 1fr;gap:14px;align-items:center;text-align:start}
  .tk{max-width:none}
@@ -192,19 +193,24 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
       <div><label for="pLang">שפה</label><input class="f" id="pLang" placeholder="עברית, אנגלית, רוסית…"></div>
       <div class="wide"><label for="pRules">כללים וגבולות שחובה לכבד (רגולציה, מותג, דברים אסורים)</label><textarea class="f" id="pRules" style="min-height:70px" placeholder="למשל: בלי מחירים, בלי הבטחות, בלי להזכיר מתחרים"></textarea></div>
     </div>
+    <div class="kit">
+      <div><b>לוגו העסק</b><div class="note" style="margin:4px 0 8px">הלוגו האמיתי שלך. הוא לא נשלח למודל, אלא מודבק על התמונות בדפדפן, כך שהוא תמיד נכון.</div>
+        <input type="file" id="logoin" accept="image/*"><div class="logoprev" id="logoprev"></div>
+        <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label style="display:inline;margin:0"><input type="checkbox" id="logoOn" checked> הדבק על תמונות יובל</label>
+        <select id="logoPos" class="f" style="width:auto"><option value="br">פינה ימנית תחתונה</option><option value="bl">פינה שמאלית תחתונה</option><option value="tr">פינה ימנית עליונה</option><option value="tl">פינה שמאלית עליונה</option></select></div></div>
+      <div><b>תמונות reference לסגנון (עד 3)</b><div class="note" style="margin:4px 0 8px">תמונות של העסק, המוצרים או הסגנון הרצוי. יובל מנתח אותן ומתאים אליהן את התמונות, כדי שלא יהיו זרות למותג.</div>
+        <input type="file" id="refin" accept="image/*" multiple><div class="thumbs" id="thumbs"></div></div>
+    </div>
     <details style="margin-top:10px"><summary class="note" style="cursor:pointer">ההקשר המלא שהסוכנים מקבלים (נבנה אוטומטית, אפשר לערוך ידנית)</summary><textarea class="f" id="ctx" style="margin-top:8px" placeholder="יתמלא אוטומטית מהשדות למעלה"></textarea></details>
   </details>
 
   <details class="cfg" id="cfg">
-    <summary id="cfgsum">חיבור: מפתח OpenAI ותמונות reference</summary>
+    <summary id="cfgsum">חיבור: מפתח OpenAI</summary>
     <div class="cfggrid">
       <div><label for="apikey">מפתח OpenAI API</label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"><div style="margin-top:8px"><button class="btn" id="chk" type="button">בדוק חיבור</button></div></div>
       <div><label for="model">מודל (לא חובה)</label><input class="f" id="model" dir="ltr" placeholder="gpt-4.1"></div>
     </div>
     <p class="note">המפתח נשמר רק בלשונית הזו, נשלח לשרת בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה. חיפוש ברשת ותמונות דורשים מפתח עם גישה לכלי web_search ול-gpt-image-2.</p>
-    <label style="margin-top:12px">תמונות reference לסגנון המותג (עד 3). יובל מנתח אותן ומתאים את התמונות אליהן.</label>
-    <input type="file" id="refin" accept="image/*" multiple>
-    <div class="thumbs" id="thumbs"></div>
     <ul id="chkout" class="srclist" style="margin-top:12px"></ul>
   </details>
 
@@ -250,7 +256,7 @@ const ICONS = {
 const svg = id => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id] || ''}</svg>`;
 const EXAMPLES = ['פוסט היכרות שמציג את העסק ואת השירות הראשי שלנו', 'מאמר שעונה על השאלה שלקוחות שואלים הכי הרבה', 'סדרת סטוריז: 3 דברים שכדאי לדעת לפני שמתחילים'];
 
-let INFO = { agents: [], live: false }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, SRC = {}, REFS = [], runStart = 0, tick = null, TAB = 'article', NEXT = [], busy = false, ENERGY = 0;
+let LOGO = '', INFO = { agents: [], live: false }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, SRC = {}, REFS = [], runStart = 0, tick = null, TAB = 'article', NEXT = [], busy = false, ENERGY = 0;
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -306,7 +312,7 @@ function md(src, imgs) {
   }
   close(); return out;
 }
-const imgMap = () => Object.fromEntries((IMGS.yuval || []).map(i => [i.n, i.url]));
+const imgMap = () => Object.fromEntries((IMGS.yuval || []).map(i => [i.n, i.shown || i.url]));
 
 // ---------- אתחול ----------
 async function init() {
@@ -317,13 +323,13 @@ async function init() {
   try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; } catch {}
   $('#model').value = store.get('model') || '';
   renderExamples(EXAMPLES);
-  updateMode(); reset();
+  loadKit(); updateMode(); reset();
 }
 function updateMode() {
   const key = $('#apikey').value.trim(), m = $('#mode'), live = Boolean(key) || INFO.live;
   m.className = 'mode ' + (live ? 'live' : 'demo');
   m.textContent = key ? 'מצב חי · OpenAI (המפתח שלך)' : INFO.live ? `מצב חי · ${INFO.model}` : 'מצב הדגמה · בלי מפתח';
-  $('#cfgsum').textContent = key ? 'חיבור: מפתח OpenAI מוגדר ✓' : 'חיבור: מפתח OpenAI ותמונות reference';
+  $('#cfgsum').textContent = key ? 'חיבור: מפתח OpenAI מוגדר ✓' : 'חיבור: מפתח OpenAI';
   try { sessionStorage.setItem('etel_key', key); } catch {}
 }
 const body = extra => ({ apiKey: $('#apikey').value.trim(), model: $('#model').value.trim(), context: $('#ctx').value, businessName: $('#pName').value.trim(), ...extra });
@@ -363,14 +369,17 @@ function renderFocus() {
   <div class="row">כלים: ${tools}</div><div class="row">מקבל: ${ins}</div><div class="row">מוציא: <span class="file out">${esc(a.out)}</span></div>
   <ul class="${todo}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
   <div class="cap">מתוך קובץ ההגדרה של הסוכן. הרשימה מסומנת כשהסוכן מסיים.</div>
-  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>`;
+  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>${s.style ? `<div class="cap" style="color:var(--gold)">ניתוח ה-reference של יובל</div><pre class="stream" style="min-height:0">${esc(s.style)}</pre>` : ''}`;
   const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'עדיין לא התחיל.' : '');
   if (s.status === 'working') pre.append(el('span', 'caret'));
   pre.scrollTop = pre.scrollHeight;
   const sl = $('#srcl'); (SRC[FOCUS] || []).forEach(x => sl.append(el('li', null, `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>`)));
   renderGallery($('#gal'), FOCUS);
 }
-function renderGallery(box, id) { box.replaceChildren(); (IMGS[id] || []).forEach(im => { const f = el('figure'); const i = el('img'); i.src = im.url; i.alt = `תמונה ${im.n}`; f.append(i, el('figcaption', null, esc(im.prompt))); box.append(f); }); }
+function renderGallery(box, id) {
+  box.replaceChildren();
+  (IMGS[id] || []).forEach(im => { const f = el('figure'); const i = el('img'); i.src = im.shown || im.url; i.alt = `תמונה ${im.n}`; const dl = el('a', 'btn', 'הורדה'); dl.href = im.shown || im.url; dl.download = `image-${im.n}.png`; dl.style.cssText = 'display:inline-block;margin-top:4px;font-size:.7rem;padding:2px 8px;text-decoration:none'; f.append(i, el('figcaption', null, esc(im.prompt)), dl); box.append(f); });
+}
 
 function log(id, msg) {
   const ul = $('#log'); if (ul.firstChild && !ul.firstChild.querySelector('time')) ul.replaceChildren();
@@ -401,10 +410,11 @@ function handle(ev) {
   } else if (ev.type === 'source') {
     (SRC[a.id] = SRC[a.id] || []).push(ev); chip('s', esc(dom(ev.url)), ev.url); log(a.id, `מצא מקור: ${dom(ev.url)}`); setStats();
     if (FOCUS === a.id) { $('#srcl').append(el('li', null, `<a href="${esc(ev.url)}" target="_blank" rel="noopener noreferrer">${esc(ev.title)}</a>`)); }
-  } else if (ev.type === 'style') { log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); }
+  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); if (FOCUS === a.id) renderFocus(); }
   else if (ev.type === 'image') {
     (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`);
     if (FOCUS === a.id) renderGallery($('#gal'), a.id);
+    if (LOGO && $('#logoOn').checked) branded(ev.url).then(u => { ev.shown = u; if (FOCUS === a.id) renderGallery($('#gal'), a.id); if (FILES.length === INFO.agents.length) renderDeliver(); }).catch(() => {});
   } else if (ev.type === 'step') { log(a.id, ev.text); }
   else if (ev.type === 'done') {
     s.status = 'done'; s.ms = ev.ms; s.text = ev.file.content; FILES.push(ev.file);
@@ -533,18 +543,39 @@ $('#chk').onclick = async () => {
   b.disabled = false;
 };
 
-// ---------- תמונות reference ----------
+// ---------- ערכת מותג: לוגו ותמונות reference ----------
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+async function fileToData(f, max, mime) {
+  const u = URL.createObjectURL(f);
+  try {
+    const im = await loadImg(u), w0 = im.naturalWidth || 300, h0 = im.naturalHeight || 300, k = Math.min(1, max / Math.max(w0, h0));
+    const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w0 * k)); c.height = Math.max(1, Math.round(h0 * k));
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c.toDataURL(mime, .85);
+  } finally { URL.revokeObjectURL(u); }
+}
+async function branded(url) {
+  const [im, lg] = await Promise.all([loadImg(url), loadImg(LOGO)]);
+  const c = document.createElement('canvas'); c.width = im.naturalWidth || 1024; c.height = im.naturalHeight || 1024;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0, c.width, c.height);
+  const w = c.width * .2, h = w * (lg.naturalHeight || 1) / (lg.naturalWidth || 1), m = c.width * .035, pos = $('#logoPos').value;
+  x.drawImage(lg, pos.includes('r') ? c.width - w - m : m, pos.includes('b') ? c.height - h - m : m, w, h);
+  return c.toDataURL('image/png');
+}
+function drawLogo() { const b = $('#logoprev'); b.replaceChildren(); if (LOGO) { const i = el('img'); i.src = LOGO; b.append(i); } }
+$('#logoin').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { LOGO = await fileToData(f, 512, 'image/png'); store.set('logo', LOGO); drawLogo(); } catch { b2('לא הצלחתי לקרוא את הלוגו'); } e.target.value = ''; });
+$('#logoOn').addEventListener('change', () => store.set('logoOn', $('#logoOn').checked ? '1' : '0'));
+$('#logoPos').addEventListener('change', () => store.set('logoPos', $('#logoPos').value));
+function b2(msg) { const b = $('#banner'); b.className = 'banner err'; b.textContent = msg; }
 $('#refin').addEventListener('change', async e => {
-  for (const f of [...e.target.files].slice(0, 3 - REFS.length)) {
-    try {
-      const bmp = await createImageBitmap(f), k = Math.min(1, 768 / Math.max(bmp.width, bmp.height)), c = document.createElement('canvas');
-      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-      REFS.push(c.toDataURL('image/jpeg', .8));
-    } catch { /* קובץ לא נתמך */ }
-  }
-  e.target.value = ''; drawRefs();
+  for (const f of [...e.target.files].slice(0, 3 - REFS.length)) { try { REFS.push(await fileToData(f, 768, 'image/jpeg')); } catch { /* לא נתמך */ } }
+  e.target.value = ''; store.set('refs', JSON.stringify(REFS)); drawRefs();
 });
-function drawRefs() { const t = $('#thumbs'); t.replaceChildren(); REFS.forEach((u, i) => { const d = el('div'); const im = el('img'); im.src = u; const b = el('button', null, '×'); b.type = 'button'; b.onclick = () => { REFS.splice(i, 1); drawRefs(); }; d.append(im, b); t.append(d); }); }
+function drawRefs() { const t = $('#thumbs'); t.replaceChildren(); REFS.forEach((u, i) => { const d = el('div'); const im = el('img'); im.src = u; const b = el('button', null, '×'); b.type = 'button'; b.onclick = () => { REFS.splice(i, 1); store.set('refs', JSON.stringify(REFS)); drawRefs(); }; d.append(im, b); t.append(d); }); }
+function loadKit() {
+  LOGO = store.get('logo') || ''; $('#logoOn').checked = store.get('logoOn') !== '0'; $('#logoPos').value = store.get('logoPos') || 'br';
+  try { REFS = JSON.parse(store.get('refs') || '[]').filter(u => typeof u === 'string').slice(0, 3); } catch { REFS = []; }
+  drawLogo(); drawRefs();
+}
 
 // ---------- שיגור ----------
 $('#form').addEventListener('submit', async e => {
