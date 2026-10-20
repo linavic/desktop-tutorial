@@ -1,12 +1,12 @@
-// Etel Clinic – מערכת 5 סוכנים. שרת ללא תלויות (Node 18+).
-// מצב חי: מוגדר ANTHROPIC_API_KEY. בלי מפתח: מצב הדגמה עם טקסטים לדוגמה.
+// מרכז שליטה לצוות 5 הסוכנים. שרת ללא תלויות (Node 18+).
+// כל סוכן נטען מקובץ ההגדרה שלו ב-agents/*.md. ההעברה בין סוכנים נעשית דרך קבצים (runs/<runId>/content/...).
+// מצב חי: OPENAI_API_KEY / ANTHROPIC_API_KEY, או מפתח שמוזן בדף. בלי מפתח: מצב הדגמה.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
-// ספק: OPENAI_API_KEY או ANTHROPIC_API_KEY. אם שניהם מוגדרים, OpenAI קודם (אפשר לכפות עם PROVIDER=anthropic).
 const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 const PROVIDER = process.env.PROVIDER || (OPENAI_KEY ? 'openai' : ANTHROPIC_KEY ? 'anthropic' : '');
@@ -18,67 +18,61 @@ const LIVE = (PROVIDER === 'openai' && Boolean(OPENAI_KEY)) || (PROVIDER === 'an
 let CLINIC = '';
 try { CLINIC = fs.readFileSync(path.join(__dirname, '..', 'CLINIC.md'), 'utf8'); } catch { /* optional */ }
 
-const STYLE_RULES = `כללי כתיבה מחייבים:
-- עברית מדוברת, חמה ודוגרית, פנייה בלשון נקבה.
-- כל שורה בעברית נפתחת באות עברית (לא באימוג'י, ספרה, מילה באנגלית או האשטג).
-- 3 עד 5 האשטגים בעברית, בשורה נפרדת בסוף, בלי קו תחתון.
-- בלי קישורים (כותבים "הלינק בביו"), בלי מחירים, בלי לפני/אחרי, בלי הבטחת תוצאה.
-- אל תמציאי עובדות, שמות או הסמכות על הקליניקה. מה שחסר מסמנים ב-[סוגריים].`;
-
-const AGENTS = [
-  {
-    id: 'strategist', n: 1, name: 'אסטרטגית', color: '#8a6d3b',
-    role: 'מחליטה על הזווית של הפוסט לפי הבריף ופרופיל הקליניקה.',
-    does: ['קוראת את פרופיל הקליניקה (CLINIC.md)', 'בוחרת זווית, קהל ומטרה', 'מגדירה קריאה לפעולה'],
-    steps: ['קוראת פרופיל קליניקה', 'בוחרת זווית וקהל', 'מגדירה קריאה לפעולה']
-  },
-  {
-    id: 'writer', n: 2, name: 'כותבת', color: '#2f6f62',
-    role: 'כותבת את הפוסט בעברית מדוברת לפי האסטרטגיה.',
-    does: ['כותבת הוק פותח', 'כותבת גוף וסיום', 'מוסיפה האשטגים בסוף'],
-    steps: ['כותבת הוק', 'כותבת גוף וקריאה לפעולה', 'מוסיפה האשטגים']
-  },
-  {
-    id: 'translator', n: 3, name: 'מתאימה לרוסית', color: '#3d5a8a',
-    role: 'כותבת גרסה רוסית טבעית (לא תרגום מילולי) לקהל הרוסי של הקליניקה.',
-    does: ['מתאימה את המסר לקהל דובר רוסית', 'שומרת על הטון והגבלות הפרסום', 'מחזירה גרסה מוכנה לפרסום'],
-    steps: ['קוראת את הפוסט בעברית', 'מנסחת ברוסית טבעית', 'בודקת שהטון נשמר']
-  },
-  {
-    id: 'compliance', n: 4, name: 'בודקת ציות', color: '#a04a3a',
-    role: 'בודקת את הפוסט מול כללי הקליניקה והפרסום ומתקנת אם צריך.',
-    does: ['6 בדיקות אוטומטיות על הטקסט', 'מתקנת הפרות', 'מחליטה: מאושר / תוקן'],
-    steps: ['מריצה 6 בדיקות', 'מתקנת הפרות אם יש', 'מחליטה על סטטוס']
-  },
-  {
-    id: 'scheduler', n: 5, name: 'מתזמנת', color: '#6b4c8a',
-    role: 'מרכיבה חבילה סופית ובוחרת מועד פרסום. לא מפרסמת בעצמה.',
-    does: ['בוחרת יום ושעה (ראשון עד חמישי, לא שבת)', 'מרכיבה חבילה סופית עם הערות', 'מעבירה לאישור שלך'],
-    steps: ['בוחרת מועד', 'מרכיבה חבילה סופית', 'מעבירה לאישור']
-  }
+// ---------- הסוכנים ----------
+// dir = תיקיית הפלט תחת content/ לפי טבלת הצוות ב-CLAUDE.md
+const PIPE = [
+  { id: 'orchestrator', title: 'מנהל', color: '#e0b567', dir: 'briefs', ext: '.md', label: 'בריף', inputs: [] },
+  { id: 'researcher', title: 'חוקר', color: '#5bc0be', dir: 'research', ext: '.md', label: 'מחקר', inputs: ['briefs'] },
+  { id: 'writer', title: 'כותב', color: '#c58bf2', dir: 'drafts', ext: '.md', label: 'טיוטה', inputs: ['briefs', 'research'] },
+  { id: 'editor', title: 'עורך', color: '#7fb3ff', dir: 'final', ext: '.md', label: 'גרסה סופית', inputs: ['drafts', 'briefs', 'research'] },
+  { id: 'publisher', title: 'מפיץ', color: '#ff8f6b', dir: 'final', ext: '.distribution.md', label: 'התאמות הפצה', inputs: ['final'] }
 ];
+
+function parseAgent(p) {
+  const raw = fs.readFileSync(path.join(__dirname, 'agents', p.id + '.md'), 'utf8').replace(/\r\n/g, '\n');
+  const m = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/.exec(raw);
+  const fm = {};
+  (m ? m[1] : '').split('\n').forEach(l => { const i = l.indexOf(':'); if (i > 0) fm[l.slice(0, i).trim()] = l.slice(i + 1).trim(); });
+  const body = (m ? m[2] : raw).trim();
+  const sec = /## מה לעשות\n([\s\S]*?)(?:\n## |$)/.exec(body);
+  const clean = s => s.replace(/\*\*|`/g, '').trim();
+  const steps = sec ? sec[1].split('\n').map(l => /^\d+\.\s+(.*)$/.exec(l.trim())).filter(Boolean).map(x => clean(x[1])) : [];
+  return { ...p, description: fm.description || '', tools: (fm.tools || '').split(',').map(s => s.trim()).filter(Boolean), body, steps };
+}
+const AGENTS = PIPE.map(parseAgent);
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function callLLM(cfg, system, user, maxTokens = 1200) {
-  if (cfg.provider === 'openai') {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.key}` },
-      body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
-    });
-    if (!res.ok) throw new Error(`OpenAI API ${res.status}: ${(await res.text()).slice(0, 200)}`);
-    const data = await res.json();
-    return (data.choices?.[0]?.message?.content || '').trim();
-  }
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+// ---------- מודל (סטרימינג) ----------
+async function streamLLM(cfg, system, user, onDelta, maxTokens = 2200) {
+  const isOpenAI = cfg.provider === 'openai';
+  const res = await fetch(isOpenAI ? (process.env.OPENAI_BASE_URL || 'https://api.openai.com') + '/v1/chat/completions' : (process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com') + '/v1/messages', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': cfg.key, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] })
+    headers: isOpenAI
+      ? { 'content-type': 'application/json', authorization: `Bearer ${cfg.key}` }
+      : { 'content-type': 'application/json', 'x-api-key': cfg.key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify(isOpenAI
+      ? { model: cfg.model, stream: true, max_completion_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }
+      : { model: cfg.model, stream: true, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] })
   });
-  if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json();
-  return (data.content || []).map(b => b.text || '').join('').trim();
+  if (!res.ok) throw new Error(`${isOpenAI ? 'OpenAI' : 'Claude'} API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const dec = new TextDecoder(); let buf = '', full = '';
+  for await (const chunk of res.body) {
+    buf += dec.decode(chunk, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+      if (!line.startsWith('data:')) continue;
+      const d = line.slice(5).trim();
+      if (d === '[DONE]') continue;
+      try {
+        const j = JSON.parse(d);
+        const t = isOpenAI ? j.choices?.[0]?.delta?.content : (j.type === 'content_block_delta' ? j.delta?.text : '');
+        if (t) { full += t; onDelta(t); }
+      } catch { /* partial line */ }
+    }
+  }
+  return full.trim();
 }
 
 // מפתח מהדפדפן (בקשה בודדת, לא נשמר ולא נרשם ביומן) קודם למפתח מהשרת.
@@ -92,116 +86,60 @@ function resolveCfg(brief) {
   return { live: LIVE, provider: PROVIDER, key: PROVIDER === 'openai' ? OPENAI_KEY : ANTHROPIC_KEY, model: MODEL };
 }
 
-// ---------- בדיקות ציות דטרמיניסטיות ----------
-function runChecks(he, ru) {
-  const lines = he.split('\n').filter(l => l.trim());
-  const isHashtagLine = l => /^\s*(#\S+\s*)+$/.test(l);
-  const badStart = lines.filter(l => !isHashtagLine(l) && /[֐-׿]/.test(l) && !/^[֐-׿]/.test(l.trim()));
-  const tags = (he.match(/#[^\s#]+/g) || []);
-  return [
-    { name: 'כל שורה בעברית נפתחת באות עברית', ok: badStart.length === 0, detail: badStart[0] },
-    { name: 'אין קישורים בכיתוב', ok: !/https?:\/\/|www\./i.test(he + ru) },
-    { name: 'אין מחירים', ok: !/₪|שקל|\bNIS\b|шекел/i.test(he + ru) },
-    { name: 'אין הבטחת תוצאה או "לפני ואחרי"', ok: !/מבטיח|מובטח|100%|לפני ואחרי|תוצאות מובטחות|гаранти|до и после/i.test(he + ru) },
-    { name: '3 עד 5 האשטגים, בלי קו תחתון', ok: tags.length >= 3 && tags.length <= 5 && !tags.some(t => t.includes('_')), detail: `${tags.length} האשטגים` },
-    { name: 'אין שאריות תבנית שלא הושלמו, חוץ מ-[סוגריים] מכוונים', ok: !/TODO|undefined|null/.test(he + ru) }
-  ];
+// ---------- מצב הדגמה ----------
+const DEMO = {
+  orchestrator: t => `# בריף: ${t}\n\n**מטרה:** להפוך את הבקשה לתוכן אחד ברור.\n**קהל יעד:** לפי הקשר הפרויקט.\n**מסר מרכזי:** ערך קודם, בלי לחץ.\n**פורמט:** פוסט קצר.\n**טון:** חם, ישיר, מדובר.\n\n## נקודות מפתח\n1. הוק פותח שעוצר גלילה\n2. שלוש נקודות ערך\n3. קריאה לפעולה אחת\n\n## פערים פתוחים\n- אין. (מצב הדגמה)`,
+  researcher: t => `# מחקר: ${t}\n\n## ממצאים\n- נקודה 1: [מצב הדגמה, אין חיפוש אמיתי]\n- נקודה 2: [צריך אימות]\n\n## מקורות\nאין מקורות במצב הדגמה. במצב חי החוקר עובד בלי גישה לאינטרנט ומסמן "צריך אימות".`,
+  writer: t => `# ${t}\n\nפתיח שמושך: שאלה שהקהל שואל את עצמו.\n\nגוף: שלוש נקודות קצרות לפי הבריף והמחקר.\n\nסיום: קריאה לפעולה אחת, ברורה.\n\n[צריך מקור] — נקודה 2`,
+  editor: t => `# ${t}\n\nפתיח מחודד: שאלה אחת שהקהל באמת שואל.\n\nגוף: שלוש נקודות קצרות וברורות.\n\nסיום: קריאה אחת לפעולה.\n\n---\n## הערות עורך\n- קוצר הפתיח.\n- הוסר סימון "צריך מקור" שלא נתמך.\n- ללא בעיות פתוחות. (מצב הדגמה)`,
+  publisher: t => `# התאמות הפצה: ${t}\n\n## פייסבוק\nפוסט קצר עם שאלה בסוף.\n\n## אינסטגרם\nקרוסלה של 5 שקפים.\n\n## Checklist פרסום\n- [ ] מדיה מוכנה\n- [ ] קישורים נבדקו\n- [ ] אישור לפני פרסום\n\nהפרסום בפועל ידני אחרי אישור.`
+};
+
+const FILE_NAMES = { briefs: 'brief', research: 'research', drafts: 'draft', final: 'final' };
+
+function buildPrompts(agent, task, ctx, slug, files) {
+  const env = `\n\n---\nהקשר הפרויקט (תחליף ל-CLAUDE.md):\n${ctx}\n\nמגבלות הסביבה: אין לך גישה לקבצים, לאינטרנט או לכלים. הקבצים מהשלבים הקודמים מוצגים בהודעה. אל תמציא מקורות או עובדות; מה שחסר מסמנים "[צריך מקור]" או "צריך אימות". כתוב בעברית אלא אם התבקש אחרת. ה-slug הוא ${slug}. החזר רק את תוכן קובץ הפלט שלך ב-Markdown, בלי הקדמה ובלי תיאור של פעולות על קבצים.`;
+  const f = k => `### ${k.path}\n${k.content}`;
+  const need = agent.inputs.map(d => files.find(x => x.dir === d)).filter(Boolean).map(f).join('\n\n');
+  const user = agent.id === 'orchestrator' ? `בקשת תוכן: ${task}` : `בקשת התוכן המקורית: ${task}\n\nהקבצים מהשלבים הקודמים:\n\n${need}`;
+  return { system: agent.body + env, user };
 }
 
-function autoFix(he) {
-  return he.replace(/https?:\/\/\S+/g, 'הלינק בביו').split('\n').map(l => {
-    if (/^\s*(#\S+\s*)+$/.test(l)) return l.replace(/_/g, '');
-    return /[֐-׿]/.test(l) && !/^[֐-׿]/.test(l.trim()) ? l.replace(/^[^֐-׿]+/, '') : l;
-  }).join('\n');
-}
-
-// ---------- מועד פרסום ----------
-function nextSlot(platform, from = new Date()) {
-  const times = { instagram: '12:30', facebook: '20:00', tiktok: '20:00', linkedin: '08:30' };
-  const t = times[platform] || '12:30';
-  const [h, m] = t.split(':').map(Number);
-  const d = new Date(from);
-  for (let i = 0; i < 8; i++) {
-    const c = new Date(d); c.setDate(d.getDate() + i); c.setHours(h, m, 0, 0);
-    if (c > from && c.getDay() <= 4) { // ראשון(0) עד חמישי(4)
-      const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי'];
-      return `יום ${days[c.getDay()]}, ${c.toLocaleDateString('he-IL')} בשעה ${t}`;
-    }
-  }
-  return 'ראשון הקרוב, 12:30';
-}
-
-// ---------- ריצת הצינור ----------
-async function pipeline(brief, emit) {
+// ---------- ריצת הצוות ----------
+async function runCrew(brief, emit) {
   const cfg = resolveCfg(brief);
-  const LIVE = cfg.live;
-  const claude = (system, user, max) => callLLM(cfg, system, user, max);
-  const topic = (brief.topic || 'בדיקת עור לפני טיפול ראשון').trim();
-  const platform = brief.platform || 'instagram';
-  const format = brief.format || 'פוסט';
-  const ctx = {};
-  const step = async (agent, i, text, ms = 700) => { emit({ type: 'step', agent, index: i, text }); if (!LIVE) await sleep(ms); };
+  const task = String(brief.task || '').trim().slice(0, 1500) || 'פוסט על בדיקת עור לפני טיפול ראשון';
+  const ctx = String(brief.context || '').trim().slice(0, 6000) || CLINIC || 'אין הקשר. כתבו תוכן כללי וברור.';
+  const runId = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14) + '-' + crypto.randomBytes(2).toString('hex');
+  const slug = 'task-' + runId.slice(-9);
+  emit({ type: 'run', runId, slug, mode: cfg.live ? 'live' : 'demo', model: cfg.live ? `${cfg.provider === 'openai' ? 'OpenAI' : 'Claude'} · ${cfg.model}` : null });
+  const files = [];
 
-  // 1. אסטרטגית
-  emit({ type: 'start', agent: 'strategist' });
-  await step('strategist', 0, `קראה את פרופיל הקליניקה (${CLINIC ? CLINIC.length + ' תווים' : 'לא נמצא CLINIC.md'})`);
-  ctx.strategy = LIVE
-    ? await claude(`את אסטרטגית תוכן של Etel Clinic. ענִי בקצרה (עד 6 שורות) בפורמט: זווית / קהל / מטרה / קריאה לפעולה.\n\n${CLINIC}`, `נושא: ${topic}\nפלטפורמה: ${platform}\nפורמט: ${format}`, 500)
-    : `זווית: ${topic} – מתחילים בהבנה ולא בהזרקה.\nקהל: נשים 28–60 בנתניה והסביבה.\nמטרה: אמון, ולהוביל לבדיקת העור.\nקריאה לפעולה: "הלינק בביו" לבדיקת עור של 60 שניות.`;
-  await step('strategist', 1, 'בחרה זווית וקהל');
-  await step('strategist', 2, 'הגדירה קריאה לפעולה');
-  emit({ type: 'done', agent: 'strategist', output: ctx.strategy });
-
-  // 2. כותבת
-  emit({ type: 'start', agent: 'writer' });
-  await step('writer', 0, 'כותבת הוק פותח');
-  ctx.he = LIVE
-    ? await claude(`את כותבת תוכן בעברית ל-Etel Clinic. החזירי רק את הפוסט המוכן, בלי הקדמות.\n\n${STYLE_RULES}\n\n${CLINIC}`, `פורמט: ${format} ל-${platform}\nנושא: ${topic}\n\nאסטרטגיה:\n${ctx.strategy}`)
-    : `${topic}? בואי נעשה סדר 🤍\n\nלפני שמחליטים על טיפול, כדאי להבין מה העור שלך באמת צריך.\n\nבקליניקה שלנו בנתניה מתחילים בשיחה ובבדיקה, לא בהזרקה.\n\nעני על 5 שאלות ב-60 שניות וקבלי המלצה אישית מהצוות שלנו. בלי לחץ ובלי התחייבות.\n\nהלינק בביו.\n\n#אסתטיקהרפואית #נתניה #טיפוחעור #בדיקתעור`;
-  await step('writer', 1, 'כתבה גוף וקריאה לפעולה');
-  await step('writer', 2, 'הוסיפה האשטגים');
-  emit({ type: 'done', agent: 'writer', output: ctx.he });
-
-  // 3. רוסית
-  emit({ type: 'start', agent: 'translator' });
-  await step('translator', 0, 'קראה את הפוסט בעברית');
-  ctx.ru = LIVE
-    ? await claude('את כותבת תוכן ברוסית ל-Etel Clinic בנתניה. כתבי גרסה טבעית לקהל דובר רוסית, לא תרגום מילולי. אותם כללים: בלי קישורים, מחירים, הבטחות או "до и после". החזירי רק את הטקסט.', ctx.he)
-    : `Не уверены, что на самом деле нужно вашей коже? 🤍\n\nОтветьте на 5 коротких вопросов и получите персональную рекомендацию от команды ETEL CLINIC в Нетании.\n\nБез давления и обязательств. Ссылка в профиле.`;
-  await step('translator', 1, 'ניסחה ברוסית טבעית');
-  await step('translator', 2, 'בדקה שהטון נשמר');
-  emit({ type: 'done', agent: 'translator', output: ctx.ru });
-
-  // 4. ציות
-  emit({ type: 'start', agent: 'compliance' });
-  let checks = runChecks(ctx.he, ctx.ru);
-  for (let i = 0; i < checks.length; i++) emit({ type: 'check', agent: 'compliance', check: checks[i] });
-  await step('compliance', 0, `הריצה ${checks.length} בדיקות: ${checks.filter(c => c.ok).length} עברו`);
-  let status = 'מאושר';
-  if (checks.some(c => !c.ok)) {
-    await step('compliance', 1, 'מתקנת הפרות');
-    ctx.he = LIVE && checks.some(c => !c.ok)
-      ? await claude(`תקני את הפוסט כך שיעמוד בכללים. החזירי רק את הפוסט המתוקן.\n\n${STYLE_RULES}\n\nהבדיקות שנכשלו: ${checks.filter(c => !c.ok).map(c => c.name).join('; ')}`, ctx.he)
-      : autoFix(ctx.he);
-    checks = runChecks(ctx.he, ctx.ru);
-    status = checks.every(c => c.ok) ? 'תוקן ואושר' : 'נדרשת בדיקה ידנית';
-  } else {
-    await step('compliance', 1, 'לא נמצאו הפרות');
+  for (const agent of AGENTS) {
+    const out = `content/${agent.dir}/${slug}${agent.ext}`;
+    const inputs = agent.inputs.map(d => files.find(x => x.dir === d)).filter(Boolean).map(x => x.path);
+    emit({ type: 'start', agent: agent.id, inputs, output: out });
+    const t0 = Date.now();
+    let text = '';
+    if (cfg.live) {
+      const { system, user } = buildPrompts(agent, task, ctx, slug, files);
+      text = await streamLLM(cfg, system, user, d => emit({ type: 'delta', agent: agent.id, text: d }));
+    } else {
+      text = DEMO[agent.id](task);
+      for (let i = 0; i < text.length; i += 4) { emit({ type: 'delta', agent: agent.id, text: text.slice(i, i + 4) }); await sleep(30); }
+      await sleep(600);
+    }
+    const file = { agent: agent.id, dir: agent.dir, label: agent.label, path: out, content: text };
+    files.push(file);
+    try {
+      const full = path.join(__dirname, 'runs', runId, out);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, text);
+    } catch { /* אחסון לקריאה בלבד: ממשיכים בלי שמירה */ }
+    emit({ type: 'done', agent: agent.id, ms: Date.now() - t0, chars: text.length, file });
   }
-  await step('compliance', 2, `סטטוס: ${status}`);
-  emit({ type: 'done', agent: 'compliance', output: `סטטוס: ${status}`, checks });
-
-  // 5. מתזמנת
-  emit({ type: 'start', agent: 'scheduler' });
-  const slot = nextSlot(platform);
-  await step('scheduler', 0, `בחרה מועד: ${slot}`);
-  const pkg = `# חבילה לפרסום\n\nפלטפורמה: ${platform} · פורמט: ${format}\nמועד מוצע: ${slot}\nסטטוס ציות: ${status}\n\n## עברית\n${ctx.he}\n\n## רוסית\n${ctx.ru}\n\n## לפני פרסום\n- אשרי את הטקסט מול הצוות הרפואי.\n- ודאי שיש הסכמה כתובה לכל תמונה של מטופלת או של צוות.\n- הפוסט לא פורסם. הפרסום ידני אחרי אישורך.`;
-  await step('scheduler', 1, 'הרכיבה חבילה סופית');
-  await step('scheduler', 2, 'מעבירה לאישורך. לא מפרסמת אוטומטית');
-  emit({ type: 'done', agent: 'scheduler', output: slot });
-  emit({ type: 'final', package: pkg, status });
+  emit({ type: 'final', files: files.map(f => ({ agent: f.agent, label: f.label, path: f.path, content: f.content })) });
 }
-
 
 // ---------- אבטחה: סיסמת כניסה ----------
 // בלי APP_PASSWORD השרת מאזין רק ל-localhost. עם סיסמה הוא פתוח לרשת ודורש התחברות.
@@ -267,6 +205,7 @@ async function handleAuth(req, res, url) {
   return false;
 }
 
+
 // ---------- שרת ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' };
 
@@ -276,16 +215,20 @@ http.createServer(async (req, res) => {
   if (PASSWORD && await handleAuth(req, res, url)) return;
   if (url.pathname === '/api/agents') {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({ auth: Boolean(PASSWORD), live: LIVE, model: LIVE ? `${PROVIDER === 'openai' ? 'OpenAI' : 'Claude'} · ${MODEL}` : null, agents: AGENTS }));
+    return res.end(JSON.stringify({
+      auth: Boolean(PASSWORD), live: LIVE, model: LIVE ? `${PROVIDER === 'openai' ? 'OpenAI' : 'Claude'} · ${MODEL}` : null,
+      defaultContext: CLINIC,
+      agents: AGENTS.map(a => ({ id: a.id, title: a.title, color: a.color, label: a.label, dir: a.dir, ext: a.ext, inputs: a.inputs, description: a.description, tools: a.tools, steps: a.steps }))
+    }));
   }
   if (url.pathname === '/api/run' && req.method === 'POST') {
     let body = '';
-    for await (const c of req) body += c;
+    for await (const c of req) { body += c; if (body.length > 20000) break; }
     let brief = {};
     try { brief = JSON.parse(body || '{}'); } catch { /* empty */ }
     res.writeHead(200, { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-cache' });
     const emit = e => res.write(JSON.stringify({ t: Date.now(), ...e }) + '\n');
-    try { await pipeline(brief, emit); }
+    try { await runCrew(brief, emit); }
     catch (err) { emit({ type: 'error', message: String(err.message || err) }); }
     return res.end();
   }
@@ -297,4 +240,4 @@ http.createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': MIME[path.extname(full)] || 'application/octet-stream' });
     res.end(data);
   });
-}).listen(PORT, PASSWORD ? '0.0.0.0' : '127.0.0.1', () => console.log(`Etel agents app: http://localhost:${PORT}  [${PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE ${PROVIDER} ${MODEL}` : 'DEMO mode'})`));
+}).listen(PORT, PASSWORD ? '0.0.0.0' : '127.0.0.1', () => console.log(`Agent crew: http://localhost:${PORT}  [${PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE ${PROVIDER} ${MODEL}` : 'DEMO mode'})`));

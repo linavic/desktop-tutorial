@@ -2,200 +2,319 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>סוכני Etel Clinic</title>
+<title>צוות הסוכנים · Etel Clinic</title>
 <style>
-:root{--bg:#faf6ef;--card:#fffdf9;--ink:#3a2a1e;--muted:#7d6b5b;--line:#e6dccd;--gold:#b8924a;--ok:#2f7d57;--warn:#b5532f;--work:#c98b1f}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1713;--card:#262019;--ink:#f0e6d8;--muted:#b3a38f;--line:#3a3128;--gold:#d3ab63;--ok:#5cc08f;--warn:#e58a68;--work:#e3a948}}
-:root[data-theme="dark"]{--bg:#1c1713;--card:#262019;--ink:#f0e6d8;--muted:#b3a38f;--line:#3a3128;--gold:#d3ab63;--ok:#5cc08f;--warn:#e58a68;--work:#e3a948}
+:root{--bg:#0b0d12;--bg2:#12151d;--card:#151922;--line:#262c3a;--ink:#eef0f6;--muted:#8d95a8;--gold:#e0b567;--ok:#59d39a;--err:#ff7a6b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif;line-height:1.55}
-.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:1.5rem;letter-spacing:.02em}
-h1 small{display:block;font-family:"Segoe UI",Arial,sans-serif;font-size:.85rem;color:var(--muted);letter-spacing:0}
-.mode{padding:4px 12px;border-radius:99px;font-size:.8rem;border:1px solid var(--line);background:var(--card)}
-.mode.live{color:var(--ok);border-color:var(--ok)}.mode.demo{color:var(--work);border-color:var(--work)}
-.brief{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:22px}
-label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
-input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
-button.run{padding:11px 22px;border:0;border-radius:10px;background:var(--gold);color:#fff;font:inherit;font-weight:600;cursor:pointer}
-button.run:disabled{opacity:.55;cursor:wait}
-.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
-.agent{position:relative;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .2s,transform .2s}
-.agent::after{content:"◂";position:absolute;left:-12px;top:44px;color:var(--muted);font-size:1.1rem}
-.agent:last-child::after{display:none}
-.agent.working{box-shadow:0 0 0 2px var(--work);transform:translateY(-2px)}
-.agent.done{border-color:var(--ok);border-top-color:var(--c)}
-.agent .top{display:flex;align-items:center;gap:8px}
-.num{width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem;flex:none}
-.agent h2{margin:0;font-size:1.05rem}
-.chip{margin-inline-start:auto;font-size:.72rem;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.working .chip{color:var(--work);border-color:var(--work)}.done .chip{color:var(--ok);border-color:var(--ok)}
-.role{margin:0;font-size:.85rem;color:var(--muted)}
-.steps{list-style:none;margin:0;padding:0;font-size:.82rem;display:flex;flex-direction:column;gap:5px}
-.steps li{display:flex;gap:7px;align-items:flex-start;color:var(--muted)}
-.steps li::before{content:"○";flex:none}
-.steps li.on{color:var(--ink);font-weight:600}.steps li.on::before{content:"◐";color:var(--work)}
-.steps li.ok{color:var(--ink)}.steps li.ok::before{content:"✓";color:var(--ok)}
-.live-line{min-height:2.6em;font-size:.82rem;border-top:1px dashed var(--line);padding-top:7px;color:var(--ink)}
-.checks{list-style:none;margin:0;padding:0;font-size:.78rem}
-.checks li{display:flex;gap:6px;margin-bottom:3px}.checks .y{color:var(--ok)}.checks .n{color:var(--warn)}
-details{font-size:.82rem}summary{cursor:pointer;color:var(--gold)}
-pre{white-space:pre-wrap;word-break:break-word;margin:6px 0 0;font:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:260px;overflow:auto}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-.panel h3{margin:0 0 10px;font-size:1rem}
-#log{list-style:none;margin:0;padding:0;max-height:340px;overflow:auto;font-size:.85rem}
-#log li{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
-#log time{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
-#log b{flex:none;min-width:7.5em}
-.empty{color:var(--muted);font-size:.9rem}
-.final-actions{display:flex;gap:8px;margin-bottom:8px}
-.final-actions button{padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;font:inherit}
-.err{color:var(--warn);font-weight:600}
-details.keybox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:-10px 0 22px}
-details.keybox summary{font-weight:600}
-.keygrid{display:grid;grid-template-columns:1fr 2fr 1fr;gap:12px;margin-top:12px}
-.note{font-size:.8rem;color:var(--muted);margin:10px 0 0}
-@media(max-width:1000px){.keygrid{grid-template-columns:1fr}}
-@media(max-width:1000px){.flow{grid-template-columns:1fr}.agent::after{content:"▾";left:auto;right:auto;top:auto;bottom:-16px;inset-inline-start:50%}.cols{grid-template-columns:1fr}.brief{grid-template-columns:1fr}.flow{gap:22px}}
+html{color-scheme:dark}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,Arial,sans-serif;line-height:1.55;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(900px 500px at 85% -10%,#2a2113 0,transparent 60%),radial-gradient(700px 500px at 5% 20%,#13262b 0,transparent 60%),linear-gradient(var(--bg),var(--bg))}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(ellipse at 50% 30%,#000 20%,transparent 75%)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 70px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
+.logo{font-family:Georgia,serif;letter-spacing:.14em;font-size:1.05rem}
+.logo small{display:block;font-family:inherit;letter-spacing:.02em;color:var(--muted);font-size:.78rem}
+.sp{flex:1}
+.mode{padding:4px 12px;border-radius:99px;font-size:.78rem;border:1px solid var(--line);background:#ffffff08}
+.mode.live{color:var(--ok);border-color:#59d39a66}.mode.demo{color:var(--gold);border-color:#e0b56766}
+.top a{font-size:.82rem;color:var(--muted)}
+.hero{font-size:clamp(1.6rem,4vw,2.4rem);margin:0 0 14px;font-weight:700;letter-spacing:-.01em}
+.hero span{background:linear-gradient(90deg,var(--gold),#ff8f6b 60%,#c58bf2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bar{display:flex;gap:10px;padding:8px;border-radius:18px;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(120deg,#e0b567,#5bc0be,#c58bf2) border-box;border:1.5px solid transparent}
+.bar textarea{flex:1;resize:none;height:54px;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:1.05rem;padding:14px 12px}
+.bar button{border:0;border-radius:12px;padding:0 26px;font:inherit;font-weight:700;color:#1a1305;background:linear-gradient(120deg,#f0c978,#e0b567);cursor:pointer;white-space:nowrap}
+.bar button:disabled{opacity:.55;cursor:wait}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.chip{font-size:.8rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--gold)}
+details.cfg{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:#ffffff05;padding:10px 14px}
+details.cfg summary{cursor:pointer;color:var(--muted);font-size:.88rem}
+.cfggrid{display:grid;grid-template-columns:1fr 2fr 1fr;gap:12px;margin-top:12px}
+label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px}
+select,input.f,textarea.f{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--ink);font:inherit}
+textarea.f{min-height:110px}
+.note{font-size:.78rem;color:var(--muted);margin:10px 0 0}
+
+.stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:30px 0 10px;font-size:.85rem;color:var(--muted)}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.prog{flex:1;min-width:160px;height:6px;border-radius:9px;background:#ffffff10;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0b567,#5bc0be,#c58bf2);transition:width .5s}
+
+.pipe{display:flex;align-items:flex-start;justify-content:space-between;padding:26px 6px 14px}
+.node{position:relative;flex:none;width:112px;text-align:center;cursor:pointer;opacity:.5;transition:opacity .3s}
+.node.working,.node.done,.node.focus{opacity:1}
+.core{position:relative;width:78px;height:78px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--line);color:var(--c);transition:box-shadow .3s,border-color .3s,transform .3s}
+.core svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.node.focus .core{transform:scale(1.07)}
+.node.working .core{border-color:var(--c);box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 38px color-mix(in srgb,var(--c) 45%,transparent)}
+.node.working .core::before{content:"";position:absolute;inset:-9px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 70%,var(--c));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));animation:spin 1.1s linear infinite}
+.node.done .core{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
+.badge{position:absolute;top:-4px;inset-inline-end:-2px;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#06210f;font-size:.8rem;font-weight:800;display:none;place-items:center}
+.node.done .badge{display:grid}
+.nm{font-weight:700;font-size:1rem}
+.st{font-size:.76rem;color:var(--muted);min-height:1.2em}
+.node.working .st{color:var(--c)}
+.link{position:relative;flex:1;height:2px;margin-top:38px;background:repeating-linear-gradient(90deg,#ffffff22 0 6px,transparent 6px 12px)}
+.link .packet{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 12px 3px var(--pc,#e0b567);opacity:0}
+.link.flowing .packet{opacity:1;animation:flowx 1.1s linear infinite}
+.link .tag{position:absolute;top:-34px;inset-inline-start:50%;transform:translateX(50%);font-size:.68rem;white-space:nowrap;padding:2px 8px;border-radius:99px;background:#ffffff12;color:var(--ink);opacity:0;transition:opacity .3s}
+html[dir=rtl] .link .tag{transform:translateX(50%)}
+.link.flowing .tag,.link.sent .tag{opacity:1}
+.link.sent{background:linear-gradient(90deg,var(--pc,#e0b567),var(--pc,#e0b567))}
+@keyframes flowx{from{inset-inline-start:-4%}to{inset-inline-start:100%}}
+@keyframes flowy{from{inset-block-start:-4%}to{inset-block-start:100%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:8px}
+.panel{background:linear-gradient(var(--card),#12161e);border:1px solid var(--line);border-radius:18px;padding:18px}
+.fcard{border-top:3px solid var(--c,var(--gold))}
+.fh{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.fh .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.fh .ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fh h2{margin:0;font-size:1.2rem}
+.fh .tm{margin-inline-start:auto;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem}
+.pill{font-size:.72rem;padding:2px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.pill.on{color:var(--c);border-color:var(--c)}.pill.ok{color:var(--ok);border-color:var(--ok)}
+.desc{margin:6px 0 12px;font-size:.88rem;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0;font-size:.8rem;color:var(--muted)}
+.tool,.file{padding:2px 9px;border-radius:7px;background:#ffffff0c;border:1px solid var(--line);color:var(--ink);font-size:.74rem;direction:ltr}
+.file.out{border-color:var(--c);color:var(--c)}
+.todo{list-style:none;margin:10px 0;padding:0;font-size:.84rem;display:grid;gap:5px}
+.todo li{display:flex;gap:8px;color:var(--muted)}.todo li::before{content:"○";color:var(--muted)}
+.todo.done li{color:var(--ink)}.todo.done li::before{content:"✓";color:var(--ok)}
+.todo.run li::before{content:"◌";color:var(--c)}
+.cap{font-size:.72rem;color:var(--muted);margin-top:10px}
+pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:160px;max-height:340px;overflow:auto;background:#0a0c11;border:1px solid var(--line);border-radius:12px;padding:12px;font:.84rem/1.6 ui-monospace,Consolas,monospace;color:#d9deea}
+.caret{display:inline-block;width:8px;height:1em;vertical-align:-2px;background:var(--c);animation:blink .8s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+#log{list-style:none;margin:0;padding:0;max-height:430px;overflow:auto;font-size:.8rem;font-family:ui-monospace,Consolas,monospace}
+#log li{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed #ffffff12;animation:in .25s}
+#log time{color:var(--muted);flex:none}
+#log b{flex:none}
+@keyframes in{from{opacity:0;transform:translateY(4px)}}
+.deliver{margin-top:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{padding:6px 14px;border-radius:9px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer;font:inherit;font-size:.85rem}
+.tab.on{color:var(--ink);border-color:var(--gold);background:#e0b56714}
+.acts{display:flex;gap:8px;margin-bottom:8px}
+.btn{padding:6px 14px;border-radius:9px;border:1px solid var(--line);background:#ffffff08;color:var(--ink);cursor:pointer;font:inherit;font-size:.82rem}
+.banner{margin:14px 0 0;padding:12px 16px;border-radius:12px;font-weight:600;display:none}
+.banner.ok{display:block;background:#59d39a14;border:1px solid #59d39a55;color:var(--ok)}
+.banner.err{display:block;background:#ff7a6b14;border:1px solid #ff7a6b55;color:var(--err)}
+@media(max-width:900px){
+ .grid{grid-template-columns:1fr}.cfggrid{grid-template-columns:1fr}
+ .pipe{flex-direction:column;align-items:stretch;padding:10px 0}
+ .node{width:auto;display:flex;align-items:center;gap:14px;text-align:start}
+ .core{margin:0;width:60px;height:60px;flex:none}.core svg{width:28px;height:28px}
+ .link{flex:none;width:2px;height:34px;margin:0 29px;background:repeating-linear-gradient(180deg,#ffffff22 0 6px,transparent 6px 12px)}
+ .link .packet{top:auto;inset-inline-start:-4px}
+ .link.flowing .packet{animation:flowy 1.1s linear infinite}
+ .link .tag{top:6px;inset-inline-start:14px;transform:none}
+ html[dir=rtl] .link .tag{transform:none}
+ .link.sent{background:var(--pc)}
+ .bar{flex-direction:column}.bar button{height:46px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Etel Clinic<small>5 סוכנים בשרשרת: מבריף לפוסט מוכן</small></h1>
+  <div class="top">
+    <div class="logo">ETEL CLINIC<small>צוות 5 הסוכנים</small></div>
+    <span class="sp"></span>
     <span id="mode" class="mode">טוען…</span>
-  </header>
+  </div>
 
-  <form class="brief" id="form">
-    <div><label for="topic">על מה הפוסט?</label><input id="topic" value="בדיקת עור לפני טיפול ראשון" required></div>
-    <div><label for="platform">פלטפורמה</label>
-      <select id="platform"><option value="instagram">אינסטגרם</option><option value="facebook">פייסבוק</option><option value="tiktok">טיקטוק</option><option value="linkedin">לינקדאין</option></select></div>
-    <div><label for="format">פורמט</label>
-      <select id="format"><option>פוסט</option><option>קרוסלה</option><option>רילס</option><option>סטוריז</option></select></div>
-    <button class="run" id="go" type="submit">הפעל 5 סוכנים</button>
+  <h1 class="hero">מה <span>המשימה</span> לצוות?</h1>
+  <form class="bar" id="form">
+    <textarea id="task" placeholder="למשל: פוסט לפייסבוק על בדיקת עור לפני טיפול ראשון" required></textarea>
+    <button id="go" type="submit">שגר משימה</button>
   </form>
+  <div class="chips" id="chips"></div>
 
-  <details class="keybox" id="keybox">
-    <summary id="keysum">הגדרות מפתח API</summary>
-    <div class="keygrid">
+  <details class="cfg" id="cfg">
+    <summary id="cfgsum">הגדרות: מפתח API והקשר</summary>
+    <div class="cfggrid">
       <div><label for="provider">ספק</label><select id="provider"><option value="openai">OpenAI</option><option value="anthropic">Claude (Anthropic)</option></select></div>
-      <div><label for="apikey">מפתח API</label><input id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
-      <div><label for="model">מודל (לא חובה)</label><input id="model" dir="ltr" placeholder="ברירת מחדל"></div>
+      <div><label for="apikey">מפתח API</label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
+      <div><label for="model">מודל (לא חובה)</label><input class="f" id="model" dir="ltr" placeholder="ברירת מחדל"></div>
     </div>
-    <p class="note">המפתח נשמר רק בלשונית הזו (sessionStorage), נשלח לשרת רק בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה.</p>
+    <p class="note">המפתח נשמר רק בלשונית הזו, נשלח לשרת בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה.</p>
+    <label for="ctx" style="margin-top:12px">הקשר הפרויקט (תחום, טון, קהל). הסוכנים קוראים את זה כמו CLAUDE.md</label>
+    <textarea class="f" id="ctx" placeholder="ריק = ברירת מחדל"></textarea>
   </details>
 
-  <section class="flow" id="flow" aria-label="הסוכנים"></section>
-
-  <div class="cols">
-    <section class="panel"><h3>יומן פעילות</h3><ul id="log"><li class="empty">הפעילות תופיע כאן אחרי ההפעלה.</li></ul></section>
-    <section class="panel"><h3>התוצר הסופי</h3>
-      <div class="final-actions"><button id="copy" disabled>העתקה</button></div>
-      <pre id="final" class="empty">עדיין אין תוצר.</pre></section>
+  <div class="stats">
+    <span>סוכנים <b id="sAg">0/5</b></span><span>קבצים <b id="sFi">0/5</b></span><span>זמן <b id="sTm">0:00</b></span>
+    <div class="prog"><i id="prog"></i></div>
   </div>
+  <div class="pipe" id="pipe" aria-label="צוות הסוכנים"></div>
+  <div class="banner" id="banner"></div>
+
+  <div class="grid">
+    <article class="panel fcard" id="focus"></article>
+    <aside class="panel"><div class="cap" style="margin:0 0 8px">יומן פעילות חי</div><ul id="log"><li style="color:var(--muted)">הפעילות תופיע כאן אחרי שיגור משימה.</li></ul></aside>
+  </div>
+
+  <section class="panel deliver" id="deliver" hidden>
+    <div class="cap" style="margin:0 0 8px">התוצרים (קבצים שהסוכנים העבירו ביניהם)</div>
+    <div class="tabs" id="tabs"></div>
+    <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dl">הורדת הכול (md)</button></div>
+    <pre class="stream" id="view" style="min-height:120px"></pre>
+  </section>
 </div>
 
 <script>
 const $ = s => document.querySelector(s);
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-let AGENTS = [], cards = {}, SERVER_INFO = { live: false };
-function updateMode() {
-  const m = $('#mode'), key = $('#apikey').value.trim();
-  const label = $('#provider').selectedOptions[0].textContent;
-  const live = Boolean(key) || SERVER_INFO.live;
-  m.className = 'mode ' + (live ? 'live' : 'demo');
-  m.textContent = key ? `מצב חי · ${label} (המפתח שלך)` : SERVER_INFO.live ? `מצב חי · ${SERVER_INFO.model}` : 'מצב הדגמה · בלי מפתח API, הטקסטים לדוגמה';
-  $('#keysum').textContent = key ? 'הגדרות מפתח API · מוגדר ✓' : 'הגדרות מפתח API · לא מוגדר';
-  try { sessionStorage.setItem('etel_key', key); sessionStorage.setItem('etel_provider', $('#provider').value); } catch { /* storage blocked */ }
-}
+const ICONS = {
+  orchestrator: '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+  researcher: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+  writer: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
+  editor: '<circle cx="12" cy="12" r="8"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/>',
+  publisher: '<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-8-8-4z"/>'
+};
+const svg = id => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id] || ''}</svg>`;
+const EXAMPLES = ['פוסט לפייסבוק על בדיקת עור לפני טיפול ראשון', 'קרוסלה לאינסטגרם: סקין בוסטר או פולינוקלאוטידים', 'תסריט לרילס: מיתוס או אמת על בוטוקס', 'פוסט רוסי לקבוצת נשים בנתניה'];
+
+let INFO = { agents: [], live: false }, ST = {}, FOCUS = null, FILES = [], runStart = 0, tick = null, TAB = 0;
+
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const fmt = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const A = id => INFO.agents.find(a => a.id === id);
 
 async function init() {
-  const r0 = await fetch('/api/agents'); if (r0.status === 401) { location.href = '/login'; return; }
-  const info = await r0.json();
-  if (info.auth) { const a = document.createElement('a'); a.href = '/logout'; a.textContent = 'התנתקות'; a.style.cssText = 'font-size:.85rem;color:var(--muted)'; document.querySelector('header').append(a); }
-  AGENTS = info.agents;
-  SERVER_INFO = info;
-  try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; const pv = sessionStorage.getItem('etel_provider'); if (pv) $('#provider').value = pv; } catch { /* storage blocked */ }
-  updateMode();
-  render();
+  const r = await fetch('/api/agents'); if (r.status === 401) { location.href = '/login'; return; }
+  INFO = await r.json();
+  if (INFO.auth) { const a = el('a', null, 'התנתקות'); a.href = '/logout'; $('.top').append(a); }
+  $('#ctx').placeholder = INFO.defaultContext ? 'ברירת מחדל: פרופיל הקליניקה (CLINIC.md)' : 'אין ברירת מחדל. כתבי תחום, טון וקהל.';
+  try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; const p = sessionStorage.getItem('etel_provider'); if (p) $('#provider').value = p; } catch {}
+  EXAMPLES.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; $('#task').focus(); }; $('#chips').append(c); });
+  updateMode(); reset();
 }
 
-function render() {
-  const flow = $('#flow'); flow.replaceChildren(); cards = {};
-  for (const a of AGENTS) {
-    const card = el('article', 'agent'); card.style.setProperty('--c', a.color);
-    const top = el('div', 'top');
-    top.append(el('span', 'num', a.n), el('h2', null, a.name), Object.assign(el('span', 'chip', 'ממתין'), { id: 'chip-' + a.id }));
-    const steps = el('ul', 'steps');
-    a.steps.forEach(s => steps.append(el('li', null, s)));
-    const line = el('div', 'live-line', 'ממתין להפעלה');
-    const out = el('details'); out.hidden = true;
-    out.append(el('summary', null, 'מה הסוכן הפיק'), el('pre'));
-    const checks = el('ul', 'checks');
-    card.append(top, el('p', 'role', a.role), steps, checks, line, out);
-    flow.append(card);
-    cards[a.id] = { card, chip: top.querySelector('.chip'), steps, line, out, checks };
-  }
+function updateMode() {
+  const key = $('#apikey').value.trim(), m = $('#mode');
+  const live = Boolean(key) || INFO.live;
+  m.className = 'mode ' + (live ? 'live' : 'demo');
+  m.textContent = key ? `מצב חי · ${$('#provider').selectedOptions[0].textContent} (המפתח שלך)` : INFO.live ? `מצב חי · ${INFO.model}` : 'מצב הדגמה · טקסטים לדוגמה, בלי מפתח';
+  $('#cfgsum').textContent = key ? 'הגדרות: מפתח API מוגדר ✓' : 'הגדרות: מפתח API והקשר';
+  try { sessionStorage.setItem('etel_key', key); sessionStorage.setItem('etel_provider', $('#provider').value); } catch {}
 }
 
-const now = () => new Date().toLocaleTimeString('he-IL', { hour12: false });
-function log(agentId, text) {
-  const list = $('#log'); if (list.querySelector('.empty')) list.replaceChildren();
-  const a = AGENTS.find(x => x.id === agentId);
-  const li = el('li'); li.append(el('time', null, now()), Object.assign(el('b', null, a ? `${a.n}. ${a.name}` : 'מערכת'), { style: a ? `color:${a.color}` : '' }), el('span', null, text));
-  list.append(li); list.scrollTop = list.scrollHeight;
+function reset() {
+  ST = {}; FILES = []; TAB = 0; INFO.agents.forEach(a => ST[a.id] = { status: 'idle', text: '', ms: 0, t0: 0 });
+  const pipe = $('#pipe'); pipe.replaceChildren();
+  INFO.agents.forEach((a, i) => {
+    const n = el('div', 'node', `<div class="core" style="--c:${a.color}">${svg(a.id)}<span class="badge">✓</span></div><div><div class="nm">${a.title}</div><div class="st">ממתין</div></div>`);
+    n.dataset.id = a.id; n.style.setProperty('--c', a.color); n.onclick = () => setFocus(a.id); pipe.append(n);
+    if (i < INFO.agents.length - 1) { const l = el('div', 'link', '<span class="packet"></span><span class="tag"></span>'); l.dataset.i = i; l.style.setProperty('--pc', a.color); pipe.append(l); }
+  });
+  const first = el('li', null, 'הפעילות תופיע כאן אחרי שיגור משימה.'); first.style.color = 'var(--muted)'; $('#log').replaceChildren(first);
+  $('#deliver').hidden = true; $('#banner').className = 'banner'; setStats();
+  setFocus(INFO.agents[0].id);
 }
+
+function setStats() {
+  const done = Object.values(ST).filter(s => s.status === 'done').length;
+  $('#sAg').textContent = `${done}/5`; $('#sFi').textContent = `${FILES.length}/5`;
+  $('#prog').style.width = (done / 5 * 100) + '%';
+  $('#sTm').textContent = runStart ? fmt(Date.now() - runStart) : '0:00';
+}
+
+function nodeEl(id) { return document.querySelector(`.node[data-id="${id}"]`); }
+function linkEl(i) { return document.querySelector(`.link[data-i="${i}"]`); }
+
+function setFocus(id) {
+  FOCUS = id;
+  document.querySelectorAll('.node').forEach(n => n.classList.toggle('focus', n.dataset.id === id));
+  renderFocus();
+}
+
+function renderFocus() {
+  const a = A(FOCUS), s = ST[FOCUS], box = $('#focus');
+  box.style.setProperty('--c', a.color);
+  const status = s.status === 'working' ? ['עובד עכשיו', 'on'] : s.status === 'done' ? ['הושלם', 'ok'] : ['ממתין', ''];
+  const ins = a.inputs.length ? a.inputs.map(d => `<span class="file">content/${d}/…</span>`).join('') : '<span class="file">בקשת המשתמש</span>';
+  const todoCls = s.status === 'done' ? 'todo done' : s.status === 'working' ? 'todo run' : 'todo';
+  box.innerHTML = `<div class="fh"><div class="ico">${svg(a.id)}</div><h2>${a.title}</h2><span class="pill ${status[1]}">${status[0]}</span><span class="tm" id="ftm">${s.status === 'working' ? fmt(Date.now() - s.t0) : s.ms ? (s.ms / 1000).toFixed(1) + ' ש׳' : ''}</span></div>
+  <p class="desc">${esc(a.description)}</p>
+  <div class="row">כלים בהגדרה: ${a.tools.map(t => `<span class="tool">${esc(t)}</span>`).join('')}</div>
+  <div class="row">מקבל: ${ins}</div>
+  <div class="row">מוציא: <span class="file out">content/${a.dir}/&lt;slug&gt;${a.ext}</span></div>
+  <ul class="${todoCls}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+  <div class="cap">מתוך קובץ ההגדרה של הסוכן. הרשימה מסומנת כשהסוכן מסיים.</div>
+  <pre class="stream" id="stream"></pre>`;
+  const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'עדיין לא התחיל.' : '');
+  if (s.status === 'working') pre.append(el('span', 'caret'));
+  pre.scrollTop = pre.scrollHeight;
+}
+
+function log(id, msg) {
+  const ul = $('#log'); if (ul.firstChild && !ul.firstChild.querySelector('time')) ul.replaceChildren();
+  const a = id ? A(id) : null;
+  const li = el('li', null, `<time>${fmt(Date.now() - runStart)}</time><b style="color:${a ? a.color : 'var(--ink)'}">${a ? a.title : 'מערכת'}</b><span>${esc(msg)}</span>`);
+  ul.append(li); ul.scrollTop = ul.scrollHeight;
+}
+
+const short = p => p.split('/').slice(-2).join('/');
 
 function handle(ev) {
-  const c = cards[ev.agent];
-  if (ev.type === 'start') {
-    c.card.classList.add('working'); c.chip.textContent = 'עובדת';
-    c.line.textContent = 'מתחילה…'; log(ev.agent, 'התחילה לעבוד');
-  } else if (ev.type === 'step') {
-    const items = [...c.steps.children];
-    items.forEach((li, i) => { li.className = i < ev.index ? 'ok' : i === ev.index ? 'on' : ''; });
-    c.line.textContent = ev.text; log(ev.agent, ev.text);
-  } else if (ev.type === 'check') {
-    const li = el('li'); li.append(el('span', ev.check.ok ? 'y' : 'n', ev.check.ok ? '✓' : '✗'), el('span', null, ev.check.name + (ev.check.ok || !ev.check.detail ? '' : ` (${ev.check.detail})`)));
-    c.checks.append(li);
+  const a = ev.agent ? A(ev.agent) : null, s = a ? ST[a.id] : null, idx = a ? INFO.agents.indexOf(a) : -1;
+  if (ev.type === 'run') { runStart = Date.now(); log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug}`); }
+  else if (ev.type === 'start') {
+    s.status = 'working'; s.t0 = Date.now(); s.text = '';
+    nodeEl(a.id).classList.add('working'); nodeEl(a.id).querySelector('.st').textContent = 'עובד…';
+    if (idx > 0) { const l = linkEl(idx - 1); l.classList.add('flowing'); l.querySelector('.tag').textContent = short(FILES[FILES.length - 1].path); }
+    setFocus(a.id);
+    log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש');
+  } else if (ev.type === 'delta') {
+    s.text += ev.text;
+    if (FOCUS === a.id) { const pre = $('#stream'); pre.querySelector('.caret')?.remove(); pre.append(document.createTextNode(ev.text)); pre.append(el('span', 'caret')); pre.scrollTop = pre.scrollHeight; }
   } else if (ev.type === 'done') {
-    [...c.steps.children].forEach(li => li.className = 'ok');
-    c.card.classList.replace('working', 'done'); c.chip.textContent = 'הושלם';
-    c.out.hidden = false; c.out.querySelector('pre').textContent = ev.output; log(ev.agent, 'סיימה');
+    s.status = 'done'; s.ms = ev.ms; s.text = ev.file.content; FILES.push(ev.file);
+    const n = nodeEl(a.id); n.classList.remove('working'); n.classList.add('done'); n.querySelector('.st').textContent = `${(ev.ms / 1000).toFixed(1)} ש׳`;
+    if (idx > 0) { const l = linkEl(idx - 1); l.classList.remove('flowing'); l.classList.add('sent'); }
+    log(a.id, `סיים · ${ev.chars} תווים · כתב ${short(ev.file.path)}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
+    if (FOCUS === a.id) renderFocus(); renderDeliver(); setStats();
   } else if (ev.type === 'final') {
-    const f = $('#final'); f.className = ''; f.textContent = ev.package; $('#copy').disabled = false;
-    log(null, `החבילה מוכנה · ${ev.status}`);
+    const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה · ${FILES.length} קבצים · ${fmt(Date.now() - runStart)}`; log(null, 'כל הסוכנים סיימו');
   } else if (ev.type === 'error') {
-    log(null, 'שגיאה: ' + ev.message); $('#final').className = 'err'; $('#final').textContent = 'שגיאה: ' + ev.message;
+    const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message);
+    document.querySelectorAll('.node.working').forEach(n => n.classList.remove('working')); document.querySelectorAll('.link.flowing').forEach(l => l.classList.remove('flowing'));
   }
 }
+
+function renderDeliver() {
+  $('#deliver').hidden = !FILES.length;
+  const tabs = $('#tabs'); tabs.replaceChildren();
+  FILES.forEach((f, i) => { const b = el('button', 'tab' + (i === TAB ? ' on' : ''), `${A(f.agent).title} · ${f.label}`); b.onclick = () => { TAB = i; renderDeliver(); }; tabs.append(b); });
+  if (FILES[TAB]) $('#view').textContent = FILES[TAB].content;
+}
+
+$('#copy').onclick = async () => { try { await navigator.clipboard.writeText(FILES[TAB]?.content || ''); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1400); } catch {} };
+$('#dl').onclick = () => {
+  const text = FILES.map(f => `<!-- ${f.path} -->\n${f.content}`).join('\n\n---\n\n');
+  const a = el('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/markdown' })); a.download = 'agents-output.md'; a.click();
+};
 
 $('#form').addEventListener('submit', async e => {
   e.preventDefault();
-  const btn = $('#go'); btn.disabled = true; btn.textContent = 'הסוכנים עובדים…';
-  render(); $('#log').replaceChildren(el('li', 'empty', 'מתחיל…')); $('#final').className = 'empty'; $('#final').textContent = 'ממתין לסוכנים…'; $('#copy').disabled = true;
+  const btn = $('#go'); btn.disabled = true; btn.textContent = 'הצוות עובד…';
+  reset(); runStart = Date.now(); clearInterval(tick);
+  tick = setInterval(() => { setStats(); const t = $('#ftm'); if (t && ST[FOCUS]?.status === 'working') t.textContent = fmt(Date.now() - ST[FOCUS].t0); }, 500);
   try {
-    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic: $('#topic').value, platform: $('#platform').value, format: $('#format').value, apiKey: $('#apikey').value.trim(), provider: $('#provider').value, model: $('#model').value.trim() }) });
+    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ task: $('#task').value, context: $('#ctx').value, apiKey: $('#apikey').value.trim(), provider: $('#provider').value, model: $('#model').value.trim() }) });
     if (res.status === 401) { location.href = '/login'; return; }
-    const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
-    for (;;) {
-      const { done, value } = await reader.read(); if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let i; while ((i = buf.indexOf('\n')) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) handle(JSON.parse(line)); }
-    }
+    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+    for (;;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n')) >= 0) { const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (ln) handle(JSON.parse(ln)); } }
   } catch (err) { handle({ type: 'error', message: err.message }); }
-  btn.disabled = false; btn.textContent = 'הפעל 5 סוכנים';
+  clearInterval(tick); setStats(); btn.disabled = false; btn.textContent = 'שגר משימה';
 });
-
-$('#copy').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText($('#final').textContent); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1500); } catch { /* clipboard blocked */ }
-});
-
-$('#apikey').addEventListener('input', updateMode);
-$('#provider').addEventListener('change', updateMode);
+$('#apikey').addEventListener('input', updateMode); $('#provider').addEventListener('change', updateMode);
+$('#task').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#form').requestSubmit(); } });
 init();
 </script>
 </body>
