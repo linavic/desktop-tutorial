@@ -1,0 +1,27 @@
+# דוגמה לפריסה אוטומטית של הגרסה הסטטית לאירוח האתר ב-SFTP. לא פעיל ולא נבדק.
+# כדי להשתמש: להעביר את הקובץ ל-.github/workflows/, ולהגדיר ב-GitHub (Settings > Secrets) את הסודות
+# SFTP_SERVER, SFTP_USERNAME, SFTP_PASSWORD (או SSH key), ולעדכן את remote_path ואת שם הענף.
+name: Deploy static crew app
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'agents-app/**' ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Build static app
+        working-directory: agents-app
+        run: BRAND_NAME="${{ vars.BRAND_NAME || 'Agent Crew' }}" node build-static.js dist
+      - name: Upload via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
+          server: ${{ secrets.SFTP_SERVER }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          local_path: './agents-app/dist/*'
+          remote_path: '/public_html/crew'
+          sftp_only: true

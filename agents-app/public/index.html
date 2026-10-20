@@ -54,6 +54,13 @@ textarea.f{min-height:110px}
 .cfggrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.cfggrid2 .wide{grid-column:1/-1}
 .pre{border-color:#e0b56788;color:var(--gold)}
 .kit{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}.kit>div{padding:12px;border:1px dashed var(--line);border-radius:12px}.logoprev img{max-height:48px;max-width:140px;background:#ffffff14;padding:6px;border-radius:8px;margin-top:8px;display:block}
+.ctrl{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin-top:12px}.ctrl label{margin:0;font-size:.78rem;color:var(--muted)}.ctrl select{width:auto;max-width:100%;display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--ink);font:inherit}
+.lrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0;font-size:.8rem;color:var(--muted)}.lrow label{display:inline-flex;gap:6px;align-items:center;margin:0}.lrow select{padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--ink)}
+.stagewrap{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.stage{position:relative;width:min(100%,230px);margin:8px 0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(135deg,#e9dcc6,#b8a285);background-size:cover;background-position:center;touch-action:none;cursor:crosshair}
+.stage.real{border-color:var(--gold)}
+#stageLogo{position:absolute;transform:translate(-50%,-50%);cursor:grab;user-select:none;-webkit-user-drag:none;max-width:90%;filter:drop-shadow(0 1px 3px #0007);display:none}
+.dlrow{display:flex;gap:6px;align-items:center;margin-top:4px}.dlrow select{padding:2px;font-size:.7rem;width:auto;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--ink)}.dlrow .btn{font-size:.7rem;padding:2px 8px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumbs div{position:relative}.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 .thumbs button{position:absolute;top:-6px;inset-inline-end:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--err);color:#fff;cursor:pointer;line-height:1}
@@ -119,7 +126,7 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
 .caret{display:inline-block;width:8px;height:1em;vertical-align:-2px;background:var(--c);animation:blink .8s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
 .gal{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.gal figure{margin:0;width:150px;animation:pop .4s both}.gal img{width:150px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.gal figure{margin:0;width:150px;animation:pop .4s both}.gal img{width:150px;height:150px;object-fit:contain;background:#0006;border-radius:10px;border:1px solid var(--line);display:block}
 .gal figcaption{font-size:.68rem;color:var(--muted);direction:ltr;margin-top:3px;max-height:2.8em;overflow:hidden}
 .srclist{margin:8px 0 0;padding:0;list-style:none;font-size:.78rem}.srclist a{color:#8fd16a;direction:ltr;unicode-bidi:plaintext}
 #log{list-style:none;margin:0;padding:0;max-height:430px;overflow:auto;font-size:.8rem;font-family:ui-monospace,Consolas,monospace}
@@ -178,6 +185,11 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
     <button id="go" type="submit">שגר משימה</button>
   </form>
   <div class="chips" id="chips"><button class="chip radar" id="radar" type="button"><i></i><span>סרוק טרנדים עכשיו</span></button></div>
+  <div class="ctrl">
+    <label>פורמט התמונות לפי רשת<select id="fmt"></select></label>
+    <label>הקראה בקול<select id="narr"><option value="off">כבויה</option><option value="browser">בדפדפן (חינם)</option><option value="openai">OpenAI (איכותי)</option></select></label>
+    <label id="voiceWrap" hidden>קול<select id="voice"><option>coral</option><option>nova</option><option>alloy</option><option>shimmer</option><option>sage</option><option>onyx</option></select></label>
+  </div>
   <div class="ideas" id="ideas"></div>
 
   <details class="cfg" id="biz" open>
@@ -194,10 +206,12 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
       <div class="wide"><label for="pRules">כללים וגבולות שחובה לכבד (רגולציה, מותג, דברים אסורים)</label><textarea class="f" id="pRules" style="min-height:70px" placeholder="למשל: בלי מחירים, בלי הבטחות, בלי להזכיר מתחרים"></textarea></div>
     </div>
     <div class="kit">
-      <div><b>לוגו העסק</b><div class="note" style="margin:4px 0 8px">הלוגו האמיתי שלך. הוא לא נשלח למודל, אלא מודבק על התמונות בדפדפן, כך שהוא תמיד נכון.</div>
-        <input type="file" id="logoin" accept="image/*"><div class="logoprev" id="logoprev"></div>
-        <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label style="display:inline;margin:0"><input type="checkbox" id="logoOn" checked> הדבק על תמונות יובל</label>
-        <select id="logoPos" class="f" style="width:auto"><option value="br">פינה ימנית תחתונה</option><option value="bl">פינה שמאלית תחתונה</option><option value="tr">פינה ימנית עליונה</option><option value="tl">פינה שמאלית עליונה</option></select></div></div>
+      <div><b>לוגו העסק</b><div class="note" style="margin:4px 0 8px">הלוגו האמיתי שלך. הוא לא נשלח למודל, אלא מוטבע על התמונות בדפדפן. אפשר להסיר את הרקע ולהשאיר את האותיות בלבד, ולבחור איפה הוא יופיע.</div>
+        <input type="file" id="logoin" accept="image/*"> <button class="btn" id="logoClear" type="button" style="font-size:.72rem;padding:2px 8px">הסר לוגו</button>
+        <div class="lrow"><label><input type="checkbox" id="lrm" checked> אותיות בלבד (הסר רקע)</label><label>רגישות <input type="range" id="ltol" min="8" max="140" value="55"></label><label>צבע <select id="ltint"><option value="orig">מקורי</option><option value="white">לבן</option><option value="black">שחור</option></select></label></div>
+        <div class="lrow"><label><input type="checkbox" id="logoOn" checked> הטבע על התמונות</label><label>גודל <input type="range" id="lw" min="5" max="60" value="20"></label></div>
+        <div class="note" style="margin:4px 0">גררי את הלוגו או לחצי על התמונה כדי לבחור את המיקום. אחרי הרצה תופיע כאן התמונה האמיתית של יובל, בפורמט שבחרת.</div>
+        <div class="stagewrap"><div class="stage" id="stage"><img id="stageLogo" alt=""></div></div></div>
       <div><b>תמונות reference לסגנון (עד 3)</b><div class="note" style="margin:4px 0 8px">תמונות של העסק, המוצרים או הסגנון הרצוי. יובל מנתח אותן ומתאים אליהן את התמונות, כדי שלא יהיו זרות למותג.</div>
         <input type="file" id="refin" accept="image/*" multiple><div class="thumbs" id="thumbs"></div></div>
     </div>
@@ -241,6 +255,7 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
 
 <div class="hist" id="hist"><div class="box"><div class="cap" style="margin:0 0 8px">משימות קודמות (נשמרות בדפדפן הזה)</div><ul id="histlist" style="margin:0;padding:0"></ul><button class="btn" id="histClose" style="margin-top:12px">סגירה</button></div></div>
 
+<script src="crew-engine.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 const ICONS = {
@@ -255,14 +270,31 @@ const ICONS = {
 };
 const svg = id => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id] || ''}</svg>`;
 const EXAMPLES = ['פוסט היכרות שמציג את העסק ואת השירות הראשי שלנו', 'מאמר שעונה על השאלה שלקוחות שואלים הכי הרבה', 'סדרת סטוריז: 3 דברים שכדאי לדעת לפני שמתחילים'];
+// שמות הסוכנים להקראה
+const HTO = { orchestrator: 'למנהל', chen: 'לחן', researcher: 'לחוקר', writer: 'לכותב', yael: 'ליעל', yuval: 'ליובל', editor: 'לעורך', publisher: 'למפיץ' };
+const FEM = { chen: 1, yael: 1 };
+const HEN = { orchestrator: 'המנהל', chen: 'חן', researcher: 'החוקר', writer: 'הכותב', yael: 'יעל', yuval: 'יובל', editor: 'העורך', publisher: 'המפיץ' };
+const SAY_START = {
+  orchestrator: 'המנהל מתחיל. הוא הופך את הבקשה לבריף: מגדיר מטרה, קהל ומסר מרכזי.',
+  chen: 'חן יוצאת לרשת. היא מחפשת מקורות עדכניים ואמינים לנושא.',
+  researcher: 'החוקר עובד עכשיו. הוא אוסף עובדות ומאמת אותן מול מקורות.',
+  writer: 'הכותב כותב את הטיוטה לפי הבריף והמחקר.',
+  yael: 'יעל משכתבת את הטקסט בקול של העסק, ומסמנת איפה צריכה להיות תמונה.',
+  yuval: 'יובל מעצב את התמונות ומתאים אותן לסגנון המותג ולפורמט שבחרת.',
+  editor: 'העורך מלטש את הגרסה הסופית ובודק אותה מול הבריף והמחקר.',
+  publisher: 'המפיץ מכין התאמות לרשתות חברתיות ורשימת בדיקה לפני פרסום.'
+};
 
-let LOGO = '', INFO = { agents: [], live: false }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, SRC = {}, REFS = [], runStart = 0, tick = null, TAB = 'article', NEXT = [], busy = false, ENERGY = 0;
+let STATIC = false, EIO = null;
+let LOGO = '', LOGO_SRC = '', LCFG = { rm: true, tol: 55, tint: 'orig', x: .86, y: .9, w: .2, on: true };
+let INFO = { agents: [], live: false, formats: {} }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, SRC = {}, REFS = [], runStart = 0, tick = null, TAB = 'article', NEXT = [], busy = false, ENERGY = 0;
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 const A = id => INFO.agents.find(a => a.id === id);
 const dom = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // ---------- רקע חי ----------
 (function bg() {
@@ -314,25 +346,73 @@ function md(src, imgs) {
 }
 const imgMap = () => Object.fromEntries((IMGS.yuval || []).map(i => [i.n, i.shown || i.url]));
 
+// ---------- חיבור לשרת, או מצב סטטי (הדפדפן מדבר ישירות עם OpenAI) ----------
+const scfg = b => ({ live: Boolean(b.apiKey), key: b.apiKey, model: b.model || CrewEngine.DEFAULT_MODEL, base: INFO.base || 'https://api.openai.com' });
+const dataUrlToBlob = u => { const [h, d] = u.split(','), mime = /:(.*?);/.exec(h)[1], bin = atob(d), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: mime }); };
+async function readNdjson(res, onEv) {
+  const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+  for (;;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n')) >= 0) { const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (ln) onEv(JSON.parse(ln)); } }
+}
+const post = (url, b) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) });
+const API = {
+  async run(b, onEv) {
+    if (STATIC) return CrewEngine.runCrew(b, onEv, EIO, scfg(b));
+    const res = await post('api/run', b);
+    if (res.status === 401) { location.href = '/login'; return; }
+    if (!res.ok) throw new Error(res.status === 413 ? 'הבקשה גדולה מדי (תמונות reference)' : 'שגיאת שרת ' + res.status);
+    await readNdjson(res, onEv);
+  },
+  async trends(b) {
+    if (STATIC) return CrewEngine.trends(b, EIO, scfg(b));
+    const r = await post('api/trends', b); if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || 'שגיאה'); return d;
+  },
+  async check(b) {
+    if (STATIC) return CrewEngine.checkConn(scfg(b));
+    const r = await post('api/check', b); if (r.status === 401) { location.href = '/login'; return []; } return r.json();
+  },
+  async tts(b, text) {
+    if (STATIC) return new Blob([await CrewEngine.tts(scfg(b), text, { voice: b.voice, model: b.ttsModel })], { type: 'audio/mpeg' });
+    const r = await post('api/tts', { ...b, text }); if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'TTS ' + r.status); return r.blob();
+  }
+};
+async function loadInfo() {
+  try {
+    const r = await fetch('api/agents');
+    if (r.status === 401) { location.href = '/login'; return null; }
+    if (r.ok && (r.headers.get('content-type') || '').includes('json')) return await r.json();
+  } catch { /* אין שרת: מצב סטטי */ }
+  STATIC = true;
+  const [agents, profiles, config] = await Promise.all(['agents.json', 'profiles.json', 'config.json'].map(f => fetch(f).then(r => r.json())));
+  const ag = CrewEngine.buildAgents(agents);
+  EIO = {
+    agents: ag, defaultCtx: config.defaultContext || '', brand: config.brand,
+    putFile() {},
+    putImage(rel, p, mime) { return p.b64 ? `data:${mime};base64,${p.b64}` : `data:${mime};charset=utf-8,${encodeURIComponent(p.svg)}`; }
+  };
+  return { brand: config.brand, auth: false, live: false, model: null, defaultContext: config.defaultContext || '', profiles, formats: CrewEngine.FORMATS, agents: CrewEngine.meta(ag), base: config.base };
+}
+
 // ---------- אתחול ----------
 async function init() {
-  const r = await fetch('/api/agents'); if (r.status === 401) { location.href = '/login'; return; }
-  INFO = await r.json();
+  INFO = await loadInfo(); if (!INFO) return;
+  INFO.formats = INFO.formats || CrewEngine.FORMATS;
   loadProfile(); renderPresets(); applyBrand();
   if (INFO.auth) { const a = el('a', null, 'התנתקות'); a.href = '/logout'; $('.top').append(a); }
   try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; } catch {}
   $('#model').value = store.get('model') || '';
+  renderFormats(); loadNarr();
   renderExamples(EXAMPLES);
-  loadKit(); updateMode(); reset();
+  await loadKit(); updateMode(); reset();
 }
 function updateMode() {
   const key = $('#apikey').value.trim(), m = $('#mode'), live = Boolean(key) || INFO.live;
   m.className = 'mode ' + (live ? 'live' : 'demo');
-  m.textContent = key ? 'מצב חי · OpenAI (המפתח שלך)' : INFO.live ? `מצב חי · ${INFO.model}` : 'מצב הדגמה · בלי מפתח';
+  m.textContent = (key ? 'מצב חי · OpenAI (המפתח שלך)' : INFO.live ? `מצב חי · ${INFO.model}` : 'מצב הדגמה · בלי מפתח') + (STATIC ? ' · גרסה סטטית' : '');
   $('#cfgsum').textContent = key ? 'חיבור: מפתח OpenAI מוגדר ✓' : 'חיבור: מפתח OpenAI';
   try { sessionStorage.setItem('etel_key', key); } catch {}
 }
-const body = extra => ({ apiKey: $('#apikey').value.trim(), model: $('#model').value.trim(), context: $('#ctx').value, businessName: $('#pName').value.trim(), ...extra });
+const body = extra => ({ apiKey: $('#apikey').value.trim(), model: $('#model').value.trim(), context: $('#ctx').value, businessName: $('#pName').value.trim(), format: $('#fmt').value, voice: $('#voice').value, ...extra });
 
 function reset() {
   ST = {}; FILES = []; IMGS = {}; SRC = {}; NEXT = []; TAB = 'article'; ENERGY = 0;
@@ -376,9 +456,17 @@ function renderFocus() {
   const sl = $('#srcl'); (SRC[FOCUS] || []).forEach(x => sl.append(el('li', null, `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>`)));
   renderGallery($('#gal'), FOCUS);
 }
+function downloadUrl(name, url) { const a = el('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); }
 function renderGallery(box, id) {
   box.replaceChildren();
-  (IMGS[id] || []).forEach(im => { const f = el('figure'); const i = el('img'); i.src = im.shown || im.url; i.alt = `תמונה ${im.n}`; const dl = el('a', 'btn', 'הורדה'); dl.href = im.shown || im.url; dl.download = `image-${im.n}.png`; dl.style.cssText = 'display:inline-block;margin-top:4px;font-size:.7rem;padding:2px 8px;text-decoration:none'; f.append(i, el('figcaption', null, esc(im.prompt)), dl); box.append(f); });
+  (IMGS[id] || []).forEach(im => {
+    const f = el('figure'), i = el('img'); i.src = im.shown || im.url; i.alt = `תמונה ${im.n}`;
+    const row = el('div', 'dlrow'), sel = el('select', 'f');
+    Object.entries(INFO.formats).forEach(([k, v]) => { const o = el('option'); o.value = k; o.textContent = k; o.title = v.label; if (k === im.ratio) o.selected = true; sel.append(o); });
+    const b = el('button', 'btn', 'הורדה'); b.type = 'button';
+    b.onclick = async () => { try { downloadUrl(`image-${im.n}-${sel.value.replace(':', 'x')}.png`, await compose(im.url, sel.value)); } catch { b.textContent = 'שגיאה'; } };
+    row.append(sel, b); f.append(i, el('figcaption', null, esc(im.prompt)), row); box.append(f);
+  });
 }
 
 function log(id, msg) {
@@ -389,33 +477,76 @@ function log(id, msg) {
 const short = p => p.split('/').slice(-2).join('/');
 let tkPending = false;
 function ticker(id) { if (tkPending) return; tkPending = true; requestAnimationFrame(() => { tkPending = false; const n = nodeEl(id); if (n) n.querySelector('.tk').textContent = (ST[id].text || '').replace(/\s+/g, ' ').slice(-34); }); }
-
 function chip(cls, html, href) { const c = href ? el('a', 'sc ' + cls, html) : el('span', 'sc ' + cls, html); if (href) { c.href = href; c.target = '_blank'; c.rel = 'noopener noreferrer'; } $('#schips').append(c); }
+
+// ---------- הקראה בקול ----------
+const NARR = { mode: 'off', q: [], busy: false, warned: false, srcSaid: {} };
+function loadNarr() {
+  NARR.mode = store.get('narr') || 'off'; $('#narr').value = NARR.mode; $('#voice').value = store.get('voice') || 'coral'; $('#voiceWrap').hidden = NARR.mode !== 'openai';
+}
+function say(text, minor) {
+  if (NARR.mode === 'off') return;
+  if (minor && NARR.q.length > 0) return;       // פרטים משניים לא נערמים
+  NARR.q.push(text); if (NARR.q.length > 3) NARR.q.splice(0, NARR.q.length - 3);
+  pump();
+}
+async function pump() {
+  if (NARR.busy) return; NARR.busy = true;
+  while (NARR.q.length && NARR.mode !== 'off') {
+    const t = NARR.q.shift();
+    try { await (NARR.mode === 'openai' ? speakOpenAI(t) : speakBrowser(t)); }
+    catch (e) {
+      if (NARR.mode === 'openai') { if (!NARR.warned) { NARR.warned = true; log(null, 'הקראה דרך OpenAI נכשלה (' + String(e.message || e).slice(0, 80) + '). עוברת להקראת הדפדפן.'); } NARR.mode = 'browser'; $('#narr').value = 'browser'; await speakBrowser(t).catch(() => {}); }
+    }
+  }
+  NARR.busy = false;
+}
+function speakBrowser(t) {
+  return new Promise(res => {
+    if (!('speechSynthesis' in window)) { res(); return; }
+    const u = new SpeechSynthesisUtterance(t); u.lang = 'he-IL'; u.rate = 1.02;
+    const v = speechSynthesis.getVoices().find(v => /^he/i.test(v.lang)); if (v) u.voice = v;
+    else if (!NARR.warned) { NARR.warned = true; log(null, 'לא נמצא קול עברי בדפדפן. אפשר לבחור הקראה דרך OpenAI בהגדרות.'); }
+    const done = () => res(); u.onend = done; u.onerror = done; speechSynthesis.speak(u); setTimeout(done, 25000);
+  });
+}
+async function speakOpenAI(t) {
+  const blob = await API.tts(body({}), t), url = URL.createObjectURL(blob), a = new Audio(url);
+  try { await new Promise((res, rej) => { a.onended = res; a.onerror = () => rej(new Error('audio')); a.play().catch(rej); }); } finally { URL.revokeObjectURL(url); }
+}
+$('#narr').addEventListener('change', () => {
+  NARR.mode = $('#narr').value; NARR.q = []; NARR.warned = false; store.set('narr', NARR.mode); $('#voiceWrap').hidden = NARR.mode !== 'openai';
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (NARR.mode !== 'off') say('ההקראה פועלת. אני אספר לך מה כל סוכן עושה בזמן אמת.');
+});
+$('#voice').addEventListener('change', () => { store.set('voice', $('#voice').value); if (NARR.mode === 'openai') say('כך נשמע הקול הזה.'); });
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
 
 function handle(ev) {
   const a = ev.agent ? A(ev.agent) : null, s = a ? ST[a.id] : null, idx = a ? INFO.agents.indexOf(a) : -1;
-  if (ev.type === 'run') { runStart = Date.now(); log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug}${ev.refs ? ` · ${ev.refs} תמונות reference` : ''}`); }
+  if (ev.type === 'run') { runStart = Date.now(); NARR.srcSaid = {}; log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug} · פורמט ${ev.format}${ev.refs ? ` · ${ev.refs} תמונות reference` : ''}`); say('המשימה נקלטה. שמונה סוכנים מתחילים לעבוד.'); }
   else if (ev.type === 'start') {
     s.status = 'working'; s.t0 = Date.now(); s.text = ''; ENERGY = 1;
     const n = nodeEl(a.id); n.classList.add('working'); n.querySelector('.st').textContent = 'עובד…';
     if (idx > 0) { const l = linkEl(idx - 1); l.classList.add('flowing'); l.querySelector('.tag').textContent = short(FILES[FILES.length - 1].path); }
-    setFocus(a.id); log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש');
+    setFocus(a.id); log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש'); say(SAY_START[a.id] || `${a.title} מתחיל לעבוד.`);
   } else if (ev.type === 'delta') {
     s.text += ev.text; ticker(a.id);
     if (FOCUS === a.id) { const pre = $('#stream'); pre.querySelector('.caret')?.remove(); pre.append(document.createTextNode(ev.text)); pre.append(el('span', 'caret')); pre.scrollTop = pre.scrollHeight; }
   } else if (ev.type === 'search') {
     const strip = $('#sstrip'); strip.className = 'sstrip on'; nodeEl(a.id).classList.add('searching');
     $('#shd').textContent = `${a.title} מחפש ברשת…`;
-    if (ev.query) { chip('q', '⌕ ' + esc(ev.query)); log(a.id, `מחפש: ${ev.query}`); } else log(a.id, 'מבצע חיפוש ברשת');
+    if (ev.query) { chip('q', '⌕ ' + esc(ev.query)); log(a.id, `מחפש: ${ev.query}`); say(`${HEN[a.id]} ${FEM[a.id] ? 'מחפשת' : 'מחפש'} ברשת: ${ev.query.split(/\s+/).slice(0, 6).join(' ')}`, true); } else log(a.id, 'מבצע חיפוש ברשת');
   } else if (ev.type === 'source') {
     (SRC[a.id] = SRC[a.id] || []).push(ev); chip('s', esc(dom(ev.url)), ev.url); log(a.id, `מצא מקור: ${dom(ev.url)}`); setStats();
+    if (!NARR.srcSaid[a.id]) { NARR.srcSaid[a.id] = 1; say(`נמצא מקור ראשון, מאתר ${dom(ev.url).replace(/\./g, ' נקודה ')}.`, true); }
     if (FOCUS === a.id) { $('#srcl').append(el('li', null, `<a href="${esc(ev.url)}" target="_blank" rel="noopener noreferrer">${esc(ev.title)}</a>`)); }
-  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); if (FOCUS === a.id) renderFocus(); }
+  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); say('יובל ניתח את תמונות ה-reference ומתאים אליהן את הסגנון.', true); if (FOCUS === a.id) renderFocus(); }
   else if (ev.type === 'image') {
-    (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`);
+    (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`); say(`תמונה ${ev.n} מוכנה.`, true); setStage(ev.url);
     if (FOCUS === a.id) renderGallery($('#gal'), a.id);
-    if (LOGO && $('#logoOn').checked) branded(ev.url).then(u => { ev.shown = u; if (FOCUS === a.id) renderGallery($('#gal'), a.id); if (FILES.length === INFO.agents.length) renderDeliver(); }).catch(() => {});
-  } else if (ev.type === 'step') { log(a.id, ev.text); }
+    compose(ev.url, ev.ratio).then(u => { ev.shown = u; if (FOCUS === a.id) renderGallery($('#gal'), a.id); if (FILES.length === INFO.agents.length) renderDeliver(); }).catch(() => {});
+  } else if (ev.type === 'step') { log(a.id, ev.text); if (/מייצר תמונה/.test(ev.text)) say(`${HEN[a.id]} מייצר ${ev.text.replace(/\(.*\)/, '').replace('מייצר ', '')}`, true); }
   else if (ev.type === 'done') {
     s.status = 'done'; s.ms = ev.ms; s.text = ev.file.content; FILES.push(ev.file);
     const n = nodeEl(a.id); n.classList.remove('working', 'searching'); n.classList.add('done'); n.querySelector('.st').textContent = `${(ev.ms / 1000).toFixed(1)} ש׳`; n.querySelector('.tk').textContent = '';
@@ -423,17 +554,18 @@ function handle(ev) {
     if (a.search) $('#sstrip').classList.add('idle');
     log(a.id, `סיים · ${ev.chars} תווים${ev.sources ? ` · ${ev.sources} מקורות` : ''} · כתב ${short(ev.file.path)}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
     if (ev.note) log(a.id, ev.note.split('\n')[0]);
+    say(`${HEN[a.id]} ${FEM[a.id] ? 'סיימה' : 'סיים'}${idx < INFO.agents.length - 1 ? ` ו${FEM[a.id] ? 'מעבירה' : 'מעביר'} ${HTO[INFO.agents[idx + 1].id]}` : ''}.`);
     if (FOCUS === a.id) renderFocus(); setStats();
   } else if (ev.type === 'final') {
     ENERGY = .25; const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה · ${FILES.length} קבצים · ${fmt(Date.now() - runStart)}`;
-    log(null, 'כל הסוכנים סיימו'); TAB = 'article'; renderDeliver(); confetti(); saveHist();
+    log(null, 'כל הסוכנים סיימו'); say('כל הסוכנים סיימו. המאמר והתמונות מוכנים.'); TAB = 'article'; renderDeliver(); confetti(); saveHist();
     $('#deliver').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else if (ev.type === 'next') {
     NEXT = ev.ideas; const box = $('#nextchips'); box.replaceChildren();
     NEXT.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; scrollTo({ top: 0, behavior: 'smooth' }); $('#task').focus(); }; box.append(c); });
     if (NEXT.length) $('#next').classList.add('on');
   } else if (ev.type === 'error') {
-    ENERGY = 0; const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message);
+    ENERGY = 0; const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message); say('אירעה שגיאה. פרטים בדף.');
     document.querySelectorAll('.node.working').forEach(n => n.classList.remove('working', 'searching')); document.querySelectorAll('.link.flowing').forEach(l => l.classList.remove('flowing'));
   }
 }
@@ -447,14 +579,16 @@ function renderDeliver() {
   if (ed()) add('article', '★ המאמר המוכן', 'star');
   FILES.forEach((f, i) => add(String(i), `${A(f.agent).title} · ${f.label}`));
   const art = $('#article'), view = $('#view'), g = $('#dgal');
-  if (TAB === 'article' && ed()) { art.hidden = false; view.hidden = true; const im = imgMap(), has = /!\[/.test(ed().content);
-    art.innerHTML = (!has && Object.keys(im).length ? Object.values(im).map(u => `<img src="${u}" alt="">`).join('') : '') + md(ed().content, im); g.replaceChildren(); }
-  else { const f = FILES[Number(TAB)] || FILES[0]; art.hidden = true; view.hidden = false; view.textContent = f ? f.content : ''; g.replaceChildren(); if (f?.agent === 'yuval') renderGallery(g, 'yuval'); }
+  if (TAB === 'article' && ed()) {
+    art.hidden = false; view.hidden = true;
+    const im = imgMap(), has = /!\[/.test(ed().content);
+    art.innerHTML = (!has && Object.keys(im).length ? Object.values(im).map(u => `<img src="${u}" alt="">`).join('') : '') + md(ed().content, im); g.replaceChildren();
+  } else { const f = FILES[Number(TAB)] || FILES[0]; art.hidden = true; view.hidden = false; view.textContent = f ? f.content : ''; g.replaceChildren(); if (f?.agent === 'yuval') renderGallery(g, 'yuval'); }
 }
 const curText = () => (TAB === 'article' && ed() ? ed().content : (FILES[Number(TAB)] || FILES[0] || {}).content || '');
 $('#copy').onclick = async () => { try { await navigator.clipboard.writeText(curText()); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1400); } catch {} };
+function download(name, blob) { const u = URL.createObjectURL(blob); downloadUrl(name, u); setTimeout(() => URL.revokeObjectURL(u), 4000); }
 $('#dl').onclick = () => { const t = FILES.map(f => `<!-- ${f.path} -->\n${f.content}`).join('\n\n---\n\n'); download('agents-output.md', new Blob([t], { type: 'text/markdown' })); };
-function download(name, blob) { const a = el('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
 $('#dlHtml').onclick = async () => {
   if (!ed()) return;
   const map = imgMap(), inl = {};
@@ -518,32 +652,16 @@ function renderPresets() {
   const blank = el('button', 'chip'); blank.type = 'button'; blank.textContent = 'ריק: אמלא בעצמי'; blank.onclick = () => { fillProfile({}); renderExamples(EXAMPLES); }; box.append(blank);
 }
 
-// ---------- רדאר טרנדים ----------
-$('#radar').onclick = async () => {
-  const btn = $('#radar'); if (btn.classList.contains('scan')) return; btn.classList.add('scan'); btn.querySelector('span').textContent = 'סורק את הרשת…';
-  const box = $('#ideas'); box.replaceChildren();
-  try {
-    const r = await fetch('/api/trends', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body({})) });
-    if (r.status === 401) { location.href = '/login'; return; }
-    const d = await r.json(); if (!r.ok) throw new Error(d.error || 'שגיאה');
-    d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; $('#form').requestSubmit(); }; c.append(b); box.append(c); });
-  } catch (e) { box.append(el('div', 'banner err', 'שגיאה: ' + esc(e.message))); }
-  btn.classList.remove('scan'); btn.querySelector('span').textContent = 'סרוק טרנדים עכשיו';
-};
+// ---------- פורמט התמונות לרשתות ----------
+function renderFormats() {
+  const s = $('#fmt'); s.replaceChildren();
+  Object.entries(INFO.formats).forEach(([k, v]) => { const o = el('option'); o.value = k; o.textContent = v.label; s.append(o); });
+  s.value = INFO.formats[store.get('fmt')] ? store.get('fmt') : '1:1'; applyStageRatio();
+}
+$('#fmt').addEventListener('change', () => { store.set('fmt', $('#fmt').value); applyStageRatio(); });
+const ratioOf = id => { const f = INFO.formats[id]; return f ? f.w / f.h : 1; };
 
-// ---------- בדיקת חיבור ----------
-$('#chk').onclick = async () => {
-  const ul = $('#chkout'), b = $('#chk'); ul.replaceChildren(el('li', null, 'בודק…')); b.disabled = true;
-  try {
-    const r = await fetch('/api/check', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body({})) });
-    if (r.status === 401) { location.href = '/login'; return; }
-    ul.replaceChildren();
-    (await r.json()).forEach(x => { const c = x.ok === true ? 'var(--ok)' : x.ok === false ? 'var(--err)' : 'var(--muted)'; ul.append(el('li', null, `<b style="color:${c}">${x.ok === true ? '✓' : x.ok === false ? '✗' : '•'} ${esc(x.name)}</b>: <span style="color:var(--muted)">${esc(x.detail)}</span>`)); });
-  } catch (e) { ul.replaceChildren(el('li', null, 'שגיאה: ' + esc(e.message))); }
-  b.disabled = false;
-};
-
-// ---------- ערכת מותג: לוגו ותמונות reference ----------
+// ---------- לוגו: אותיות בלבד, הסרת רקע ומיקום שבעל המערכת בוחר ----------
 const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
 async function fileToData(f, max, mime) {
   const u = URL.createObjectURL(f);
@@ -553,44 +671,114 @@ async function fileToData(f, max, mime) {
     c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c.toDataURL(mime, .85);
   } finally { URL.revokeObjectURL(u); }
 }
-async function branded(url) {
-  const [im, lg] = await Promise.all([loadImg(url), loadImg(LOGO)]);
-  const c = document.createElement('canvas'); c.width = im.naturalWidth || 1024; c.height = im.naturalHeight || 1024;
-  const x = c.getContext('2d'); x.drawImage(im, 0, 0, c.width, c.height);
-  const w = c.width * .2, h = w * (lg.naturalHeight || 1) / (lg.naturalWidth || 1), m = c.width * .035, pos = $('#logoPos').value;
-  x.drawImage(lg, pos.includes('r') ? c.width - w - m : m, pos.includes('b') ? c.height - h - m : m, w, h);
+// מסיר רקע אחיד (לפי צבע הפינות), מצבע את האותיות אם התבקש, וחותך שוליים שקופים
+async function processLogo() {
+  if (!LOGO_SRC) { LOGO = ''; drawStageLogo(); return; }
+  const im = await loadImg(LOGO_SRC), w = im.naturalWidth, h = im.naturalHeight;
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
+  const img = x.getImageData(0, 0, w, h), d = img.data;
+  if (LCFG.rm) {
+    const at = (px, py) => { const i = (py * w + px) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+    const cs = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+    if (cs.every(p => p[3] > 200)) { // הרקע לא שקוף כבר
+      const bg = [0, 1, 2].map(k => cs.reduce((s, p) => s + p[k], 0) / 4), tol = LCFG.tol;
+      for (let i = 0; i < d.length; i += 4) {
+        const dist = Math.hypot(d[i] - bg[0], d[i + 1] - bg[1], d[i + 2] - bg[2]);
+        const a = dist <= tol ? 0 : dist >= tol * 1.8 ? 255 : Math.round(255 * (dist - tol) / (tol * .8));
+        d[i + 3] = Math.min(d[i + 3], a);
+      }
+    }
+  }
+  if (LCFG.tint !== 'orig') { const v = LCFG.tint === 'white' ? 255 : 0; for (let i = 0; i < d.length; i += 4) { d[i] = d[i + 1] = d[i + 2] = v; } }
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let py = 0; py < h; py++) for (let px = 0; px < w; px++) if (d[(py * w + px) * 4 + 3] > 12) { if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py; }
+  x.putImageData(img, 0, 0);
+  if (x1 < 0) { LOGO = ''; drawStageLogo(); return; }
+  const t = document.createElement('canvas'); t.width = x1 - x0 + 1; t.height = y1 - y0 + 1; t.getContext('2d').drawImage(c, x0, y0, t.width, t.height, 0, 0, t.width, t.height);
+  LOGO = t.toDataURL('image/png'); drawStageLogo();
+}
+function applyStageRatio() { const s = $('#stage'); if (s) s.style.aspectRatio = String(ratioOf($('#fmt').value)); }
+function setStage(url) { $('#stage').style.backgroundImage = `url("${url}")`; $('#stage').classList.add('real'); }
+function drawStageLogo() {
+  const l = $('#stageLogo'); if (!LOGO) { l.style.display = 'none'; return; }
+  l.style.display = 'block'; l.src = LOGO; l.style.width = (LCFG.w * 100) + '%'; l.style.left = (LCFG.x * 100) + '%'; l.style.top = (LCFG.y * 100) + '%';
+  l.style.opacity = LCFG.on ? 1 : .35;
+}
+function saveLogoCfg() { store.set('logoCfg', JSON.stringify(LCFG)); }
+(function stageDrag() {
+  const st = $('#stage'), lg = $('#stageLogo'); let drag = false;
+  const move = e => { const r = st.getBoundingClientRect(); LCFG.x = clamp((e.clientX - r.left) / r.width, .02, .98); LCFG.y = clamp((e.clientY - r.top) / r.height, .02, .98); drawStageLogo(); };
+  lg.addEventListener('pointerdown', e => { drag = true; lg.setPointerCapture(e.pointerId); e.preventDefault(); });
+  lg.addEventListener('pointermove', e => { if (drag) move(e); });
+  lg.addEventListener('pointerup', () => { if (drag) { drag = false; saveLogoCfg(); } });
+  st.addEventListener('click', e => { if (e.target === st) { move(e); saveLogoCfg(); } });
+})();
+let procT = null; const reproc = () => { clearTimeout(procT); procT = setTimeout(() => { processLogo().catch(() => {}); }, 120); };
+$('#logoin').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { LOGO_SRC = await fileToData(f, 600, 'image/png'); store.set('logoSrc', LOGO_SRC); await processLogo(); } catch { const b = $('#banner'); b.className = 'banner err'; b.textContent = 'לא הצלחתי לקרוא את הלוגו'; } e.target.value = ''; });
+$('#lrm').addEventListener('change', () => { LCFG.rm = $('#lrm').checked; saveLogoCfg(); reproc(); });
+$('#ltol').addEventListener('input', () => { LCFG.tol = +$('#ltol').value; saveLogoCfg(); reproc(); });
+$('#ltint').addEventListener('change', () => { LCFG.tint = $('#ltint').value; saveLogoCfg(); reproc(); });
+$('#lw').addEventListener('input', () => { LCFG.w = +$('#lw').value / 100; saveLogoCfg(); drawStageLogo(); });
+$('#logoOn').addEventListener('change', () => { LCFG.on = $('#logoOn').checked; saveLogoCfg(); drawStageLogo(); });
+$('#logoClear').addEventListener('click', () => { LOGO_SRC = ''; LOGO = ''; store.set('logoSrc', ''); drawStageLogo(); });
+
+// מחתך את התמונה בדיוק ליחס הרשת, ומטביע את הלוגו במיקום שנבחר
+async function compose(url, rid) {
+  const im = await loadImg(url), W = im.naturalWidth || 1024, H = im.naturalHeight || 1024, r = ratioOf(rid || $('#fmt').value);
+  let sw = W, sh = H; if (W / H > r) sw = Math.round(H * r); else sh = Math.round(W / r);
+  const c = document.createElement('canvas'); c.width = sw; c.height = sh; const x = c.getContext('2d');
+  x.drawImage(im, (W - sw) / 2, (H - sh) / 2, sw, sh, 0, 0, sw, sh);
+  if (LOGO && LCFG.on) {
+    const lg = await loadImg(LOGO), lw = sw * LCFG.w, lh = lw * (lg.naturalHeight / lg.naturalWidth);
+    x.drawImage(lg, clamp(sw * LCFG.x - lw / 2, 0, sw - lw), clamp(sh * LCFG.y - lh / 2, 0, sh - lh), lw, lh);
+  }
   return c.toDataURL('image/png');
 }
-function drawLogo() { const b = $('#logoprev'); b.replaceChildren(); if (LOGO) { const i = el('img'); i.src = LOGO; b.append(i); } }
-$('#logoin').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { LOGO = await fileToData(f, 512, 'image/png'); store.set('logo', LOGO); drawLogo(); } catch { b2('לא הצלחתי לקרוא את הלוגו'); } e.target.value = ''; });
-$('#logoOn').addEventListener('change', () => store.set('logoOn', $('#logoOn').checked ? '1' : '0'));
-$('#logoPos').addEventListener('change', () => store.set('logoPos', $('#logoPos').value));
-function b2(msg) { const b = $('#banner'); b.className = 'banner err'; b.textContent = msg; }
+
+// ---------- תמונות reference ----------
 $('#refin').addEventListener('change', async e => {
   for (const f of [...e.target.files].slice(0, 3 - REFS.length)) { try { REFS.push(await fileToData(f, 768, 'image/jpeg')); } catch { /* לא נתמך */ } }
   e.target.value = ''; store.set('refs', JSON.stringify(REFS)); drawRefs();
 });
 function drawRefs() { const t = $('#thumbs'); t.replaceChildren(); REFS.forEach((u, i) => { const d = el('div'); const im = el('img'); im.src = u; const b = el('button', null, '×'); b.type = 'button'; b.onclick = () => { REFS.splice(i, 1); store.set('refs', JSON.stringify(REFS)); drawRefs(); }; d.append(im, b); t.append(d); }); }
-function loadKit() {
-  LOGO = store.get('logo') || ''; $('#logoOn').checked = store.get('logoOn') !== '0'; $('#logoPos').value = store.get('logoPos') || 'br';
+async function loadKit() {
+  try { LCFG = { ...LCFG, ...JSON.parse(store.get('logoCfg') || '{}') }; } catch {}
+  $('#lrm').checked = LCFG.rm; $('#ltol').value = LCFG.tol; $('#ltint').value = LCFG.tint; $('#lw').value = Math.round(LCFG.w * 100); $('#logoOn').checked = LCFG.on;
+  LOGO_SRC = store.get('logoSrc') || ''; await processLogo().catch(() => {});
   try { REFS = JSON.parse(store.get('refs') || '[]').filter(u => typeof u === 'string').slice(0, 3); } catch { REFS = []; }
-  drawLogo(); drawRefs();
+  drawRefs();
 }
+
+// ---------- בדיקת חיבור ----------
+$('#chk').onclick = async () => {
+  const ul = $('#chkout'), b = $('#chk'); ul.replaceChildren(el('li', null, 'בודק…')); b.disabled = true;
+  try {
+    const out = await API.check(body({})); ul.replaceChildren();
+    out.forEach(x => { const c = x.ok === true ? 'var(--ok)' : x.ok === false ? 'var(--err)' : 'var(--muted)'; ul.append(el('li', null, `<b style="color:${c}">${x.ok === true ? '✓' : x.ok === false ? '✗' : '•'} ${esc(x.name)}</b>: <span style="color:var(--muted)">${esc(x.detail)}</span>`)); });
+  } catch (e) { ul.replaceChildren(el('li', null, 'שגיאה: ' + esc(e.message))); }
+  b.disabled = false;
+};
+
+// ---------- רדאר טרנדים ----------
+$('#radar').onclick = async () => {
+  const btn = $('#radar'); if (btn.classList.contains('scan')) return; btn.classList.add('scan'); btn.querySelector('span').textContent = 'סורק את הרשת…';
+  const box = $('#ideas'); box.replaceChildren();
+  try {
+    const d = await API.trends(body({}));
+    d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; $('#form').requestSubmit(); }; c.append(b); box.append(c); });
+  } catch (e) { box.append(el('div', 'banner err', 'שגיאה: ' + esc(e.message))); }
+  btn.classList.remove('scan'); btn.querySelector('span').textContent = 'סרוק טרנדים עכשיו';
+};
 
 // ---------- שיגור ----------
 $('#form').addEventListener('submit', async e => {
   e.preventDefault(); if (busy) return; busy = true;
   saveProfile(); store.set('model', $('#model').value);
   const btn = $('#go'); btn.disabled = true; btn.textContent = 'הצוות עובד…';
-  reset(); runStart = Date.now(); clearInterval(tick);
+  NARR.q = []; reset(); runStart = Date.now(); clearInterval(tick);
   tick = setInterval(() => { setStats(); const t = $('#ftm'); if (t && ST[FOCUS]?.status === 'working') t.textContent = fmt(Date.now() - ST[FOCUS].t0); }, 500);
-  try {
-    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body({ task: $('#task').value, refs: REFS })) });
-    if (res.status === 401) { location.href = '/login'; return; }
-    if (!res.ok) throw new Error(res.status === 413 ? 'הבקשה גדולה מדי (תמונות reference)' : 'שגיאת שרת ' + res.status);
-    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '';
-    for (;;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n')) >= 0) { const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (ln) handle(JSON.parse(ln)); } }
-  } catch (err) { handle({ type: 'error', message: err.message }); }
+  try { await API.run(body({ task: $('#task').value, refs: REFS }), handle); }
+  catch (err) { handle({ type: 'error', message: err.message }); }
   clearInterval(tick); setStats(); ENERGY = 0; busy = false; btn.disabled = false; btn.textContent = 'שגר משימה';
 });
 $('#apikey').addEventListener('input', updateMode);
