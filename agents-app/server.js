@@ -283,6 +283,18 @@ async function runCrew(brief, emit) {
   } catch { /* הצעות הן בונוס */ }
 }
 
+// ---------- בדיקת חיבור (חינמית: בלי יצירת תוכן) ----------
+async function checkConn(brief) {
+  const cfg = resolveCfg(brief);
+  if (!cfg.live) return [{ name: 'מפתח OpenAI', ok: false, detail: 'לא הוזן מפתח. הדביקי אותו בשדה למעלה, או הגדירי OPENAI_API_KEY בשרת.' }];
+  const out = [];
+  const step = async (name, fn) => { try { out.push({ name, ok: true, detail: await fn() }); } catch (e) { out.push({ name, ok: false, detail: String(e.message || e) }); } };
+  const model = async id => { const r = await fetch(BASE + '/v1/models/' + encodeURIComponent(id), { headers: hdr(cfg) }); if (!r.ok) await fail('models', r); };
+  await step('מפתח ומודל הטקסט', async () => { await model(cfg.model); return `המפתח תקין והמודל ${cfg.model} זמין`; });
+  await step('מודל התמונות', async () => { await model(IMAGE_MODEL); return `${IMAGE_MODEL} זמין`; });
+  out.push({ name: 'חיפוש ברשת', ok: null, detail: 'אי אפשר לבדוק בלי להריץ חיפוש (עולה כסף). יתברר בהרצה: חן והחוקר יציגו שאילתות ומקורות, ואם לא, תופיע הערה ביומן.' });
+  return out;
+}
 // ---------- רדאר טרנדים (פרואקטיבי) ----------
 async function trends(brief) {
   const cfg = resolveCfg(brief);
@@ -411,6 +423,11 @@ http.createServer(async (req, res) => {
     try { await runCrew(brief, emit); }
     catch (err) { emit({ type: 'error', message: String(err.message || err) }); }
     return res.end();
+  }
+  if (url.pathname === '/api/check' && req.method === 'POST') {
+    const brief = await readJson(req, 200_000) || {};
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify(await checkConn(brief)));
   }
   if (url.pathname === '/api/trends' && req.method === 'POST') {
     const brief = await readJson(req, 200_000) || {};

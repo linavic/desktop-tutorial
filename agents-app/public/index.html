@@ -198,13 +198,14 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
   <details class="cfg" id="cfg">
     <summary id="cfgsum">חיבור: מפתח OpenAI ותמונות reference</summary>
     <div class="cfggrid">
-      <div><label for="apikey">מפתח OpenAI API</label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
+      <div><label for="apikey">מפתח OpenAI API</label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"><div style="margin-top:8px"><button class="btn" id="chk" type="button">בדוק חיבור</button></div></div>
       <div><label for="model">מודל (לא חובה)</label><input class="f" id="model" dir="ltr" placeholder="gpt-4.1"></div>
     </div>
     <p class="note">המפתח נשמר רק בלשונית הזו, נשלח לשרת בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה. חיפוש ברשת ותמונות דורשים מפתח עם גישה לכלי web_search ול-gpt-image-2.</p>
     <label style="margin-top:12px">תמונות reference לסגנון המותג (עד 3). יובל מנתח אותן ומתאים את התמונות אליהן.</label>
     <input type="file" id="refin" accept="image/*" multiple>
     <div class="thumbs" id="thumbs"></div>
+    <ul id="chkout" class="srclist" style="margin-top:12px"></ul>
   </details>
 
   <div class="stats">
@@ -518,6 +519,18 @@ $('#radar').onclick = async () => {
     d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; $('#form').requestSubmit(); }; c.append(b); box.append(c); });
   } catch (e) { box.append(el('div', 'banner err', 'שגיאה: ' + esc(e.message))); }
   btn.classList.remove('scan'); btn.querySelector('span').textContent = 'סרוק טרנדים עכשיו';
+};
+
+// ---------- בדיקת חיבור ----------
+$('#chk').onclick = async () => {
+  const ul = $('#chkout'), b = $('#chk'); ul.replaceChildren(el('li', null, 'בודק…')); b.disabled = true;
+  try {
+    const r = await fetch('/api/check', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body({})) });
+    if (r.status === 401) { location.href = '/login'; return; }
+    ul.replaceChildren();
+    (await r.json()).forEach(x => { const c = x.ok === true ? 'var(--ok)' : x.ok === false ? 'var(--err)' : 'var(--muted)'; ul.append(el('li', null, `<b style="color:${c}">${x.ok === true ? '✓' : x.ok === false ? '✗' : '•'} ${esc(x.name)}</b>: <span style="color:var(--muted)">${esc(x.detail)}</span>`)); });
+  } catch (e) { ul.replaceChildren(el('li', null, 'שגיאה: ' + esc(e.message))); }
+  b.disabled = false;
 };
 
 // ---------- תמונות reference ----------
