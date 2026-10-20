@@ -3,6 +3,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const PORT = process.env.PORT || 3000;
 // ספק: OPENAI_API_KEY או ANTHROPIC_API_KEY. אם שניהם מוגדרים, OpenAI קודם (אפשר לכפות עם PROVIDER=anthropic).
@@ -201,14 +202,81 @@ async function pipeline(brief, emit) {
   emit({ type: 'final', package: pkg, status });
 }
 
+
+// ---------- אבטחה: סיסמת כניסה ----------
+// בלי APP_PASSWORD השרת מאזין רק ל-localhost. עם סיסמה הוא פתוח לרשת ודורש התחברות.
+const PASSWORD = process.env.APP_PASSWORD || '';
+const SECRET = process.env.APP_SECRET || crypto.randomBytes(32).toString('hex');
+const sha = v => crypto.createHash('sha256').update(String(v)).digest();
+const sign = exp => crypto.createHmac('sha256', SECRET).update(String(exp)).digest('hex');
+const SESSION_MS = 7 * 24 * 3600 * 1000;
+const fails = new Map(); let globalFails = { n: 0, until: 0 };
+
+function authed(req) {
+  if (!PASSWORD) return true;
+  const m = /(?:^|;\s*)etel_session=(\d+)\.([a-f0-9]+)/.exec(req.headers.cookie || '');
+  if (!m || Number(m[1]) < Date.now()) return false;
+  const a = Buffer.from(sign(m[1])), b = Buffer.from(m[2]);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+const clientIp = req => String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+const isHttps = req => req.headers['x-forwarded-proto'] === 'https';
+const LOGIN_HTML = (msg = '') => `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>כניסה · Etel Clinic</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#faf6ef;color:#3a2a1e;font-family:"Segoe UI",Arial,sans-serif}
+form{background:#fffdf9;border:1px solid #e6dccd;border-radius:14px;padding:28px;width:min(92vw,340px)}
+h1{margin:0 0 4px;font-family:Georgia,serif;font-size:1.4rem}p{margin:0 0 16px;color:#7d6b5b;font-size:.9rem}
+input,button{width:100%;padding:11px;border-radius:8px;font:inherit;box-sizing:border-box}input{border:1px solid #e6dccd;margin-bottom:12px}
+button{border:0;background:#b8924a;color:#fff;font-weight:600;cursor:pointer}.e{color:#b5532f;font-size:.85rem;margin:0 0 10px}</style></head>
+<body><form method="post" action="/login"><h1>Etel Clinic</h1><p>הכניסה למערכת הסוכנים</p>${msg ? `<p class="e">${msg}</p>` : ''}
+<input type="password" name="password" placeholder="סיסמה" autocomplete="current-password" autofocus required><button>כניסה</button></form></body></html>`;
+
+async function handleAuth(req, res, url) {
+  if (url.pathname === '/logout') {
+    res.writeHead(302, { location: '/login', 'set-cookie': 'etel_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict' });
+    return res.end(), true;
+  }
+  if (url.pathname === '/login') {
+    if (req.method === 'POST') {
+      let body = ''; for await (const c of req) { body += c; if (body.length > 2000) break; }
+      const pw = new URLSearchParams(body).get('password') || '';
+      const ip = clientIp(req), now = Date.now();
+      const f = fails.get(ip) || { n: 0, until: 0 };
+      if (f.until > now || globalFails.until > now) {
+        res.writeHead(429, { 'content-type': 'text/html; charset=utf-8' });
+        return res.end(LOGIN_HTML('יותר מדי ניסיונות. נסי שוב בעוד כמה דקות.')), true;
+      }
+      if (crypto.timingSafeEqual(sha(pw), sha(PASSWORD))) {
+        fails.delete(ip);
+        const exp = now + SESSION_MS;
+        res.writeHead(302, { location: '/', 'set-cookie': `etel_session=${exp}.${sign(exp)}; Path=/; Max-Age=${SESSION_MS / 1000}; HttpOnly; SameSite=Strict${isHttps(req) ? '; Secure' : ''}` });
+        return res.end(), true;
+      }
+      f.n++; if (f.n >= 5) { f.until = now + 15 * 60 * 1000; f.n = 0; } fails.set(ip, f);
+      globalFails.n++; if (globalFails.n >= 30) { globalFails = { n: 0, until: now + 15 * 60 * 1000 }; }
+      res.writeHead(401, { 'content-type': 'text/html; charset=utf-8' });
+      return res.end(LOGIN_HTML('סיסמה שגויה.')), true;
+    }
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    return res.end(LOGIN_HTML()), true;
+  }
+  if (!authed(req)) {
+    if (url.pathname.startsWith('/api/')) { res.writeHead(401, { 'content-type': 'application/json' }); res.end('{"error":"login required"}'); }
+    else { res.writeHead(302, { location: '/login' }); res.end(); }
+    return true;
+  }
+  return false;
+}
+
 // ---------- שרת ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' };
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
+  res.setHeader('x-content-type-options', 'nosniff'); res.setHeader('referrer-policy', 'no-referrer'); res.setHeader('cache-control', 'no-store');
+  if (PASSWORD && await handleAuth(req, res, url)) return;
   if (url.pathname === '/api/agents') {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({ live: LIVE, model: LIVE ? `${PROVIDER === 'openai' ? 'OpenAI' : 'Claude'} · ${MODEL}` : null, agents: AGENTS }));
+    return res.end(JSON.stringify({ auth: Boolean(PASSWORD), live: LIVE, model: LIVE ? `${PROVIDER === 'openai' ? 'OpenAI' : 'Claude'} · ${MODEL}` : null, agents: AGENTS }));
   }
   if (url.pathname === '/api/run' && req.method === 'POST') {
     let body = '';
@@ -229,4 +297,4 @@ http.createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': MIME[path.extname(full)] || 'application/octet-stream' });
     res.end(data);
   });
-}).listen(PORT, () => console.log(`Etel agents app: http://localhost:${PORT}  (${LIVE ? `LIVE ${PROVIDER} ${MODEL}` : 'DEMO mode'})`));
+}).listen(PORT, PASSWORD ? '0.0.0.0' : '127.0.0.1', () => console.log(`Etel agents app: http://localhost:${PORT}  [${PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE ${PROVIDER} ${MODEL}` : 'DEMO mode'})`));

@@ -1,0 +1,16 @@
+# פריסה ל-Render (Blueprint). לא נבדק מול Render עצמו.
+# APP_PASSWORD מוזן ידנית בלוח הבקרה של Render ולא נשמר בקובץ.
+services:
+  - type: web
+    name: etel-agents
+    runtime: node
+    rootDir: agents-app
+    branch: ccr-c26f43f2-x39v26
+    buildCommand: echo "no build"
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: APP_PASSWORD
+        sync: false
+      - key: NODE_VERSION
+        value: "22"

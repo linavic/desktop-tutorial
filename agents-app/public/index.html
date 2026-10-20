@@ -113,7 +113,9 @@ function updateMode() {
 }
 
 async function init() {
-  const info = await (await fetch('/api/agents')).json();
+  const r0 = await fetch('/api/agents'); if (r0.status === 401) { location.href = '/login'; return; }
+  const info = await r0.json();
+  if (info.auth) { const a = document.createElement('a'); a.href = '/logout'; a.textContent = 'התנתקות'; a.style.cssText = 'font-size:.85rem;color:var(--muted)'; document.querySelector('header').append(a); }
   AGENTS = info.agents;
   SERVER_INFO = info;
   try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; const pv = sessionStorage.getItem('etel_provider'); if (pv) $('#provider').value = pv; } catch { /* storage blocked */ }
@@ -177,6 +179,7 @@ $('#form').addEventListener('submit', async e => {
   render(); $('#log').replaceChildren(el('li', 'empty', 'מתחיל…')); $('#final').className = 'empty'; $('#final').textContent = 'ממתין לסוכנים…'; $('#copy').disabled = true;
   try {
     const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic: $('#topic').value, platform: $('#platform').value, format: $('#format').value, apiKey: $('#apikey').value.trim(), provider: $('#provider').value, model: $('#model').value.trim() }) });
+    if (res.status === 401) { location.href = '/login'; return; }
     const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
     for (;;) {
       const { done, value } = await reader.read(); if (done) break;
