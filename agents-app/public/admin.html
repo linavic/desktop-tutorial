@@ -2,43 +2,123 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
-<title>ניהול מנויים</title>
+<meta name="robots" content="noindex">
+<title>CRM מנויים</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d12;--card:#151922;--line:#262c3a;--ink:#eef0f6;--muted:#8d95a8;--gold:#e0b567;--ok:#59d39a;--err:#ff7a6b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif;line-height:1.5}
-.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}h1{margin:0 0 14px}
+.wrap{max-width:1200px;margin:0 auto;padding:18px 16px 60px}h1{margin:0}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.sp{flex:1}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.cards .card{margin:0;text-align:center}.cards b{display:block;font-size:1.5rem;color:var(--gold)}
-input{padding:8px;border:1px solid var(--line);border-radius:8px;background:#0e1118;color:var(--ink);font:inherit}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}.cards .card{margin:0;text-align:center}.cards b{display:block;font-size:1.45rem;color:var(--gold)}.cards span{font-size:.8rem;color:var(--muted)}
+input,select,textarea{padding:8px;border:1px solid var(--line);border-radius:8px;background:#0e1118;color:var(--ink);font:inherit;max-width:100%}
+textarea{width:100%;min-height:80px}
 button{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:#ffffff0a;color:var(--ink);cursor:pointer;font:inherit;font-size:.82rem}button:hover{border-color:var(--gold)}
-table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}th{color:var(--muted);font-weight:600}
-.s-active{color:var(--ok)}.s-trial{color:var(--gold)}.s-expired,.s-none{color:var(--err)}.muted{color:var(--muted);font-size:.78rem}
+button.gold{background:linear-gradient(120deg,#f6d58a,#e0b567);color:#1a1305;border:0;font-weight:700}button.red{color:var(--err)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.chip{border-radius:99px;padding:3px 12px}.chip.on{background:var(--gold);color:#1a1305;border-color:var(--gold);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}th{color:var(--muted);font-weight:600;cursor:pointer;white-space:nowrap;user-select:none}
+tbody tr{cursor:pointer}tbody tr:hover{background:#ffffff08}
+.s-active{color:var(--ok)}.s-trial{color:var(--gold)}.s-expired,.s-none,.s-blocked{color:var(--err)}.muted{color:var(--muted);font-size:.78rem}
+.tag{display:inline-block;background:#e0b56722;border:1px solid #e0b56755;border-radius:99px;padding:0 8px;font-size:.72rem;margin:1px}
+.scroll{overflow-x:auto}
 pre{white-space:pre-wrap;word-break:break-word;font-size:.75rem;color:var(--muted);margin:0}
+#drawer{position:fixed;inset:0;background:#000a;display:none;z-index:10}#drawer.on{display:block}
+#dbox{position:absolute;inset-block:0;inset-inline-start:0;width:min(560px,100%);background:var(--bg);border-inline-end:1px solid var(--line);overflow:auto;padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2 label{display:block;font-size:.78rem;color:var(--muted)}.grid2 input{width:100%}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+h3{margin:14px 0 6px;font-size:.95rem;color:var(--gold)}
+.codebox{padding:8px 12px;border:1px dashed var(--gold);border-radius:10px;font-family:ui-monospace,Consolas,monospace;font-size:.8rem;direction:ltr;word-break:break-all;margin:8px 0}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
 </style></head><body><div class="wrap">
-<h1>ניהול מנויים</h1>
-<div class="card"><input id="tok" type="password" placeholder="ADMIN_TOKEN" dir="ltr" style="width:280px"> <button id="go">כניסה</button> <span id="msg" class="muted"></span></div>
+<div class="top"><h1>CRM מנויים</h1><span class="sp"></span>
+  <input id="tok" type="password" placeholder="ADMIN_TOKEN" dir="ltr" style="width:220px"> <button id="go" class="gold">כניסה</button> <span id="msg" class="muted"></span></div>
 <div class="cards" id="sum"></div>
-<div class="card"><table><thead><tr><th>לקוח</th><th>מסלול</th><th>מצב</th><th>בתוקף עד</th><th>שימוש החודש</th><th>עלות API החודש</th><th>פעולות</th></tr></thead><tbody id="rows"></tbody></table></div>
-<div class="card"><b>אירועים אחרונים (תשלומים, webhooks, שגיאות)</b><pre id="ev"></pre></div>
+
+<div class="card">
+  <div class="bar">
+    <input id="q" placeholder="חיפוש: שם, אימייל, טלפון, תגית" style="flex:1;min-width:200px">
+    <select id="plan"><option value="">כל המסלולים</option><option value="own">מפתח עצמי</option><option value="managed">מפתח המערכת</option><option value="-">ללא מסלול</option></select>
+    <button id="add">+ לקוח חדש</button><button id="exp">ייצוא CSV</button>
+  </div>
+  <div class="bar" id="chips"></div>
+  <div class="scroll"><table><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="muted" id="count"></div>
 </div>
+<div class="card"><b>אירועים אחרונים (תשלומים, webhooks, פעולות ניהול)</b><pre id="ev" style="margin-top:8px"></pre></div>
+</div>
+<div id="drawer"><div id="dbox"></div></div>
 <script>
 const $ = s => document.querySelector(s);
-let T = sessionStorage.getItem('admtok') || ''; $('#tok').value = T;
-const call = async (path, body) => { const r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { 'x-admin-token': T, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); if (!r.ok) throw new Error(r.status === 401 ? 'טוקן שגוי' : 'שגיאה ' + r.status); return r.json(); };
+let T = sessionStorage.getItem('admtok') || '', ALL = [], FILTER = 'all', SORT = { k: 'createdAt', d: -1 }, PRICES = {};
+$('#tok').value = T;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const call = async (path, body) => { const r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { 'x-admin-token': T, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(r.status === 401 ? 'טוקן שגוי' : d.error || 'שגיאה ' + r.status); return d; };
 const d = t => t ? new Date(t).toLocaleDateString('he-IL') : '—';
+const dt = t => t ? new Date(t).toLocaleString('he-IL') : '—';
 const SN = { active: 'פעיל', trial: 'ניסיון', expired: 'פג תוקף', none: 'ללא' }, PN = { own: 'מפתח עצמי', managed: 'מפתח המערכת' };
+const COLS = [['name', 'לקוח'], ['plan', 'מסלול'], ['state', 'מצב'], ['paidUntil', 'בתוקף עד'], ['totalRuns', 'ריצות'], ['costUsdMonth', 'עלות החודש'], ['lastSeen', 'נראה לאחרונה'], ['createdAt', 'נרשם']];
+$('#thead').innerHTML = COLS.map(c => `<th data-k="${c[0]}">${c[1]}</th>`).join('');
+const FILTERS = [['all', 'הכל'], ['active', 'פעילים'], ['trial', 'ניסיון'], ['expired', 'פג תוקף'], ['none', 'ללא מנוי'], ['cancel', 'ביקשו ביטול'], ['blocked', 'חסומים'], ['near', 'מסתיים בשבוע']];
+const match = (c, f) => f === 'all' || (f === 'cancel' ? c.cancelRequested : f === 'blocked' ? c.blocked : f === 'near' ? c.state === 'active' && c.paidUntil - Date.now() < 7 * 864e5 : c.state === f);
+function render() {
+  const q = $('#q').value.trim().toLowerCase(), pl = $('#plan').value;
+  $('#chips').innerHTML = FILTERS.map(f => `<button class="chip${FILTER === f[0] ? ' on' : ''}" data-f="${f[0]}">${f[1]} (${ALL.filter(c => match(c, f[0])).length})</button>`).join('');
+  let L = ALL.filter(c => match(c, FILTER) && (!pl || (pl === '-' ? !c.plan : c.plan === pl)) && (!q || [c.name, c.email, c.phone, ...(c.tags || [])].join(' ').toLowerCase().includes(q)));
+  L.sort((a, b) => { const x = a[SORT.k], y = b[SORT.k]; return (typeof x === 'string' ? x.localeCompare(y) : (x || 0) - (y || 0)) * SORT.d; });
+  $('#rows').innerHTML = L.map(c => `<tr data-i="${c.id}"><td>${esc(c.name)}${c.blocked ? ' <span class="s-blocked">(חסום)</span>' : ''}<div class="muted">${esc(c.email)} ${esc(c.phone)}</div>${(c.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}${c.cancelRequested ? '<div class="s-expired muted">ביקש ביטול</div>' : ''}</td><td>${PN[c.plan] || '—'}</td><td class="s-${c.state}">${SN[c.state]}${c.state === 'trial' ? ' (' + c.trialRuns + ')' : ''}</td><td>${d(c.paidUntil)}</td><td>${c.usage.runs}${c.usage.runLimit ? '/' + c.usage.runLimit : ''} החודש<div class="muted">${c.totalRuns} סה"כ</div></td><td>$${c.costUsdMonth}<div class="muted">סה"כ $${c.costUsdTotal}</div></td><td>${d(c.lastSeen)}</td><td>${d(c.createdAt)}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">אין לקוחות להצגה</td></tr>';
+  $('#count').textContent = `מוצגים ${L.length} מתוך ${ALL.length}`;
+}
 async function load() {
   T = $('#tok').value.trim(); sessionStorage.setItem('admtok', T); $('#msg').textContent = 'טוען…';
   try {
     const [s, c, e] = await Promise.all([call('/api/admin/summary'), call('/api/admin/customers'), call('/api/admin/events')]);
-    $('#msg').textContent = '';
-    $('#sum').innerHTML = [['לקוחות', s.customers], ['מנויים פעילים', s.active], ['מפתח עצמי', s.own], ['מפתח המערכת', s.managed], ['בניסיון', s.trial], ['הכנסה חודשית (כולל מע"מ)', '₪' + s.mrrIls], ['עלות API החודש', '₪' + s.costIls]].map(x => `<div class="card"><b>${x[1]}</b>${x[0]}</div>`).join('');
-    $('#rows').innerHTML = c.customers.map(x => `<tr><td>${esc(x.name)}<div class="muted">${esc(x.email)} ${esc(x.phone || '')}</div>${x.cancelRequested ? '<div class="s-expired">ביקש ביטול</div>' : ''}</td><td>${PN[x.plan] || '—'}</td><td class="s-${x.state}">${SN[x.state]}${x.state === 'trial' ? ' (' + x.trialRuns + ')' : ''}</td><td>${d(x.paidUntil)}</td><td>${x.usage.runs}${x.usage.runLimit ? '/' + x.usage.runLimit : ''} ריצות<div class="muted">רדאר ${x.usage.radar}${x.usage.radarLimit ? '/' + x.usage.radarLimit : ''}</div></td><td>$${x.costUsdMonth}</td><td><button data-a="activate" data-p="own" data-i="${x.id}">הפעל מפתח עצמי</button> <button data-a="activate" data-p="managed" data-i="${x.id}">הפעל מפתח המערכת</button> <button data-a="trial" data-i="${x.id}">+ריצת ניסיון</button> <button data-a="cancel" data-i="${x.id}">בטל</button></td></tr>`).join('') || '<tr><td colspan="7" class="muted">אין לקוחות עדיין</td></tr>';
-    $('#ev').textContent = e.events.map(x => `${new Date(x.t).toLocaleString('he-IL')}  ${x.type}  ${JSON.stringify(x.data)}`).join('\n');
+    $('#msg').textContent = ''; ALL = c.customers; PRICES = c.prices || {};
+    $('#sum').innerHTML = [['לקוחות', s.customers], ['מנויים פעילים', s.active], ['מפתח עצמי', s.own], ['מפתח המערכת', s.managed], ['בניסיון', s.trial], ['הכנסה חודשית (כולל מע"מ)', '₪' + s.mrrIls], ['עלות API החודש', '₪' + s.costIls]].map(x => `<div class="card"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+    $('#ev').textContent = e.events.map(x => `${dt(x.t)}  ${x.type}  ${JSON.stringify(x.data)}`).join('\n');
+    render();
   } catch (err) { $('#msg').textContent = err.message; }
 }
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-$('#go').onclick = load;
-$('#rows').onclick = async e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.a === 'cancel' && !confirm('לבטל את הגישה של הלקוח?')) return; await call('/api/admin/customer', { id: b.dataset.i, action: b.dataset.a, plan: b.dataset.p, days: 31, value: 1 }); load(); };
+$('#go').onclick = load; $('#q').oninput = render; $('#plan').onchange = render;
+$('#chips').onclick = e => { const b = e.target.closest('[data-f]'); if (b) { FILTER = b.dataset.f; render(); } };
+$('#thead').onclick = e => { const k = e.target.closest('th')?.dataset.k; if (!k) return; SORT = { k, d: SORT.k === k ? -SORT.d : 1 }; render(); };
+$('#rows').onclick = e => { const tr = e.target.closest('tr[data-i]'); if (tr) openDrawer(tr.dataset.i); };
+$('#exp').onclick = async () => { const r = await fetch('/api/admin/export', { headers: { 'x-admin-token': T } }); if (!r.ok) return $('#msg').textContent = 'שגיאה בייצוא'; const a = document.createElement('a'); a.href = URL.createObjectURL(await r.blob()); a.download = 'customers.csv'; a.click(); };
+$('#add').onclick = () => {
+  $('#dbox').innerHTML = `<div class="acts"><b style="flex:1">לקוח חדש</b><button id="dx">סגירה</button></div><div class="grid2"><div><label>שם</label><input id="nn"></div><div><label>אימייל</label><input id="ne" dir="ltr"></div><div><label>טלפון</label><input id="np" dir="ltr"></div></div><div class="acts"><button class="gold" id="nok">צור</button></div><div id="nres"></div>`;
+  $('#drawer').classList.add('on'); $('#dx').onclick = closeD;
+  $('#nok').onclick = async () => { try { const r = await call('/api/admin/create', { name: $('#nn').value, email: $('#ne').value, phone: $('#np').value }); $('#nres').innerHTML = `<h3>נוצר. קוד הגישה מוצג פעם אחת:</h3><div class="codebox">${esc(r.token)}</div>`; load(); } catch (e) { $('#nres').textContent = e.message === 'email_exists' ? 'האימייל כבר קיים' : e.message === 'invalid_details' ? 'שם ואימייל תקינים בלבד' : e.message; } };
+};
+const closeD = () => $('#drawer').classList.remove('on');
+$('#drawer').onclick = e => { if (e.target.id === 'drawer') closeD(); };
+async function openDrawer(id) {
+  $('#drawer').classList.add('on'); $('#dbox').textContent = 'טוען…';
+  const { customer: c, events } = await call('/api/admin/customer?id=' + encodeURIComponent(id));
+  const months = Object.entries(c.usageMonths || {}).sort().reverse();
+  const act = (a, extra = {}) => async () => { try { const r = await call('/api/admin/customer', { id, action: a, ...extra }); await load(); await openDrawer(id); if (r.token) { $('#dbox').insertAdjacentHTML('afterbegin', `<h3>קוד גישה חדש (מוצג פעם אחת, הישן בוטל):</h3><div class="codebox">${esc(r.token)}</div>`); } } catch (e) { alert(e.message); } };
+  $('#dbox').innerHTML = `<div class="acts"><b style="flex:1;font-size:1.15rem">${esc(c.name)}</b><button id="dx">סגירה</button></div>
+  <div class="muted">${esc(c.id)} · נרשם ${d(c.createdAt)} · נראה ${dt(c.lastSeen)}</div>
+  <div style="margin:8px 0"><span class="s-${c.state}">${SN[c.state]}</span> · ${PN[c.plan] || 'ללא מסלול'}${c.paidUntil ? ' · עד ' + d(c.paidUntil) : ''}${c.state === 'trial' ? ' · ריצות ניסיון: ' + c.trialRuns : ''}${c.blocked ? ' · <span class="s-blocked">חסום</span>' : ''}${c.cancelRequested ? ' · ביקש ביטול' : ''}</div>
+  <h3>פרטים</h3><div class="grid2"><div><label>שם</label><input id="en" value="${esc(c.name)}"></div><div><label>אימייל</label><input id="ee" dir="ltr" value="${esc(c.email)}"></div><div><label>טלפון</label><input id="ep" dir="ltr" value="${esc(c.phone)}"></div></div>
+  <div class="acts"><button id="esave">שמירת פרטים</button><a class="muted" href="mailto:${esc(c.email)}">שליחת מייל</a>${c.phone ? ` · <a class="muted" target="_blank" rel="noopener noreferrer" href="https://wa.me/${esc(c.phone.replace(/^0/, '972').replace(/\D/g, ''))}">וואטסאפ</a>` : ''}</div>
+  <h3>מנוי</h3><div class="acts"><button id="a1">הפעל מפתח עצמי (31 ימים)</button><button id="a2">הפעל מפתח המערכת (31 ימים)</button><button id="a3">הארך 7 ימים</button><button id="a4" class="red">בטל מנוי</button></div>
+  <div class="acts"><label class="muted">ריצות ניסיון <input id="tr" type="number" min="0" value="${c.trialRuns}" style="width:70px"></label><button id="tsave">עדכן</button><label class="muted">מכסה חודשית מותאמת <input id="lim" type="number" min="0" value="${c.customLimit || ''}" placeholder="ברירת מחדל" style="width:90px"></label><button id="lsave">עדכן</button><button id="rst">אפס שימוש החודש</button></div>
+  <h3>גישה</h3><div class="acts"><button id="blk" class="${c.blocked ? '' : 'red'}">${c.blocked ? 'בטל חסימה' : 'חסום לקוח'}</button><button id="nc">הנפק קוד גישה חדש</button><button id="del" class="red">מחק לקוח</button></div>
+  <h3>תגיות (מופרדות בפסיק)</h3><div class="acts"><input id="tg" value="${esc((c.tags || []).join(', '))}" style="flex:1"><button id="tgs">שמירה</button></div>
+  <h3>הערות פנימיות</h3><textarea id="nt">${esc(c.note || '')}</textarea><div class="acts"><button id="nts">שמירת הערה</button></div>
+  <h3>שימוש לפי חודש</h3><table><tr><th>חודש</th><th>ריצות</th><th>רדאר</th><th>חיפושים</th><th>תמונות</th><th>עלות $</th></tr>${months.map(([m, u]) => `<tr><td>${m}</td><td>${u.runs || 0}</td><td>${u.radar || 0}</td><td>${u.searches || 0}</td><td>${u.images || 0}</td><td>${(u.costUsd || 0).toFixed(3)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">אין שימוש</td></tr>'}</table>
+  <h3>ריצות אחרונות</h3>${(c.history || []).map(h => `<div class="muted">${dt(h.t)} · ${h.ok ? '✓' : '✗'} · ${esc(h.mode)} · $${h.costUsd} · ${esc(h.task)}</div>`).join('') || '<div class="muted">אין</div>'}
+  <h3>אירועים</h3><pre>${esc(events.map(x => `${dt(x.t)}  ${x.type}  ${JSON.stringify(x.data)}`).join('\n')) || 'אין'}</pre>`;
+  $('#dx').onclick = closeD;
+  $('#esave').onclick = act('edit', { get name() { return $('#en').value; }, get email() { return $('#ee').value; }, get phone() { return $('#ep').value; } });
+  $('#a1').onclick = act('activate', { plan: 'own' }); $('#a2').onclick = act('activate', { plan: 'managed' }); $('#a3').onclick = act('extend', { days: 7 });
+  $('#a4').onclick = () => confirm('לבטל את המנוי של הלקוח?') && act('cancel')();
+  $('#tsave').onclick = () => act('trial', { value: +$('#tr').value })(); $('#lsave').onclick = () => act('limit', { value: +$('#lim').value })();
+  $('#rst').onclick = () => confirm('לאפס את השימוש של החודש?') && act('resetUsage')();
+  $('#blk').onclick = act('block', { value: !c.blocked });
+  $('#nc').onclick = () => confirm('הקוד הישן יפסיק לעבוד. להנפיק חדש?') && act('newcode')();
+  $('#del').onclick = async () => { if (!confirm('למחוק את הלקוח לצמיתות?')) return; await call('/api/admin/customer', { id, action: 'delete' }); closeD(); load(); };
+  $('#tgs').onclick = () => act('tags', { value: $('#tg').value })(); $('#nts').onclick = () => act('note', { value: $('#nt').value })();
+}
 if (T) load();
 </script></body></html>

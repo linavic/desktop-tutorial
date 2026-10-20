@@ -28,6 +28,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   const ipOf = req => String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   const eq = (a, b) => { const x = crypto.createHash('sha256').update(String(a)).digest(), y = crypto.createHash('sha256').update(String(b)).digest(); return crypto.timingSafeEqual(x, y); };
 
+  const limOf = c => (Number.isFinite(c.customLimit) && c.customLimit > 0 ? c.customLimit : C.limitManaged);
   const state = c => {
     const now = Date.now();
     if (c.plan && c.paidUntil && now <= c.paidUntil + C.graceDays * 864e5) return 'active';
@@ -36,8 +37,8 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   };
   const pub = c => {
     const u = usageOf(c), managed = c.plan === 'managed';
-    return { id: c.id, name: c.name, email: c.email, plan: c.plan, state: state(c), paidUntil: c.paidUntil, trialRuns: c.trialRuns, cancelRequested: c.cancelRequested,
-      usage: { runs: u.runs, radar: u.radar, runLimit: managed ? C.limitManaged : null, radarLimit: managed ? C.radarLimit : null } };
+    return { id: c.id, name: c.name, email: c.email, plan: c.plan, state: state(c), paidUntil: c.paidUntil, trialRuns: c.trialRuns, cancelRequested: c.cancelRequested, blocked: Boolean(c.blocked),
+      usage: { runs: u.runs, radar: u.radar, runLimit: managed ? limOf(c) : null, radarLimit: managed ? C.radarLimit : null } };
   };
   const publicConfig = () => ({
     accounts: true, termsUrl: env.TERMS_URL || '',
@@ -49,10 +50,11 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   });
 
   function entitle(c, kind) {
+    if (c.blocked) return { ok: false, reason: 'blocked' };
     const s = state(c);
     if (s === 'active') {
       if (c.plan === 'own') return { ok: true, mode: 'own' };
-      const u = usageOf(c), used = kind === 'run' ? u.runs : u.radar, lim = kind === 'run' ? C.limitManaged : C.radarLimit;
+      const u = usageOf(c), used = kind === 'run' ? u.runs : u.radar, lim = kind === 'run' ? limOf(c) : C.radarLimit;
       return used >= lim ? { ok: false, reason: kind === 'run' ? 'limit_reached' : 'radar_limit' } : { ok: true, mode: 'managed' };
     }
     if (s === 'trial') return kind === 'run' ? { ok: true, mode: 'trial' } : { ok: false, reason: 'radar_needs_subscription' };
@@ -68,7 +70,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   const json = (res, code, obj) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); };
   async function readRaw(req, limit = 6_000_000) { let b = ''; for await (const x of req) { b += x; if (b.length > limit) return null; } return b; }
   async function readJson(req, limit) { const raw = await readRaw(req, limit); if (raw === null) return null; try { return JSON.parse(raw || '{}'); } catch { return {}; } }
-  const auth = req => { const m = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || ''); return m ? store.byToken(m[1].trim()) : null; };
+  const auth = req => { const m = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || ''); const c = m ? store.byToken(m[1].trim()) : null; if (c && Date.now() - (c.lastSeen || 0) > 60e3) { c.lastSeen = Date.now(); store.save(); } return c; };
   const isAdmin = req => C.adminToken && eq(req.headers['x-admin-token'] || '', C.adminToken);
   const baseUrl = req => C.publicUrl || `https://${req.headers.host}`;
 
@@ -146,15 +148,48 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         const mrr = act.reduce((s, c) => s + (C.prices[c.plan] || 0), 0);
         return json(res, 200, { customers: all.length, active: act.length, own: act.filter(c => c.plan === 'own').length, managed: act.filter(c => c.plan === 'managed').length, trial: all.filter(c => state(c) === 'trial').length, mrrIls: mrr, costUsd: +costUsd.toFixed(2), costIls: +(costUsd * C.usdIls).toFixed(2), month: m, note: 'ההכנסה כוללת מע"מ ועמלות סליקה. העלות היא הערכה לפי מחירון שמוגדר ב-PRICES_JSON.' }), true;
       }
-      if (p === '/api/admin/customers') return json(res, 200, { customers: store.all().sort((a, b) => b.createdAt - a.createdAt).map(c => ({ ...pub(c), phone: c.phone, createdAt: c.createdAt, costUsdMonth: +(((c.usage[month()] || {}).costUsd) || 0).toFixed(3), history: c.history.slice(0, 5) })) }), true;
+      const row = c => { const tot = Object.values(c.usage).reduce((t, u) => ({ runs: t.runs + (u.runs || 0), cost: t.cost + (u.costUsd || 0) }), { runs: 0, cost: 0 }); return { ...pub(c), phone: c.phone, createdAt: c.createdAt, lastSeen: c.lastSeen || 0, tags: c.tags || [], note: (c.note || '').slice(0, 80), customLimit: c.customLimit || null, totalRuns: tot.runs, costUsdMonth: +(((c.usage[month()] || {}).costUsd) || 0).toFixed(3), costUsdTotal: +tot.cost.toFixed(3) }; };
+      if (p === '/api/admin/customers') return json(res, 200, { customers: store.all().sort((a, b) => b.createdAt - a.createdAt).map(row), prices: C.prices }), true;
+      if (p === '/api/admin/customer' && req.method === 'GET') {
+        const c = store.get(url.searchParams.get('id')); if (!c) return json(res, 404, { error: 'not_found' }), true;
+        const { tokenHash, ...rest } = c; return json(res, 200, { customer: { ...rest, ...row(c), usageMonths: c.usage }, events: store.db.events.filter(e => e.data && e.data.id === c.id).slice(-60).reverse() }), true;
+      }
+      if (p === '/api/admin/create' && req.method === 'POST') {
+        const b = await readJson(req, 5000) || {}, name = String(b.name || '').trim().slice(0, 80), email = String(b.email || '').trim().slice(0, 120);
+        if (name.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json(res, 400, { error: 'invalid_details' }), true;
+        if (store.byEmail(email)) return json(res, 409, { error: 'email_exists' }), true;
+        const { customer, token } = store.create({ name, email, phone: String(b.phone || '').replace(/[^\d+]/g, '').slice(0, 16), trialRuns: C.trialRuns });
+        store.event('admin', { id: customer.id, action: 'create' }); return json(res, 200, { customer: row(customer), token }), true;
+      }
+      if (p === '/api/admin/export') {
+        const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"', d = t => (t ? new Date(t).toISOString().slice(0, 10) : '');
+        const lines = [['name', 'email', 'phone', 'plan', 'state', 'paid_until', 'created', 'last_seen', 'runs_total', 'cost_usd_total', 'tags', 'note'].join(',')];
+        store.all().forEach(c => { const r = row(c); lines.push([r.name, r.email, r.phone, r.plan || '', r.state, d(r.paidUntil), d(r.createdAt), d(r.lastSeen), r.totalRuns, r.costUsdTotal, (r.tags || []).join(' '), c.note || ''].map(q).join(',')); });
+        res.writeHead(200, { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="customers.csv"' }); res.end('\ufeff' + lines.join('\n')); return true;
+      }
       if (p === '/api/admin/events') return json(res, 200, { events: store.db.events.slice(-100).reverse() }), true;
       if (p === '/api/admin/customer' && req.method === 'POST') {
-        const b = await readJson(req, 5000) || {}, c = store.get(b.id); if (!c) return json(res, 404, { error: 'not_found' }), true;
+        const b = await readJson(req, 8000) || {}, c = store.get(b.id); if (!c) return json(res, 404, { error: 'not_found' }), true;
+        let extra = {};
         if (b.action === 'activate') { c.plan = b.plan === 'managed' ? 'managed' : 'own'; c.paidUntil = Math.max(Date.now(), c.paidUntil || 0) + (num(b.days, C.periodDays)) * 864e5; c.cancelRequested = false; }
+        else if (b.action === 'extend') { c.paidUntil = Math.max(Date.now(), c.paidUntil || 0) + num(b.days, 7) * 864e5; }
         else if (b.action === 'cancel') { c.paidUntil = Date.now() - C.graceDays * 864e5 - 1; }
         else if (b.action === 'trial') { c.trialRuns = num(b.value, 1); }
+        else if (b.action === 'block') { c.blocked = Boolean(b.value); }
+        else if (b.action === 'limit') { const v = num(b.value, 0); c.customLimit = v > 0 ? Math.min(v, 100000) : null; }
+        else if (b.action === 'resetUsage') { delete c.usage[month()]; }
+        else if (b.action === 'note') { c.note = String(b.value || '').slice(0, 2000); }
+        else if (b.action === 'tags') { c.tags = (Array.isArray(b.value) ? b.value : String(b.value || '').split(/[,\s]+/)).map(t => String(t).trim().slice(0, 24)).filter(Boolean).slice(0, 12); }
+        else if (b.action === 'edit') {
+          const name = String(b.name || '').trim().slice(0, 80), email = String(b.email || '').trim().slice(0, 120);
+          if (name.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json(res, 400, { error: 'invalid_details' }), true;
+          const other = store.byEmail(email); if (other && other.id !== c.id) return json(res, 409, { error: 'email_exists' }), true;
+          c.name = name; c.email = email.toLowerCase(); c.phone = String(b.phone || '').replace(/[^\d+]/g, '').slice(0, 16);
+        }
+        else if (b.action === 'newcode') { const t = 'crew_' + crypto.randomBytes(24).toString('hex'); c.tokenHash = store.hash(t); extra = { token: t }; }
+        else if (b.action === 'delete') { delete store.db.customers[c.id]; store.event('admin', { id: c.id, action: 'delete', email: c.email }); store.save(); return json(res, 200, { deleted: true }), true; }
         else return json(res, 400, { error: 'invalid_action' }), true;
-        store.event('admin', { id: c.id, action: b.action, plan: b.plan }); store.save(); return json(res, 200, { customer: pub(c) }), true;
+        store.event('admin', { id: c.id, action: b.action, plan: b.plan }); store.save(); return json(res, 200, { customer: row(c), ...extra }), true;
       }
       return json(res, 404, { error: 'not_found' }), true;
     }

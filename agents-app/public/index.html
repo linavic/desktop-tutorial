@@ -1059,7 +1059,7 @@ function renderSummary() {
 }
 
 // ---------- שיגור ----------
-const ERR_MSG = { login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
+const ERR_MSG = { blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
 function apiProblem(err) {
   if (!(err instanceof ApiErr)) return false;
   if (err.data && err.data.account) ACCOUNT = err.data.account;
