@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סוכני Etel Clinic</title>
+<style>
+:root{--bg:#faf6ef;--card:#fffdf9;--ink:#3a2a1e;--muted:#7d6b5b;--line:#e6dccd;--gold:#b8924a;--ok:#2f7d57;--warn:#b5532f;--work:#c98b1f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1713;--card:#262019;--ink:#f0e6d8;--muted:#b3a38f;--line:#3a3128;--gold:#d3ab63;--ok:#5cc08f;--warn:#e58a68;--work:#e3a948}}
+:root[data-theme="dark"]{--bg:#1c1713;--card:#262019;--ink:#f0e6d8;--muted:#b3a38f;--line:#3a3128;--gold:#d3ab63;--ok:#5cc08f;--warn:#e58a68;--work:#e3a948}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif;line-height:1.55}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:1.5rem;letter-spacing:.02em}
+h1 small{display:block;font-family:"Segoe UI",Arial,sans-serif;font-size:.85rem;color:var(--muted);letter-spacing:0}
+.mode{padding:4px 12px;border-radius:99px;font-size:.8rem;border:1px solid var(--line);background:var(--card)}
+.mode.live{color:var(--ok);border-color:var(--ok)}.mode.demo{color:var(--work);border-color:var(--work)}
+.brief{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:22px}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+button.run{padding:11px 22px;border:0;border-radius:10px;background:var(--gold);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button.run:disabled{opacity:.55;cursor:wait}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.agent{position:relative;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .2s,transform .2s}
+.agent::after{content:"◂";position:absolute;left:-12px;top:44px;color:var(--muted);font-size:1.1rem}
+.agent:last-child::after{display:none}
+.agent.working{box-shadow:0 0 0 2px var(--work);transform:translateY(-2px)}
+.agent.done{border-color:var(--ok);border-top-color:var(--c)}
+.agent .top{display:flex;align-items:center;gap:8px}
+.num{width:28px;height:28px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem;flex:none}
+.agent h2{margin:0;font-size:1.05rem}
+.chip{margin-inline-start:auto;font-size:.72rem;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.working .chip{color:var(--work);border-color:var(--work)}.done .chip{color:var(--ok);border-color:var(--ok)}
+.role{margin:0;font-size:.85rem;color:var(--muted)}
+.steps{list-style:none;margin:0;padding:0;font-size:.82rem;display:flex;flex-direction:column;gap:5px}
+.steps li{display:flex;gap:7px;align-items:flex-start;color:var(--muted)}
+.steps li::before{content:"○";flex:none}
+.steps li.on{color:var(--ink);font-weight:600}.steps li.on::before{content:"◐";color:var(--work)}
+.steps li.ok{color:var(--ink)}.steps li.ok::before{content:"✓";color:var(--ok)}
+.live-line{min-height:2.6em;font-size:.82rem;border-top:1px dashed var(--line);padding-top:7px;color:var(--ink)}
+.checks{list-style:none;margin:0;padding:0;font-size:.78rem}
+.checks li{display:flex;gap:6px;margin-bottom:3px}.checks .y{color:var(--ok)}.checks .n{color:var(--warn)}
+details{font-size:.82rem}summary{cursor:pointer;color:var(--gold)}
+pre{white-space:pre-wrap;word-break:break-word;margin:6px 0 0;font:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:260px;overflow:auto}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.panel h3{margin:0 0 10px;font-size:1rem}
+#log{list-style:none;margin:0;padding:0;max-height:340px;overflow:auto;font-size:.85rem}
+#log li{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
+#log time{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+#log b{flex:none;min-width:7.5em}
+.empty{color:var(--muted);font-size:.9rem}
+.final-actions{display:flex;gap:8px;margin-bottom:8px}
+.final-actions button{padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;font:inherit}
+.err{color:var(--warn);font-weight:600}
+@media(max-width:1000px){.flow{grid-template-columns:1fr}.agent::after{content:"▾";left:auto;right:auto;top:auto;bottom:-16px;inset-inline-start:50%}.cols{grid-template-columns:1fr}.brief{grid-template-columns:1fr}.flow{gap:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Etel Clinic<small>5 סוכנים בשרשרת: מבריף לפוסט מוכן</small></h1>
+    <span id="mode" class="mode">טוען…</span>
+  </header>
+
+  <form class="brief" id="form">
+    <div><label for="topic">על מה הפוסט?</label><input id="topic" value="בדיקת עור לפני טיפול ראשון" required></div>
+    <div><label for="platform">פלטפורמה</label>
+      <select id="platform"><option value="instagram">אינסטגרם</option><option value="facebook">פייסבוק</option><option value="tiktok">טיקטוק</option><option value="linkedin">לינקדאין</option></select></div>
+    <div><label for="format">פורמט</label>
+      <select id="format"><option>פוסט</option><option>קרוסלה</option><option>רילס</option><option>סטוריז</option></select></div>
+    <button class="run" id="go" type="submit">הפעל 5 סוכנים</button>
+  </form>
+
+  <section class="flow" id="flow" aria-label="הסוכנים"></section>
+
+  <div class="cols">
+    <section class="panel"><h3>יומן פעילות</h3><ul id="log"><li class="empty">הפעילות תופיע כאן אחרי ההפעלה.</li></ul></section>
+    <section class="panel"><h3>התוצר הסופי</h3>
+      <div class="final-actions"><button id="copy" disabled>העתקה</button></div>
+      <pre id="final" class="empty">עדיין אין תוצר.</pre></section>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+let AGENTS = [], cards = {};
+
+async function init() {
+  const info = await (await fetch('/api/agents')).json();
+  AGENTS = info.agents;
+  const m = $('#mode');
+  m.textContent = info.live ? `מצב חי · ${info.model}` : 'מצב הדגמה · בלי מפתח API, הטקסטים לדוגמה';
+  m.classList.add(info.live ? 'live' : 'demo');
+  render();
+}
+
+function render() {
+  const flow = $('#flow'); flow.replaceChildren(); cards = {};
+  for (const a of AGENTS) {
+    const card = el('article', 'agent'); card.style.setProperty('--c', a.color);
+    const top = el('div', 'top');
+    top.append(el('span', 'num', a.n), el('h2', null, a.name), Object.assign(el('span', 'chip', 'ממתין'), { id: 'chip-' + a.id }));
+    const steps = el('ul', 'steps');
+    a.steps.forEach(s => steps.append(el('li', null, s)));
+    const line = el('div', 'live-line', 'ממתין להפעלה');
+    const out = el('details'); out.hidden = true;
+    out.append(el('summary', null, 'מה הסוכן הפיק'), el('pre'));
+    const checks = el('ul', 'checks');
+    card.append(top, el('p', 'role', a.role), steps, checks, line, out);
+    flow.append(card);
+    cards[a.id] = { card, chip: top.querySelector('.chip'), steps, line, out, checks };
+  }
+}
+
+const now = () => new Date().toLocaleTimeString('he-IL', { hour12: false });
+function log(agentId, text) {
+  const list = $('#log'); if (list.querySelector('.empty')) list.replaceChildren();
+  const a = AGENTS.find(x => x.id === agentId);
+  const li = el('li'); li.append(el('time', null, now()), Object.assign(el('b', null, a ? `${a.n}. ${a.name}` : 'מערכת'), { style: a ? `color:${a.color}` : '' }), el('span', null, text));
+  list.append(li); list.scrollTop = list.scrollHeight;
+}
+
+function handle(ev) {
+  const c = cards[ev.agent];
+  if (ev.type === 'start') {
+    c.card.classList.add('working'); c.chip.textContent = 'עובדת';
+    c.line.textContent = 'מתחילה…'; log(ev.agent, 'התחילה לעבוד');
+  } else if (ev.type === 'step') {
+    const items = [...c.steps.children];
+    items.forEach((li, i) => { li.className = i < ev.index ? 'ok' : i === ev.index ? 'on' : ''; });
+    c.line.textContent = ev.text; log(ev.agent, ev.text);
+  } else if (ev.type === 'check') {
+    const li = el('li'); li.append(el('span', ev.check.ok ? 'y' : 'n', ev.check.ok ? '✓' : '✗'), el('span', null, ev.check.name + (ev.check.ok || !ev.check.detail ? '' : ` (${ev.check.detail})`)));
+    c.checks.append(li);
+  } else if (ev.type === 'done') {
+    [...c.steps.children].forEach(li => li.className = 'ok');
+    c.card.classList.replace('working', 'done'); c.chip.textContent = 'הושלם';
+    c.out.hidden = false; c.out.querySelector('pre').textContent = ev.output; log(ev.agent, 'סיימה');
+  } else if (ev.type === 'final') {
+    const f = $('#final'); f.className = ''; f.textContent = ev.package; $('#copy').disabled = false;
+    log(null, `החבילה מוכנה · ${ev.status}`);
+  } else if (ev.type === 'error') {
+    log(null, 'שגיאה: ' + ev.message); $('#final').className = 'err'; $('#final').textContent = 'שגיאה: ' + ev.message;
+  }
+}
+
+$('#form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = $('#go'); btn.disabled = true; btn.textContent = 'הסוכנים עובדים…';
+  render(); $('#log').replaceChildren(el('li', 'empty', 'מתחיל…')); $('#final').className = 'empty'; $('#final').textContent = 'ממתין לסוכנים…'; $('#copy').disabled = true;
+  try {
+    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic: $('#topic').value, platform: $('#platform').value, format: $('#format').value }) });
+    const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+    for (;;) {
+      const { done, value } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i; while ((i = buf.indexOf('\n')) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) handle(JSON.parse(line)); }
+    }
+  } catch (err) { handle({ type: 'error', message: err.message }); }
+  btn.disabled = false; btn.textContent = 'הפעל 5 סוכנים';
+});
+
+$('#copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('#final').textContent); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1500); } catch { /* clipboard blocked */ }
+});
+
+init();
+</script>
+</body>
+</html>
