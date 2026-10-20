@@ -12,7 +12,7 @@ fs.writeFileSync(path.join(out, 'agents.json'), JSON.stringify(loadAgentsData(pa
 fs.copyFileSync(path.join(__dirname, 'profiles.json'), path.join(out, 'profiles.json'));
 let defaultContext = '';
 try { defaultContext = fs.readFileSync(process.env.CONTEXT_FILE || path.join(__dirname, 'context.md'), 'utf8'); } catch { /* optional */ }
-fs.writeFileSync(path.join(out, 'config.json'), JSON.stringify({ brand: process.env.BRAND_NAME || 'Agent Crew', base: process.env.OPENAI_BASE_URL || 'https://api.openai.com', defaultContext }));
+fs.writeFileSync(path.join(out, 'config.json'), JSON.stringify({ brand: process.env.BRAND_NAME || 'Agent Crew', base: process.env.OPENAI_BASE_URL || 'https://api.openai.com', defaultContext, ...(process.env.API_BASE ? { apiBase: process.env.API_BASE } : {}) }));
 fs.writeFileSync(path.join(out, 'htaccess.example.txt'), `# אופציונלי: הגנה בסיסמה ברמת האירוח (Apache). לשנות את השם ל-.htaccess ולהוסיף קובץ .htpasswd
 # (אפשר ליצור בלוח הבקרה של האירוח: "Password Protect Directories", או בכלי htpasswd).
 AuthType Basic

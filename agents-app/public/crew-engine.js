@@ -38,6 +38,9 @@
   const buildAgents = data => PIPE.map(p => ({ ...p, ...(data[p.id] || { description: '', tools: [], body: '', steps: [] }) }));
   const meta = agents => agents.map(a => ({ id: a.id, title: a.title, color: a.color, label: a.label, search: Boolean(a.search), out: a.out('<slug>'), inputs: a.inputs, description: a.description, tools: a.tools, steps: a.steps }));
 
+  // מדידת שימוש בפועל: cfg.usage = { in, out, searches, images } מצטבר לאורך הריצה
+  const addUsage = (cfg, u) => { if (!cfg.usage) return; for (const k of Object.keys(u)) cfg.usage[k] = (cfg.usage[k] || 0) + (u[k] || 0); };
+
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const hdr = cfg => ({ 'content-type': 'application/json', authorization: `Bearer ${cfg.key}` });
   const fail = async (what, res) => { throw new Error(`${what} ${res.status}: ${(await res.text()).slice(0, 220)}`); };
@@ -64,22 +67,25 @@
   async function streamLLM(cfg, system, user, onDelta, maxTokens = 2200) {
     const res = await fetch(cfg.base + '/v1/chat/completions', {
       method: 'POST', headers: hdr(cfg),
-      body: JSON.stringify({ model: cfg.model, stream: true, max_completion_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
+      body: JSON.stringify({ model: cfg.model, stream: true, stream_options: { include_usage: true }, max_completion_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
     });
     if (!res.ok) await fail('OpenAI API', res);
     let full = '';
-    for await (const j of sse(res)) { const t = j.choices?.[0]?.delta?.content; if (t) { full += t; onDelta(t); } }
+    for await (const j of sse(res)) { const t = j.choices?.[0]?.delta?.content; if (t) { full += t; onDelta(t); } if (j.usage) addUsage(cfg, { in: j.usage.prompt_tokens, out: j.usage.completion_tokens }); }
     return full.trim();
   }
 
   // Responses API עם חיפוש חי ברשת (web_search, ואם נדחה אז web_search_preview)
   async function streamSearch(cfg, system, user, h, maxTokens = 2600) {
-    const open = tool => fetch(cfg.base + '/v1/responses', {
+    const open = (tool, capped) => fetch(cfg.base + '/v1/responses', {
       method: 'POST', headers: hdr(cfg),
-      body: JSON.stringify({ model: cfg.model, stream: true, instructions: system, input: user, tools: [{ type: tool }], max_output_tokens: maxTokens })
+      body: JSON.stringify({ model: cfg.model, stream: true, instructions: system, input: user, tools: [{ type: tool }], max_output_tokens: maxTokens, ...(capped ? { max_tool_calls: cfg.maxToolCalls || 3 } : {}) })
     });
-    let res = await open('web_search');
-    if (!res.ok && (res.status === 400 || res.status === 404)) res = await open('web_search_preview');
+    let res = null;
+    for (const [tool, capped] of [['web_search', true], ['web_search', false], ['web_search_preview', false]]) {
+      res = await open(tool, capped);
+      if (res.ok || (res.status !== 400 && res.status !== 404)) break;
+    }
     if (!res.ok) await fail('OpenAI Responses', res);
     let full = ''; const sources = new Map();
     const cleanUrl = u => { try { const x = new URL(u); if (x.searchParams.get('utm_source') === 'openai') x.searchParams.delete('utm_source'); return x.toString(); } catch { return u; } };
@@ -88,9 +94,9 @@
       const t = j.type;
       if (t === 'response.output_text.delta' && j.delta) { full += j.delta; h.onDelta(j.delta); }
       else if (t === 'response.web_search_call.searching' || t === 'response.web_search_call.in_progress') h.onSearch('');
-      else if (t === 'response.output_item.done' && j.item?.type === 'web_search_call') { const q = j.item.action?.query; if (q) h.onSearch(q); }
+      else if (t === 'response.output_item.done' && j.item?.type === 'web_search_call') { addUsage(cfg, { searches: 1 }); const q = j.item.action?.query; if (q) h.onSearch(q); }
       else if (t === 'response.output_text.annotation.added' && j.annotation?.type === 'url_citation') addSource(j.annotation);
-      else if (t === 'response.completed') { for (const o of j.response?.output || []) for (const c of o.content || []) for (const a of c.annotations || []) if (a.type === 'url_citation') addSource(a); }
+      else if (t === 'response.completed') { if (j.response?.usage) addUsage(cfg, { in: j.response.usage.input_tokens, out: j.response.usage.output_tokens }); for (const o of j.response?.output || []) for (const c of o.content || []) for (const a of c.annotations || []) if (a.type === 'url_citation') addSource(a); }
       else if (t === 'error' || t === 'response.failed') throw new Error('OpenAI Responses: ' + (j.message || j.response?.error?.message || 'failed'));
     }
     return { text: full.trim(), sources: [...sources.values()] };
@@ -106,7 +112,8 @@
       ] }] })
     });
     if (!res.ok) await fail('OpenAI Vision', res);
-    return ((await res.json()).choices?.[0]?.message?.content || '').trim();
+    const vj = await res.json(); if (vj.usage) addUsage(cfg, { in: vj.usage.prompt_tokens, out: vj.usage.completion_tokens });
+    return (vj.choices?.[0]?.message?.content || '').trim();
   }
 
   // יצירת תמונה (הסקיל gpt-image-gen): gpt-image-2, medium, png. אם הגודל לא נתמך, חוזרים לריבוע.
@@ -117,6 +124,7 @@
     if (!res.ok) await fail('OpenAI Images', res);
     const b64 = (await res.json()).data?.[0]?.b64_json;
     if (!b64) throw new Error('OpenAI Images: no image in response');
+    addUsage(cfg, { images: 1 });
     return { b64, size: used, fellBack: used !== size };
   }
 

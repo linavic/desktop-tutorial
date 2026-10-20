@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
+<title>ניהול מנויים</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d12;--card:#151922;--line:#262c3a;--ink:#eef0f6;--muted:#8d95a8;--gold:#e0b567;--ok:#59d39a;--err:#ff7a6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}h1{margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.cards .card{margin:0;text-align:center}.cards b{display:block;font-size:1.5rem;color:var(--gold)}
+input{padding:8px;border:1px solid var(--line);border-radius:8px;background:#0e1118;color:var(--ink);font:inherit}
+button{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:#ffffff0a;color:var(--ink);cursor:pointer;font:inherit;font-size:.82rem}button:hover{border-color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}th{color:var(--muted);font-weight:600}
+.s-active{color:var(--ok)}.s-trial{color:var(--gold)}.s-expired,.s-none{color:var(--err)}.muted{color:var(--muted);font-size:.78rem}
+pre{white-space:pre-wrap;word-break:break-word;font-size:.75rem;color:var(--muted);margin:0}
+</style></head><body><div class="wrap">
+<h1>ניהול מנויים</h1>
+<div class="card"><input id="tok" type="password" placeholder="ADMIN_TOKEN" dir="ltr" style="width:280px"> <button id="go">כניסה</button> <span id="msg" class="muted"></span></div>
+<div class="cards" id="sum"></div>
+<div class="card"><table><thead><tr><th>לקוח</th><th>מסלול</th><th>מצב</th><th>בתוקף עד</th><th>שימוש החודש</th><th>עלות API החודש</th><th>פעולות</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="card"><b>אירועים אחרונים (תשלומים, webhooks, שגיאות)</b><pre id="ev"></pre></div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+let T = sessionStorage.getItem('admtok') || ''; $('#tok').value = T;
+const call = async (path, body) => { const r = await fetch(path, { method: body ? 'POST' : 'GET', headers: { 'x-admin-token': T, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); if (!r.ok) throw new Error(r.status === 401 ? 'טוקן שגוי' : 'שגיאה ' + r.status); return r.json(); };
+const d = t => t ? new Date(t).toLocaleDateString('he-IL') : '—';
+const SN = { active: 'פעיל', trial: 'ניסיון', expired: 'פג תוקף', none: 'ללא' }, PN = { own: 'מפתח עצמי', managed: 'מפתח המערכת' };
+async function load() {
+  T = $('#tok').value.trim(); sessionStorage.setItem('admtok', T); $('#msg').textContent = 'טוען…';
+  try {
+    const [s, c, e] = await Promise.all([call('/api/admin/summary'), call('/api/admin/customers'), call('/api/admin/events')]);
+    $('#msg').textContent = '';
+    $('#sum').innerHTML = [['לקוחות', s.customers], ['מנויים פעילים', s.active], ['מפתח עצמי', s.own], ['מפתח המערכת', s.managed], ['בניסיון', s.trial], ['הכנסה חודשית (כולל מע"מ)', '₪' + s.mrrIls], ['עלות API החודש', '₪' + s.costIls]].map(x => `<div class="card"><b>${x[1]}</b>${x[0]}</div>`).join('');
+    $('#rows').innerHTML = c.customers.map(x => `<tr><td>${esc(x.name)}<div class="muted">${esc(x.email)} ${esc(x.phone || '')}</div>${x.cancelRequested ? '<div class="s-expired">ביקש ביטול</div>' : ''}</td><td>${PN[x.plan] || '—'}</td><td class="s-${x.state}">${SN[x.state]}${x.state === 'trial' ? ' (' + x.trialRuns + ')' : ''}</td><td>${d(x.paidUntil)}</td><td>${x.usage.runs}${x.usage.runLimit ? '/' + x.usage.runLimit : ''} ריצות<div class="muted">רדאר ${x.usage.radar}${x.usage.radarLimit ? '/' + x.usage.radarLimit : ''}</div></td><td>$${x.costUsdMonth}</td><td><button data-a="activate" data-p="own" data-i="${x.id}">הפעל מפתח עצמי</button> <button data-a="activate" data-p="managed" data-i="${x.id}">הפעל מפתח המערכת</button> <button data-a="trial" data-i="${x.id}">+ריצת ניסיון</button> <button data-a="cancel" data-i="${x.id}">בטל</button></td></tr>`).join('') || '<tr><td colspan="7" class="muted">אין לקוחות עדיין</td></tr>';
+    $('#ev').textContent = e.events.map(x => `${new Date(x.t).toLocaleString('he-IL')}  ${x.type}  ${JSON.stringify(x.data)}`).join('\n');
+  } catch (err) { $('#msg').textContent = err.message; }
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+$('#go').onclick = load;
+$('#rows').onclick = async e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.a === 'cancel' && !confirm('לבטל את הגישה של הלקוח?')) return; await call('/api/admin/customer', { id: b.dataset.i, action: b.dataset.a, plan: b.dataset.p, days: 31, value: 1 }); load(); };
+if (T) load();
+</script></body></html>

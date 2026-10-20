@@ -20,9 +20,11 @@ try { DEFAULT_CTX = fs.readFileSync(process.env.CONTEXT_FILE || path.join(__dirn
 let PROFILES = [];
 try { PROFILES = JSON.parse(fs.readFileSync(path.join(__dirname, 'profiles.json'), 'utf8')); } catch { /* optional */ }
 const AGENTS = Engine.buildAgents(loadAgentsData(path.join(__dirname, 'agents')));
+const ACCOUNTS = process.env.ACCOUNTS === '1'; // מצב מנויים: חשבונות, מסלולים, מכסות וחיבור ל-GROW (ראו lib/saas.js)
 
 // מפתח מהדפדפן (בקשה בודדת, לא נשמר ולא נרשם ביומן) קודם למפתח מהשרת.
 function resolveCfg(brief) {
+  if (brief.demo === true) return { live: false, key: '', model: MODEL, base: BASE };
   const userKey = typeof brief.apiKey === 'string' ? brief.apiKey.trim() : '';
   const model = String(brief.model || '').trim() || MODEL;
   if (userKey) return { live: true, key: userKey, model, base: BASE };
@@ -36,6 +38,19 @@ const io = {
   putImage(rel, payload, mime, runId) { this.putFile(rel, payload.b64 ? Buffer.from(payload.b64, 'base64') : payload.svg, runId); return `/runs/${runId}/${rel}`; }
 };
 
+// שולח ריצה כזרם NDJSON. hooks.after({finished, failed, emit}) רץ בסוף, לפני סגירת התגובה.
+async function streamRun(res, brief, cfg, hooks = {}) {
+  res.writeHead(200, { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-cache' });
+  const emit = e => { try { res.write(JSON.stringify({ t: Date.now(), ...e }) + '\n'); } catch { /* הלקוח התנתק */ } };
+  let runIdOf = '', finished = false, failed = null;
+  const wrap = { ...io, putFile: (rel, d) => io.putFile(rel, d, runIdOf), putImage: (rel, pl, m) => io.putImage(rel, pl, m, runIdOf) };
+  try { await Engine.runCrew(brief, e => { if (e.type === 'run') runIdOf = e.runId; if (e.type === 'final') finished = true; emit(e); }, wrap, cfg); }
+  catch (err) { failed = String(err.message || err); emit({ type: 'error', message: failed }); }
+  if (hooks.after) hooks.after({ finished, failed, emit });
+  res.end();
+  return { finished, failed };
+}
+const saas = ACCOUNTS ? require('./lib/saas.js')({ env: process.env, Engine, streamRun, io }) : null;
 // ---------- אבטחה: סיסמת כניסה ----------
 // בלי APP_PASSWORD השרת מאזין רק ל-localhost. עם סיסמה הוא פתוח לרשת ודורש התחברות.
 const PASSWORD = process.env.APP_PASSWORD || '';
@@ -133,19 +148,15 @@ http.createServer(async (req, res) => {
   res.setHeader('x-content-type-options', 'nosniff'); res.setHeader('referrer-policy', 'no-referrer'); res.setHeader('cache-control', 'no-store');
   if (PASSWORD && await handleAuth(req, res, url)) return;
   const p = url.pathname;
+  if (saas && await saas.handle(req, res, url)) return;
   if (p === '/api/agents') {
-    return sendJson(res, 200, { brand: BRAND, auth: Boolean(PASSWORD), live: LIVE, model: LIVE ? `OpenAI · ${MODEL}` : null, defaultContext: DEFAULT_CTX, profiles: PROFILES, formats: Engine.FORMATS, agents: Engine.meta(AGENTS) });
+    return sendJson(res, 200, { brand: BRAND, auth: Boolean(PASSWORD), live: LIVE, model: LIVE ? `OpenAI · ${MODEL}` : null, defaultContext: DEFAULT_CTX, profiles: PROFILES, formats: Engine.FORMATS, agents: Engine.meta(AGENTS), ...(saas ? saas.publicConfig() : {}) });
   }
   if (p === '/api/run' && req.method === 'POST') {
     const brief = await readJson(req);
     if (!brief) return sendJson(res, 413, { error: 'request too large' });
-    res.writeHead(200, { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-cache' });
-    const emit = e => res.write(JSON.stringify({ t: Date.now(), ...e }) + '\n');
-    const wrap = { ...io, putFile: (rel, d) => io.putFile(rel, d, runIdOf), putImage: (rel, pl, m) => io.putImage(rel, pl, m, runIdOf) };
-    let runIdOf = '';
-    try { await Engine.runCrew(brief, e => { if (e.type === 'run') runIdOf = e.runId; emit(e); }, wrap, resolveCfg(brief)); }
-    catch (err) { emit({ type: 'error', message: String(err.message || err) }); }
-    return res.end();
+    await streamRun(res, brief, resolveCfg(brief));
+    return;
   }
   if (p === '/api/trends' && req.method === 'POST') {
     const brief = await readJson(req, 200_000) || {};
@@ -165,4 +176,4 @@ http.createServer(async (req, res) => {
   }
   if (p.startsWith('/runs/') && /\.(png|svg)$/.test(p)) return serveFrom(path.join(__dirname, 'runs'), p.slice(6), res);
   return serveFrom(path.join(__dirname, 'public'), p === '/' ? 'index.html' : p, res);
-}).listen(PORT, PASSWORD ? '0.0.0.0' : '127.0.0.1', () => console.log(`Agent crew: http://localhost:${PORT}  [${PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE OpenAI ${MODEL}` : 'DEMO mode'})`));
+}).listen(PORT, (PASSWORD || ACCOUNTS) ? '0.0.0.0' : '127.0.0.1', () => console.log(`Agent crew: http://localhost:${PORT}  [${ACCOUNTS ? 'ACCOUNTS mode' : PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE OpenAI ${MODEL}` : 'DEMO mode'})`));
