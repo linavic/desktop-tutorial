@@ -24,14 +24,14 @@
 
   // inputs = מזהי הסוכנים שהקבצים שלהם עוברים לסוכן. out = נתיב קובץ הפלט. search = חיפוש חי ברשת.
   const PIPE = [
-    { id: 'orchestrator', title: 'מנהל', color: '#e0b567', label: 'בריף', inputs: [], out: s => `content/briefs/${s}.md` },
-    { id: 'chen', title: 'חן', color: '#8fd16a', label: 'מקורות', search: true, inputs: ['orchestrator'], out: s => `content/sources/${s}.md` },
-    { id: 'researcher', title: 'חוקר', color: '#44b3a6', label: 'מחקר', search: true, inputs: ['orchestrator', 'chen'], out: s => `content/research/${s}.md` },
-    { id: 'writer', title: 'כותב', color: '#c58bf2', label: 'טיוטה', inputs: ['orchestrator', 'researcher', 'chen'], out: s => `content/drafts/${s}.md` },
-    { id: 'yael', title: 'יעל', color: '#f28bb6', label: 'שכתוב בסגנון הצוות', inputs: ['writer'], out: s => `Output/${s}.md` },
-    { id: 'yuval', title: 'יובל', color: '#ffb347', label: 'תמונות', inputs: ['yael'], out: s => `yuval/outputs/${s}.md` },
-    { id: 'editor', title: 'עורך', color: '#7fb3ff', label: 'גרסה סופית', inputs: ['yael', 'orchestrator', 'researcher'], out: s => `content/final/${s}.md` },
-    { id: 'publisher', title: 'מפיץ', color: '#ff7a7a', label: 'התאמות הפצה', inputs: ['editor'], out: s => `content/final/${s}.distribution.md` }
+    { id: 'orchestrator', title: 'מנהל תוכן', color: '#e0b567', label: 'בריף', inputs: [], out: s => `content/briefs/${s}.md` },
+    { id: 'chen', title: 'חוקר הרשת', color: '#8fd16a', label: 'מקורות', search: true, inputs: ['orchestrator'], out: s => `content/sources/${s}.md` },
+    { id: 'researcher', title: 'חוקר תוכן', color: '#44b3a6', label: 'מחקר', search: true, inputs: ['orchestrator', 'chen'], out: s => `content/research/${s}.md` },
+    { id: 'writer', title: 'קופירייטר', color: '#c58bf2', label: 'טיוטה', inputs: ['orchestrator', 'researcher', 'chen'], out: s => `content/drafts/${s}.md` },
+    { id: 'yael', title: 'עורך הסגנון', color: '#f28bb6', label: 'שכתוב בסגנון הצוות', inputs: ['writer'], out: s => `Output/${s}.md` },
+    { id: 'yuval', title: 'מעצב ויזואלי', color: '#ffb347', label: 'תמונות', inputs: ['yael'], out: s => `yuval/outputs/${s}.md` },
+    { id: 'editor', title: 'עורך ראשי', color: '#7fb3ff', label: 'גרסה סופית', inputs: ['yael', 'orchestrator', 'researcher'], out: s => `content/final/${s}.md` },
+    { id: 'publisher', title: 'מנהל הפצה', color: '#ff7a7a', label: 'התאמות הפצה', inputs: ['editor'], out: s => `content/final/${s}.distribution.md` }
   ];
 
   // data = { id: { description, tools, body, steps } } מקבצי agents/*.md
@@ -133,7 +133,7 @@
   // ---------- הדגמה ----------
   const DEMO = {
     orchestrator: t => `# בריף: ${t}\n\n**מטרה:** להפוך את הבקשה לתוכן אחד ברור.\n**קהל יעד:** לפי הקשר הפרויקט.\n**מסר מרכזי:** ערך קודם, בלי לחץ.\n**פורמט:** מאמר קצר עם תמונה.\n**טון:** חם, ישיר, מדובר.\n\n## נקודות מפתח\n1. הוק פותח שעוצר גלילה\n2. שלוש נקודות ערך\n3. קריאה לפעולה אחת`,
-    chen: t => `# מקורות: ${t}\n\n**מצב הדגמה: אין חיפוש אמיתי.** במצב חי חן מחפשת ברשת ומחזירה קישורים אמיתיים.\n\n## מילות חיפוש\n- ${t}\n- מדריך למתחילות`,
+    chen: t => `# מקורות: ${t}\n\n**מצב הדגמה: אין חיפוש אמיתי.** במצב חי חוקר הרשת מחפש ברשת ומחזיר קישורים אמיתיים.\n\n## מילות חיפוש\n- ${t}\n- מדריך למתחילות`,
     researcher: t => `# מחקר: ${t}\n\n## ממצאים\n- נקודה 1: [מצב הדגמה]\n- נקודה 2: [צריך אימות]\n\n## מקורות\nאין מקורות במצב הדגמה.`,
     writer: t => `# ${t}\n\nפתיח שמושך: שאלה שהקהל שואל את עצמו.\n\nגוף: שלוש נקודות קצרות לפי הבריף והמחקר.\n\nסיום: קריאה לפעולה אחת, ברורה.\n\n[צריך מקור] — נקודה 2`,
     yael: t => `# ${t}\n\n{{IMAGE_NEEDED: "תמונת פתיחה: סצנה נקייה ומודרנית שמבטאת את המותג, תאורה רכה, פלטת צבעים עדינה"}}\n\nפתיח בקול שלנו: שאלה אחת שהקהל באמת שואל.\n\n## שלוש נקודות\n- נקודה ראשונה, קצרה וברורה\n- נקודה שנייה, בלי ז'רגון\n- נקודה שלישית, עם **דגש** אחד\n\n{{IMAGE_NEEDED: "המחשה לנקודה המרכזית: קומפוזיציה פשוטה עם אלמנט אחד בולט על רקע נקי"}}\n\nסיום: קריאה אחת לפעולה.`,
@@ -282,7 +282,7 @@
     await step('מפתח ומודל הטקסט', async () => { await model(cfg.model); return `המפתח תקין והמודל ${cfg.model} זמין`; });
     await step('מודל התמונות', async () => { await model(IMAGE_MODEL); return `${IMAGE_MODEL} זמין`; });
     await step('הקראה בקול (OpenAI)', async () => { await model(TTS_MODEL); return `${TTS_MODEL} זמין`; });
-    out.push({ name: 'חיפוש ברשת', ok: null, detail: 'אי אפשר לבדוק בלי להריץ חיפוש (עולה כסף). יתברר בהרצה: חן והחוקר יציגו שאילתות ומקורות, ואם לא, תופיע הערה ביומן.' });
+    out.push({ name: 'חיפוש ברשת', ok: null, detail: 'אי אפשר לבדוק בלי להריץ חיפוש (עולה כסף). יתברר בהרצה: חוקר הרשת וחוקר התוכן יציגו שאילתות ומקורות, ואם לא, תופיע הערה ביומן.' });
     return out;
   }
 

@@ -80,7 +80,7 @@ textarea.f{min-height:110px}
 .node.done .core{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
 .badge{position:absolute;top:-4px;inset-inline-end:-2px;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#06210f;font-size:.8rem;font-weight:800;display:none;place-items:center;animation:pop .35s both}
 .node.done .badge{display:grid}
-.nm{font-weight:700;font-size:.95rem}
+.nm{font-weight:700;font-size:.86rem;line-height:1.2}
 .st{font-size:.74rem;color:var(--muted);min-height:1.1em}
 .node.working .st{color:var(--c)}
 .tk{font-size:.66rem;color:var(--muted);height:1.3em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:92px;opacity:.85}
@@ -210,9 +210,9 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
         <input type="file" id="logoin" accept="image/*"> <button class="btn" id="logoClear" type="button" style="font-size:.72rem;padding:2px 8px">הסר לוגו</button>
         <div class="lrow"><label><input type="checkbox" id="lrm" checked> אותיות בלבד (הסר רקע)</label><label>רגישות <input type="range" id="ltol" min="8" max="140" value="55"></label><label>צבע <select id="ltint"><option value="orig">מקורי</option><option value="white">לבן</option><option value="black">שחור</option></select></label></div>
         <div class="lrow"><label><input type="checkbox" id="logoOn" checked> הטבע על התמונות</label><label>גודל <input type="range" id="lw" min="5" max="60" value="20"></label></div>
-        <div class="note" style="margin:4px 0">גררי את הלוגו או לחצי על התמונה כדי לבחור את המיקום. אחרי הרצה תופיע כאן התמונה האמיתית של יובל, בפורמט שבחרת.</div>
+        <div class="note" style="margin:4px 0">גררי את הלוגו או לחצי על התמונה כדי לבחור את המיקום. אחרי הרצה תופיע כאן התמונה האמיתית, בפורמט שבחרת.</div>
         <div class="stagewrap"><div class="stage" id="stage"><img id="stageLogo" alt=""></div></div></div>
-      <div><b>תמונות reference לסגנון (עד 3)</b><div class="note" style="margin:4px 0 8px">תמונות של העסק, המוצרים או הסגנון הרצוי. יובל מנתח אותן ומתאים אליהן את התמונות, כדי שלא יהיו זרות למותג.</div>
+      <div><b>תמונות reference לסגנון (עד 3)</b><div class="note" style="margin:4px 0 8px">תמונות של העסק, המוצרים או הסגנון הרצוי. המעצב הוויזואלי מנתח אותן ומתאים אליהן את התמונות, כדי שלא יהיו זרות למותג.</div>
         <input type="file" id="refin" accept="image/*" multiple><div class="thumbs" id="thumbs"></div></div>
     </div>
     <details style="margin-top:10px"><summary class="note" style="cursor:pointer">ההקשר המלא שהסוכנים מקבלים (נבנה אוטומטית, אפשר לערוך ידנית)</summary><textarea class="f" id="ctx" style="margin-top:8px" placeholder="יתמלא אוטומטית מהשדות למעלה"></textarea></details>
@@ -270,19 +270,19 @@ const ICONS = {
 };
 const svg = id => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id] || ''}</svg>`;
 const EXAMPLES = ['פוסט היכרות שמציג את העסק ואת השירות הראשי שלנו', 'מאמר שעונה על השאלה שלקוחות שואלים הכי הרבה', 'סדרת סטוריז: 3 דברים שכדאי לדעת לפני שמתחילים'];
-// שמות הסוכנים להקראה
-const HTO = { orchestrator: 'למנהל', chen: 'לחן', researcher: 'לחוקר', writer: 'לכותב', yael: 'ליעל', yuval: 'ליובל', editor: 'לעורך', publisher: 'למפיץ' };
-const FEM = { chen: 1, yael: 1 };
-const HEN = { orchestrator: 'המנהל', chen: 'חן', researcher: 'החוקר', writer: 'הכותב', yael: 'יעל', yuval: 'יובל', editor: 'העורך', publisher: 'המפיץ' };
+// שמות מקצועיים להקראה (ללא שמות פרטיים)
+const HEN = { orchestrator: 'מנהל התוכן', chen: 'חוקר הרשת', researcher: 'חוקר התוכן', writer: 'הקופירייטר', yael: 'עורך הסגנון', yuval: 'המעצב הוויזואלי', editor: 'העורך הראשי', publisher: 'מנהל ההפצה' };
+const HTO = { orchestrator: 'למנהל התוכן', chen: 'לחוקר הרשת', researcher: 'לחוקר התוכן', writer: 'לקופירייטר', yael: 'לעורך הסגנון', yuval: 'למעצב הוויזואלי', editor: 'לעורך הראשי', publisher: 'למנהל ההפצה' };
+const FEM = {};
 const SAY_START = {
-  orchestrator: 'המנהל מתחיל. הוא הופך את הבקשה לבריף: מגדיר מטרה, קהל ומסר מרכזי.',
-  chen: 'חן יוצאת לרשת. היא מחפשת מקורות עדכניים ואמינים לנושא.',
-  researcher: 'החוקר עובד עכשיו. הוא אוסף עובדות ומאמת אותן מול מקורות.',
-  writer: 'הכותב כותב את הטיוטה לפי הבריף והמחקר.',
-  yael: 'יעל משכתבת את הטקסט בקול של העסק, ומסמנת איפה צריכה להיות תמונה.',
-  yuval: 'יובל מעצב את התמונות ומתאים אותן לסגנון המותג ולפורמט שבחרת.',
-  editor: 'העורך מלטש את הגרסה הסופית ובודק אותה מול הבריף והמחקר.',
-  publisher: 'המפיץ מכין התאמות לרשתות חברתיות ורשימת בדיקה לפני פרסום.'
+  orchestrator: 'מנהל התוכן מתחיל. הוא הופך את הבקשה לבריף: מגדיר מטרה, קהל ומסר מרכזי.',
+  chen: 'חוקר הרשת יוצא לחפש. הוא מחפש מקורות עדכניים ואמינים לנושא.',
+  researcher: 'חוקר התוכן עובד עכשיו. הוא אוסף עובדות ומאמת אותן מול מקורות.',
+  writer: 'הקופירייטר כותב את הטיוטה לפי הבריף והמחקר.',
+  yael: 'עורך הסגנון משכתב את הטקסט בקול של העסק, ומסמן איפה צריכה להיות תמונה.',
+  yuval: 'המעצב הוויזואלי מכין את התמונות ומתאים אותן לסגנון המותג ולפורמט שבחרת.',
+  editor: 'העורך הראשי מלטש את הגרסה הסופית ובודק אותה מול הבריף והמחקר.',
+  publisher: 'מנהל ההפצה מכין התאמות לרשתות חברתיות ורשימת בדיקה לפני פרסום.'
 };
 
 let STATIC = false, EIO = null;
@@ -449,7 +449,7 @@ function renderFocus() {
   <div class="row">כלים: ${tools}</div><div class="row">מקבל: ${ins}</div><div class="row">מוציא: <span class="file out">${esc(a.out)}</span></div>
   <ul class="${todo}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
   <div class="cap">מתוך קובץ ההגדרה של הסוכן. הרשימה מסומנת כשהסוכן מסיים.</div>
-  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>${s.style ? `<div class="cap" style="color:var(--gold)">ניתוח ה-reference של יובל</div><pre class="stream" style="min-height:0">${esc(s.style)}</pre>` : ''}`;
+  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>${s.style ? `<div class="cap" style="color:var(--gold)">ניתוח ה-reference של המעצב</div><pre class="stream" style="min-height:0">${esc(s.style)}</pre>` : ''}`;
   const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'עדיין לא התחיל.' : '');
   if (s.status === 'working') pre.append(el('span', 'caret'));
   pre.scrollTop = pre.scrollHeight;
@@ -541,7 +541,7 @@ function handle(ev) {
     (SRC[a.id] = SRC[a.id] || []).push(ev); chip('s', esc(dom(ev.url)), ev.url); log(a.id, `מצא מקור: ${dom(ev.url)}`); setStats();
     if (!NARR.srcSaid[a.id]) { NARR.srcSaid[a.id] = 1; say(`נמצא מקור ראשון, מאתר ${dom(ev.url).replace(/\./g, ' נקודה ')}.`, true); }
     if (FOCUS === a.id) { $('#srcl').append(el('li', null, `<a href="${esc(ev.url)}" target="_blank" rel="noopener noreferrer">${esc(ev.title)}</a>`)); }
-  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); say('יובל ניתח את תמונות ה-reference ומתאים אליהן את הסגנון.', true); if (FOCUS === a.id) renderFocus(); }
+  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); say('המעצב הוויזואלי ניתח את תמונות ה-reference ומתאים אליהן את הסגנון.', true); if (FOCUS === a.id) renderFocus(); }
   else if (ev.type === 'image') {
     (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`); say(`תמונה ${ev.n} מוכנה.`, true); setStage(ev.url);
     if (FOCUS === a.id) renderGallery($('#gal'), a.id);
