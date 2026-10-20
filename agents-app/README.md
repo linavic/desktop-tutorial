@@ -9,6 +9,8 @@ node server.js                         # מצב הדגמה, בלי מפתח
 OPENAI_API_KEY=... node server.js      # מצב חי עם OpenAI
 ANTHROPIC_API_KEY=... node server.js   # מצב חי עם Claude
 ```
+אפשר גם להדביק את המפתח ישירות בדף, בחלק "הגדרות מפתח API" (בחירת ספק, מפתח ומודל). המפתח נשלח לשרת רק בזמן הרצה ולא נשמר שם.
+
 פותחים http://localhost:3000. אם שני המפתחות מוגדרים, OpenAI קודם (`PROVIDER=anthropic` מכריח Claude).
 מודל: `OPENAI_MODEL` (ברירת מחדל `gpt-4.1`) או `CLAUDE_MODEL`. פורט: `PORT`.
 

@@ -54,6 +54,11 @@ pre{white-space:pre-wrap;word-break:break-word;margin:6px 0 0;font:inherit;backg
 .final-actions{display:flex;gap:8px;margin-bottom:8px}
 .final-actions button{padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;font:inherit}
 .err{color:var(--warn);font-weight:600}
+details.keybox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:-10px 0 22px}
+details.keybox summary{font-weight:600}
+.keygrid{display:grid;grid-template-columns:1fr 2fr 1fr;gap:12px;margin-top:12px}
+.note{font-size:.8rem;color:var(--muted);margin:10px 0 0}
+@media(max-width:1000px){.keygrid{grid-template-columns:1fr}}
 @media(max-width:1000px){.flow{grid-template-columns:1fr}.agent::after{content:"▾";left:auto;right:auto;top:auto;bottom:-16px;inset-inline-start:50%}.cols{grid-template-columns:1fr}.brief{grid-template-columns:1fr}.flow{gap:22px}}
 </style>
 </head>
@@ -73,6 +78,16 @@ pre{white-space:pre-wrap;word-break:break-word;margin:6px 0 0;font:inherit;backg
     <button class="run" id="go" type="submit">הפעל 5 סוכנים</button>
   </form>
 
+  <details class="keybox" id="keybox">
+    <summary id="keysum">הגדרות מפתח API</summary>
+    <div class="keygrid">
+      <div><label for="provider">ספק</label><select id="provider"><option value="openai">OpenAI</option><option value="anthropic">Claude (Anthropic)</option></select></div>
+      <div><label for="apikey">מפתח API</label><input id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
+      <div><label for="model">מודל (לא חובה)</label><input id="model" dir="ltr" placeholder="ברירת מחדל"></div>
+    </div>
+    <p class="note">המפתח נשמר רק בלשונית הזו (sessionStorage), נשלח לשרת רק בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה.</p>
+  </details>
+
   <section class="flow" id="flow" aria-label="הסוכנים"></section>
 
   <div class="cols">
@@ -86,14 +101,23 @@ pre{white-space:pre-wrap;word-break:break-word;margin:6px 0 0;font:inherit;backg
 <script>
 const $ = s => document.querySelector(s);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-let AGENTS = [], cards = {};
+let AGENTS = [], cards = {}, SERVER_INFO = { live: false };
+function updateMode() {
+  const m = $('#mode'), key = $('#apikey').value.trim();
+  const label = $('#provider').selectedOptions[0].textContent;
+  const live = Boolean(key) || SERVER_INFO.live;
+  m.className = 'mode ' + (live ? 'live' : 'demo');
+  m.textContent = key ? `מצב חי · ${label} (המפתח שלך)` : SERVER_INFO.live ? `מצב חי · ${SERVER_INFO.model}` : 'מצב הדגמה · בלי מפתח API, הטקסטים לדוגמה';
+  $('#keysum').textContent = key ? 'הגדרות מפתח API · מוגדר ✓' : 'הגדרות מפתח API · לא מוגדר';
+  try { sessionStorage.setItem('etel_key', key); sessionStorage.setItem('etel_provider', $('#provider').value); } catch { /* storage blocked */ }
+}
 
 async function init() {
   const info = await (await fetch('/api/agents')).json();
   AGENTS = info.agents;
-  const m = $('#mode');
-  m.textContent = info.live ? `מצב חי · ${info.model}` : 'מצב הדגמה · בלי מפתח API, הטקסטים לדוגמה';
-  m.classList.add(info.live ? 'live' : 'demo');
+  SERVER_INFO = info;
+  try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; const pv = sessionStorage.getItem('etel_provider'); if (pv) $('#provider').value = pv; } catch { /* storage blocked */ }
+  updateMode();
   render();
 }
 
@@ -152,7 +176,7 @@ $('#form').addEventListener('submit', async e => {
   const btn = $('#go'); btn.disabled = true; btn.textContent = 'הסוכנים עובדים…';
   render(); $('#log').replaceChildren(el('li', 'empty', 'מתחיל…')); $('#final').className = 'empty'; $('#final').textContent = 'ממתין לסוכנים…'; $('#copy').disabled = true;
   try {
-    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic: $('#topic').value, platform: $('#platform').value, format: $('#format').value }) });
+    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic: $('#topic').value, platform: $('#platform').value, format: $('#format').value, apiKey: $('#apikey').value.trim(), provider: $('#provider').value, model: $('#model').value.trim() }) });
     const reader = res.body.getReader(), dec = new TextDecoder(); let buf = '';
     for (;;) {
       const { done, value } = await reader.read(); if (done) break;
@@ -167,6 +191,8 @@ $('#copy').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText($('#final').textContent); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1500); } catch { /* clipboard blocked */ }
 });
 
+$('#apikey').addEventListener('input', updateMode);
+$('#provider').addEventListener('change', updateMode);
 init();
 </script>
 </body>

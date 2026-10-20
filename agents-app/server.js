@@ -59,12 +59,12 @@ const AGENTS = [
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function claude(system, user, maxTokens = 1200) {
-  if (PROVIDER === 'openai') {
+async function callLLM(cfg, system, user, maxTokens = 1200) {
+  if (cfg.provider === 'openai') {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${OPENAI_KEY}` },
-      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.key}` },
+      body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
     });
     if (!res.ok) throw new Error(`OpenAI API ${res.status}: ${(await res.text()).slice(0, 200)}`);
     const data = await res.json();
@@ -72,12 +72,23 @@ async function claude(system, user, maxTokens = 1200) {
   }
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] })
+    headers: { 'content-type': 'application/json', 'x-api-key': cfg.key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] })
   });
   if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return (data.content || []).map(b => b.text || '').join('').trim();
+}
+
+// מפתח מהדפדפן (בקשה בודדת, לא נשמר ולא נרשם ביומן) קודם למפתח מהשרת.
+function resolveCfg(brief) {
+  const userKey = typeof brief.apiKey === 'string' ? brief.apiKey.trim() : '';
+  if (userKey) {
+    const provider = brief.provider === 'anthropic' ? 'anthropic' : 'openai';
+    const model = String(brief.model || '').trim() || (provider === 'openai' ? (process.env.OPENAI_MODEL || 'gpt-4.1') : (process.env.CLAUDE_MODEL || 'claude-sonnet-5-5'));
+    return { live: true, provider, key: userKey, model };
+  }
+  return { live: LIVE, provider: PROVIDER, key: PROVIDER === 'openai' ? OPENAI_KEY : ANTHROPIC_KEY, model: MODEL };
 }
 
 // ---------- בדיקות ציות דטרמיניסטיות ----------
@@ -121,6 +132,9 @@ function nextSlot(platform, from = new Date()) {
 
 // ---------- ריצת הצינור ----------
 async function pipeline(brief, emit) {
+  const cfg = resolveCfg(brief);
+  const LIVE = cfg.live;
+  const claude = (system, user, max) => callLLM(cfg, system, user, max);
   const topic = (brief.topic || 'בדיקת עור לפני טיפול ראשון').trim();
   const platform = brief.platform || 'instagram';
   const format = brief.format || 'פוסט';
