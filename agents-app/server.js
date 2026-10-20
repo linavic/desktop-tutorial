@@ -5,9 +5,14 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const KEY = process.env.ANTHROPIC_API_KEY || '';
-const MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-5-5';
-const LIVE = Boolean(KEY);
+// ספק: OPENAI_API_KEY או ANTHROPIC_API_KEY. אם שניהם מוגדרים, OpenAI קודם (אפשר לכפות עם PROVIDER=anthropic).
+const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
+const PROVIDER = process.env.PROVIDER || (OPENAI_KEY ? 'openai' : ANTHROPIC_KEY ? 'anthropic' : '');
+const MODEL = PROVIDER === 'openai'
+  ? (process.env.OPENAI_MODEL || 'gpt-4.1')
+  : (process.env.CLAUDE_MODEL || 'claude-sonnet-5-5');
+const LIVE = (PROVIDER === 'openai' && Boolean(OPENAI_KEY)) || (PROVIDER === 'anthropic' && Boolean(ANTHROPIC_KEY));
 
 let CLINIC = '';
 try { CLINIC = fs.readFileSync(path.join(__dirname, '..', 'CLINIC.md'), 'utf8'); } catch { /* optional */ }
@@ -55,9 +60,19 @@ const AGENTS = [
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function claude(system, user, maxTokens = 1200) {
+  if (PROVIDER === 'openai') {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${OPENAI_KEY}` },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] })
+    });
+    if (!res.ok) throw new Error(`OpenAI API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const data = await res.json();
+    return (data.choices?.[0]?.message?.content || '').trim();
+  }
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' },
+    headers: { 'content-type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] })
   });
   if (!res.ok) throw new Error(`Claude API ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -179,7 +194,7 @@ http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   if (url.pathname === '/api/agents') {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({ live: LIVE, model: LIVE ? MODEL : null, agents: AGENTS }));
+    return res.end(JSON.stringify({ live: LIVE, model: LIVE ? `${PROVIDER === 'openai' ? 'OpenAI' : 'Claude'} · ${MODEL}` : null, agents: AGENTS }));
   }
   if (url.pathname === '/api/run' && req.method === 'POST') {
     let body = '';
@@ -200,4 +215,4 @@ http.createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': MIME[path.extname(full)] || 'application/octet-stream' });
     res.end(data);
   });
-}).listen(PORT, () => console.log(`Etel agents app: http://localhost:${PORT}  (${LIVE ? 'LIVE ' + MODEL : 'DEMO mode'})`));
+}).listen(PORT, () => console.log(`Etel agents app: http://localhost:${PORT}  (${LIVE ? `LIVE ${PROVIDER} ${MODEL}` : 'DEMO mode'})`));

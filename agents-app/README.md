@@ -6,9 +6,11 @@
 ```
 cd agents-app
 node server.js                         # מצב הדגמה, בלי מפתח
+OPENAI_API_KEY=... node server.js      # מצב חי עם OpenAI
 ANTHROPIC_API_KEY=... node server.js   # מצב חי עם Claude
 ```
-פותחים http://localhost:3000. אפשר לשנות מודל עם `CLAUDE_MODEL`, ופורט עם `PORT`.
+פותחים http://localhost:3000. אם שני המפתחות מוגדרים, OpenAI קודם (`PROVIDER=anthropic` מכריח Claude).
+מודל: `OPENAI_MODEL` (ברירת מחדל `gpt-4.1`) או `CLAUDE_MODEL`. פורט: `PORT`.
 
 ## הסוכנים
 1. **אסטרטגית:** קוראת את `../CLINIC.md`, בוחרת זווית, קהל וקריאה לפעולה.
