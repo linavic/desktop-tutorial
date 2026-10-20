@@ -2,73 +2,101 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>צוות הסוכנים · Etel Clinic</title>
+<link rel="icon" href="data:,">
+<title>צוות הסוכנים</title>
 <style>
-:root{--bg:#0b0d12;--bg2:#12151d;--card:#151922;--line:#262c3a;--ink:#eef0f6;--muted:#8d95a8;--gold:#e0b567;--ok:#59d39a;--err:#ff7a6b}
+:root{--bg:#0a0c11;--bg2:#12151d;--card:#141821;--line:#262c3a;--ink:#eef0f6;--muted:#8d95a8;--gold:#e0b567;--ok:#59d39a;--err:#ff7a6b}
 *{box-sizing:border-box}
 html{color-scheme:dark}
 body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,Arial,sans-serif;line-height:1.55;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(900px 500px at 85% -10%,#2a2113 0,transparent 60%),radial-gradient(700px 500px at 5% 20%,#13262b 0,transparent 60%),linear-gradient(var(--bg),var(--bg))}
-body::after{content:"";position:fixed;inset:0;z-index:-1;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(ellipse at 50% 30%,#000 20%,transparent 75%)}
-.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 70px}
+#bg,#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#bg{z-index:-1}#fx{z-index:50}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(900px 500px at 85% -10%,#2a2113 0,transparent 60%),radial-gradient(700px 500px at 5% 20%,#13262b 0,transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 80px;position:relative}
 .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
-.logo{font-family:Georgia,serif;letter-spacing:.14em;font-size:1.05rem}
-.logo small{display:block;font-family:inherit;letter-spacing:.02em;color:var(--muted);font-size:.78rem}
+.logo{font-family:Georgia,serif;letter-spacing:.14em;font-size:1.05rem;text-transform:uppercase}
+.logo small{display:block;font-family:inherit;letter-spacing:.02em;color:var(--muted);font-size:.78rem;text-transform:none}
 .sp{flex:1}
 .mode{padding:4px 12px;border-radius:99px;font-size:.78rem;border:1px solid var(--line);background:#ffffff08}
-.mode.live{color:var(--ok);border-color:#59d39a66}.mode.demo{color:var(--gold);border-color:#e0b56766}
-.top a{font-size:.82rem;color:var(--muted)}
-.hero{font-size:clamp(1.6rem,4vw,2.4rem);margin:0 0 14px;font-weight:700;letter-spacing:-.01em}
-.hero span{background:linear-gradient(90deg,var(--gold),#ff8f6b 60%,#c58bf2);-webkit-background-clip:text;background-clip:text;color:transparent}
-.bar{display:flex;gap:10px;padding:8px;border-radius:18px;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(120deg,#e0b567,#5bc0be,#c58bf2) border-box;border:1.5px solid transparent}
-.bar textarea{flex:1;resize:none;height:54px;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:1.05rem;padding:14px 12px}
-.bar button{border:0;border-radius:12px;padding:0 26px;font:inherit;font-weight:700;color:#1a1305;background:linear-gradient(120deg,#f0c978,#e0b567);cursor:pointer;white-space:nowrap}
+.mode.live{color:var(--ok);border-color:#59d39a66;animation:glow 2.4s ease-in-out infinite}.mode.demo{color:var(--gold);border-color:#e0b56766}
+@keyframes glow{50%{box-shadow:0 0 14px #59d39a55}}
+.top a,.top button.lnk{font-size:.82rem;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit}
+.hero{font-size:clamp(1.7rem,4.4vw,2.6rem);margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+.hero span{background:linear-gradient(90deg,var(--gold),#ff8f6b 45%,#c58bf2 75%,#7fb3ff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:200% 0}}
+.sub{margin:0 0 14px;color:var(--muted);font-size:.95rem}
+.bar{display:flex;gap:10px;padding:8px;border-radius:18px;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(120deg,#e0b567,#5bc0be,#c58bf2,#e0b567) border-box;background-size:auto,300% 100%;border:1.5px solid transparent;animation:bd 8s linear infinite;box-shadow:0 12px 50px -20px #e0b56755}
+@keyframes bd{to{background-position:0 0,300% 0}}
+.bar textarea{flex:1;resize:none;height:56px;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:1.05rem;padding:15px 12px}
+.bar button{border:0;border-radius:12px;padding:0 28px;font:inherit;font-weight:800;color:#1a1305;background:linear-gradient(120deg,#f6d58a,#e0b567);cursor:pointer;white-space:nowrap;transition:transform .15s,box-shadow .2s}
+.bar button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px -6px #e0b567aa}
 .bar button:disabled{opacity:.55;cursor:wait}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
-.chip{font-size:.8rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0;align-items:center}
+.chip{font-size:.8rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer;font-family:inherit}
 .chip:hover{color:var(--ink);border-color:var(--gold)}
+.radar{display:inline-flex;align-items:center;gap:8px;color:#8fd16a;border-color:#8fd16a66;background:#8fd16a12;font-weight:700}
+.radar i{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;position:relative}
+.radar.scan i::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;animation:ping 1s ease-out infinite}
+@keyframes ping{from{transform:scale(.5);opacity:1}to{transform:scale(1.6);opacity:0}}
+.ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.idea{padding:12px 14px;border-radius:14px;border:1px solid #8fd16a44;background:linear-gradient(#8fd16a10,#ffffff04);animation:pop .4s both}
+.idea b{display:block;margin-bottom:2px}.idea p{margin:0 0 8px;font-size:.8rem;color:var(--muted)}
+.idea button{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:99px;border:1px solid #8fd16a88;background:transparent;color:#8fd16a;cursor:pointer}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}}
 details.cfg{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:#ffffff05;padding:10px 14px}
 details.cfg summary{cursor:pointer;color:var(--muted);font-size:.88rem}
-.cfggrid{display:grid;grid-template-columns:1fr 2fr 1fr;gap:12px;margin-top:12px}
+.cfggrid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}
 label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px}
-select,input.f,textarea.f{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--ink);font:inherit}
+input.f,textarea.f{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--ink);font:inherit}
 textarea.f{min-height:110px}
 .note{font-size:.78rem;color:var(--muted);margin:10px 0 0}
-
-.stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:30px 0 10px;font-size:.85rem;color:var(--muted)}
+.cfggrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.cfggrid2 .wide{grid-column:1/-1}
+.pre{border-color:#e0b56788;color:var(--gold)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumbs div{position:relative}.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.thumbs button{position:absolute;top:-6px;inset-inline-end:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--err);color:#fff;cursor:pointer;line-height:1}
+.stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:28px 0 8px;font-size:.85rem;color:var(--muted)}
 .stats b{color:var(--ink);font-variant-numeric:tabular-nums}
 .prog{flex:1;min-width:160px;height:6px;border-radius:9px;background:#ffffff10;overflow:hidden}
-.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0b567,#5bc0be,#c58bf2);transition:width .5s}
-
-.pipe{display:flex;align-items:flex-start;justify-content:space-between;padding:26px 6px 14px}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0b567,#5bc0be,#c58bf2);transition:width .5s;box-shadow:0 0 12px #e0b567}
+.pipe{display:flex;align-items:flex-start;justify-content:space-between;padding:26px 0 8px}
 .node{position:relative;flex:none;width:92px;text-align:center;cursor:pointer;opacity:.5;transition:opacity .3s}
 .node.working,.node.done,.node.focus{opacity:1}
-.core{position:relative;width:66px;height:66px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--line);color:var(--c);transition:box-shadow .3s,border-color .3s,transform .3s}
+.core{position:relative;width:66px;height:66px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--line);color:var(--c);transition:box-shadow .3s,border-color .3s,transform .3s}
 .core svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .node.focus .core{transform:scale(1.07)}
-.node.working .core{border-color:var(--c);box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 38px color-mix(in srgb,var(--c) 45%,transparent)}
+.node.working .core{border-color:var(--c);box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 40px color-mix(in srgb,var(--c) 50%,transparent)}
 .node.working .core::before{content:"";position:absolute;inset:-9px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 70%,var(--c));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));animation:spin 1.1s linear infinite}
+.node.searching .core::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--c);animation:ping 1.2s ease-out infinite}
 .node.done .core{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
-.badge{position:absolute;top:-4px;inset-inline-end:-2px;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#06210f;font-size:.8rem;font-weight:800;display:none;place-items:center}
+.badge{position:absolute;top:-4px;inset-inline-end:-2px;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#06210f;font-size:.8rem;font-weight:800;display:none;place-items:center;animation:pop .35s both}
 .node.done .badge{display:grid}
 .nm{font-weight:700;font-size:.95rem}
-.st{font-size:.76rem;color:var(--muted);min-height:1.2em}
+.st{font-size:.74rem;color:var(--muted);min-height:1.1em}
 .node.working .st{color:var(--c)}
+.tk{font-size:.66rem;color:var(--muted);height:1.3em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:92px;opacity:.85}
 .link{position:relative;flex:1;height:2px;margin-top:33px;min-width:14px;background:repeating-linear-gradient(90deg,#ffffff22 0 6px,transparent 6px 12px)}
-.link .packet{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 12px 3px var(--pc,#e0b567);opacity:0}
-.link.flowing .packet{opacity:1;animation:flowx 1.1s linear infinite}
-.link .tag{position:absolute;top:-34px;inset-inline-start:50%;transform:translateX(50%);font-size:.68rem;white-space:nowrap;padding:2px 8px;border-radius:99px;background:#ffffff12;color:var(--ink);opacity:0;transition:opacity .3s}
-html[dir=rtl] .link .tag{transform:translateX(50%)}
+.link .packet{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 14px 4px var(--pc,#e0b567);opacity:0}
+.link.flowing .packet{opacity:1;animation:flowx 1s linear infinite}
+.link .tag{position:absolute;top:-34px;inset-inline-start:50%;transform:translateX(50%);font-size:.68rem;white-space:nowrap;padding:2px 8px;border-radius:99px;background:#ffffff18;color:var(--ink);opacity:0;transition:opacity .3s;direction:ltr}
 .link.flowing .tag{opacity:1;z-index:3}
-.link.sent{background:linear-gradient(90deg,var(--pc,#e0b567),var(--pc,#e0b567))}
+.link.sent{background:var(--pc,#e0b567)}
 @keyframes flowx{from{inset-inline-start:-4%}to{inset-inline-start:100%}}
 @keyframes flowy{from{inset-block-start:-4%}to{inset-block-start:100%}}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:8px}
-.panel{background:linear-gradient(var(--card),#12161e);border:1px solid var(--line);border-radius:18px;padding:18px}
+.sstrip{margin:6px 0 0;padding:10px 14px;border-radius:14px;border:1px solid #8fd16a33;background:#8fd16a0d;display:none}
+.sstrip.on{display:block;animation:pop .4s both}
+.sstrip .hd{font-size:.78rem;color:#8fd16a;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.sstrip .hd i{width:8px;height:8px;border-radius:50%;background:#8fd16a;animation:blink 1s steps(2) infinite}
+.sstrip.idle .hd i{animation:none;opacity:.4}
+.sc{display:inline-block;margin:3px 4px 3px 0;padding:3px 10px;border-radius:99px;font-size:.74rem;animation:pop .35s both}
+.sc.q{border:1px dashed #8fd16a88;color:#8fd16a}.sc.s{border:1px solid var(--line);background:#ffffff0c;color:var(--ink);text-decoration:none;direction:ltr}
+.banner{margin:14px 0 0;padding:12px 16px;border-radius:12px;font-weight:600;display:none}
+.banner.ok{display:block;background:#59d39a14;border:1px solid #59d39a55;color:var(--ok);animation:pop .4s both}
+.banner.err{display:block;background:#ff7a6b14;border:1px solid #ff7a6b55;color:var(--err)}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:10px}
+.panel{background:linear-gradient(var(--card),#11151d);border:1px solid var(--line);border-radius:18px;padding:18px}
 .fcard{border-top:3px solid var(--c,var(--gold))}
 .fh{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .fh .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
@@ -80,77 +108,111 @@ html[dir=rtl] .link .tag{transform:translateX(50%)}
 .desc{margin:6px 0 12px;font-size:.88rem;color:var(--muted)}
 .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0;font-size:.8rem;color:var(--muted)}
 .tool,.file{padding:2px 9px;border-radius:7px;background:#ffffff0c;border:1px solid var(--line);color:var(--ink);font-size:.74rem;direction:ltr}
-.file.out{border-color:var(--c);color:var(--c)}
+.file.out{border-color:var(--c);color:var(--c)}.tool.live{border-color:#8fd16a;color:#8fd16a}
 .todo{list-style:none;margin:10px 0;padding:0;font-size:.84rem;display:grid;gap:5px}
-.todo li{display:flex;gap:8px;color:var(--muted)}.todo li::before{content:"○";color:var(--muted)}
+.todo li{display:flex;gap:8px;color:var(--muted)}.todo li::before{content:"○";flex:none}
 .todo.done li{color:var(--ink)}.todo.done li::before{content:"✓";color:var(--ok)}
 .todo.run li::before{content:"◌";color:var(--c)}
 .cap{font-size:.72rem;color:var(--muted);margin-top:10px}
-pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:160px;max-height:340px;overflow:auto;background:#0a0c11;border:1px solid var(--line);border-radius:12px;padding:12px;font:.84rem/1.6 ui-monospace,Consolas,monospace;color:#d9deea}
+pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:160px;max-height:340px;overflow:auto;background:#090b10;border:1px solid var(--line);border-radius:12px;padding:12px;font:.84rem/1.6 ui-monospace,Consolas,monospace;color:#d9deea}
 .caret{display:inline-block;width:8px;height:1em;vertical-align:-2px;background:var(--c);animation:blink .8s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
+.gal{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.gal figure{margin:0;width:150px;animation:pop .4s both}.gal img{width:150px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.gal figcaption{font-size:.68rem;color:var(--muted);direction:ltr;margin-top:3px;max-height:2.8em;overflow:hidden}
+.srclist{margin:8px 0 0;padding:0;list-style:none;font-size:.78rem}.srclist a{color:#8fd16a;direction:ltr;unicode-bidi:plaintext}
 #log{list-style:none;margin:0;padding:0;max-height:430px;overflow:auto;font-size:.8rem;font-family:ui-monospace,Consolas,monospace}
 #log li{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed #ffffff12;animation:in .25s}
-#log time{color:var(--muted);flex:none}
-#log b{flex:none}
+#log time{color:var(--muted);flex:none}#log b{flex:none}
 @keyframes in{from{opacity:0;transform:translateY(4px)}}
-.gal{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.gal figure{margin:0;width:150px}.gal img{width:150px;height:100px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}.gal figcaption{font-size:.68rem;color:var(--muted);direction:ltr;margin-top:3px;max-height:2.8em;overflow:hidden}.deliver{margin-top:16px}
+.deliver{margin-top:16px}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .tab{padding:6px 14px;border-radius:9px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer;font:inherit;font-size:.85rem}
 .tab.on{color:var(--ink);border-color:var(--gold);background:#e0b56714}
-.acts{display:flex;gap:8px;margin-bottom:8px}
+.tab.star{border-color:#e0b56788;color:var(--gold)}
+.acts{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .btn{padding:6px 14px;border-radius:9px;border:1px solid var(--line);background:#ffffff08;color:var(--ink);cursor:pointer;font:inherit;font-size:.82rem}
-.banner{margin:14px 0 0;padding:12px 16px;border-radius:12px;font-weight:600;display:none}
-.banner.ok{display:block;background:#59d39a14;border:1px solid #59d39a55;color:var(--ok)}
-.banner.err{display:block;background:#ff7a6b14;border:1px solid #ff7a6b55;color:var(--err)}
+.btn:hover{border-color:var(--gold)}
+.article{background:#fbf8f2;color:#2b2118;border-radius:16px;padding:28px clamp(18px,4vw,44px);max-width:760px;margin:0 auto;line-height:1.85;font-size:1.02rem;animation:pop .5s both}
+.article h1,.article h2,.article h3{font-family:Georgia,"Times New Roman",serif;line-height:1.3;margin:1.1em 0 .4em;color:#1d140c}
+.article h1{font-size:1.8rem;margin-top:0}.article h2{font-size:1.3rem}
+.article img{max-width:100%;border-radius:12px;display:block;margin:16px auto}
+.article ul,.article ol{padding-inline-start:1.3em}.article hr{border:0;border-top:1px solid #d9cfbf;margin:22px 0}
+.article a{color:#9a6b1f}.article p{margin:.7em 0}
+.next{display:none;margin-top:16px}.next.on{display:block;animation:pop .5s both}
+.next .cap{margin:0 0 8px;color:var(--gold)}
+.hist{position:fixed;inset:0;z-index:40;background:#000a;display:none;place-items:center}.hist.on{display:grid}
+.hist .box{width:min(560px,92vw);max-height:80vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.hist li{padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer;list-style:none}.hist li:hover{color:var(--gold)}
 @media(max-width:900px){
- .grid{grid-template-columns:1fr}.cfggrid{grid-template-columns:1fr}
+ .grid{grid-template-columns:1fr}.cfggrid,.cfggrid2{grid-template-columns:1fr}
  .pipe{flex-direction:column;align-items:stretch;padding:10px 0}
- .node{width:auto;display:flex;align-items:center;gap:14px;text-align:start}
- .core{margin:0;width:60px;height:60px;flex:none}.core svg{width:28px;height:28px}
+ .node{width:auto;display:grid;grid-template-columns:60px 1fr;gap:14px;align-items:center;text-align:start}
+ .tk{max-width:none}
+ .core{margin:0;width:60px;height:60px}.core svg{width:28px;height:28px}
  .link{flex:none;width:2px;height:34px;margin:0 29px;background:repeating-linear-gradient(180deg,#ffffff22 0 6px,transparent 6px 12px)}
  .link .packet{top:auto;inset-inline-start:-4px}
- .link.flowing .packet{animation:flowy 1.1s linear infinite}
+ .link.flowing .packet{animation:flowy 1s linear infinite}
  .link .tag{top:6px;inset-inline-start:14px;transform:none}
- html[dir=rtl] .link .tag{transform:none}
  .link.sent{background:var(--pc)}
  .bar{flex-direction:column}.bar button{height:46px}
 }
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#bg,#fx{display:none}}
 </style>
 </head>
 <body>
+<canvas id="bg"></canvas><canvas id="fx"></canvas>
 <div class="wrap">
   <div class="top">
-    <div class="logo">ETEL CLINIC<small>צוות 8 הסוכנים</small></div>
+    <div class="logo"><span id="brand">…</span><small>צוות 8 הסוכנים · OpenAI</small></div>
     <span class="sp"></span>
     <span id="mode" class="mode">טוען…</span>
+    <button class="lnk" id="histBtn" type="button">היסטוריה</button>
   </div>
 
   <h1 class="hero">מה <span>המשימה</span> לצוות?</h1>
+  <p class="sub">מערכת סוכנים לכל עסק. מגדירים את העסק פעם אחת, מקלידים משימה, ושמונה סוכנים חוקרים ברשת, כותבים, מעצבים תמונות ומעבירים אחד לשני, מול העיניים שלך.</p>
   <form class="bar" id="form">
-    <textarea id="task" placeholder="למשל: פוסט לפייסבוק על בדיקת עור לפני טיפול ראשון" required></textarea>
+    <textarea id="task" placeholder="למשל: פוסט שמציג את השירות החדש שלנו" required></textarea>
     <button id="go" type="submit">שגר משימה</button>
   </form>
-  <div class="chips" id="chips"></div>
+  <div class="chips" id="chips"><button class="chip radar" id="radar" type="button"><i></i><span>סרוק טרנדים עכשיו</span></button></div>
+  <div class="ideas" id="ideas"></div>
+
+  <details class="cfg" id="biz" open>
+    <summary id="bizsum">העסק שלך: הגדרה חד-פעמית</summary>
+    <p class="note" style="margin-top:10px">מתחילים מתבנית ומשנים הכול, או ממלאים מאפס. כל הסוכנים עובדים לפי זה. נשמר בדפדפן הזה.</p>
+    <div class="chips" id="presets"></div>
+    <div class="cfggrid2">
+      <div><label for="pName">שם העסק</label><input class="f" id="pName" placeholder="למשל: סטודיו נועה"></div>
+      <div><label for="pType">תחום / סוג העסק</label><input class="f" id="pType" placeholder="למשל: סטודיו לעיצוב פנים"></div>
+      <div class="wide"><label for="pAbout">מה אתם מציעים</label><textarea class="f" id="pAbout" style="min-height:70px" placeholder="שירותים, מה מייחד אתכם"></textarea></div>
+      <div><label for="pAud">קהל יעד</label><input class="f" id="pAud" placeholder="מי הלקוחות שלכם"></div>
+      <div><label for="pTone">טון וסגנון</label><input class="f" id="pTone" placeholder="חם, מקצועי, קליל, יוקרתי…"></div>
+      <div><label for="pLang">שפה</label><input class="f" id="pLang" placeholder="עברית, אנגלית, רוסית…"></div>
+      <div class="wide"><label for="pRules">כללים וגבולות שחובה לכבד (רגולציה, מותג, דברים אסורים)</label><textarea class="f" id="pRules" style="min-height:70px" placeholder="למשל: בלי מחירים, בלי הבטחות, בלי להזכיר מתחרים"></textarea></div>
+    </div>
+    <details style="margin-top:10px"><summary class="note" style="cursor:pointer">ההקשר המלא שהסוכנים מקבלים (נבנה אוטומטית, אפשר לערוך ידנית)</summary><textarea class="f" id="ctx" style="margin-top:8px" placeholder="יתמלא אוטומטית מהשדות למעלה"></textarea></details>
+  </details>
 
   <details class="cfg" id="cfg">
-    <summary id="cfgsum">הגדרות: מפתח API והקשר</summary>
+    <summary id="cfgsum">חיבור: מפתח OpenAI ותמונות reference</summary>
     <div class="cfggrid">
-      <div><label for="provider">ספק</label><select id="provider"><option value="openai">OpenAI</option><option value="anthropic">Claude (Anthropic)</option></select></div>
-      <div><label for="apikey">מפתח API</label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
-      <div><label for="model">מודל (לא חובה)</label><input class="f" id="model" dir="ltr" placeholder="ברירת מחדל"></div>
+      <div><label for="apikey">מפתח OpenAI API</label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
+      <div><label for="model">מודל (לא חובה)</label><input class="f" id="model" dir="ltr" placeholder="gpt-4.1"></div>
     </div>
-    <p class="note">המפתח נשמר רק בלשונית הזו, נשלח לשרת בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה.</p>
-    <label for="ctx" style="margin-top:12px">הקשר הפרויקט (תחום, טון, קהל). הסוכנים קוראים את זה כמו CLAUDE.md</label>
-    <textarea class="f" id="ctx" placeholder="ריק = ברירת מחדל"></textarea>
+    <p class="note">המפתח נשמר רק בלשונית הזו, נשלח לשרת בזמן הרצה, ולא נשמר ולא נרשם בשרת. בלי מפתח האפליקציה רצה במצב הדגמה. חיפוש ברשת ותמונות דורשים מפתח עם גישה לכלי web_search ול-gpt-image-2.</p>
+    <label style="margin-top:12px">תמונות reference לסגנון המותג (עד 3). יובל מנתח אותן ומתאים את התמונות אליהן.</label>
+    <input type="file" id="refin" accept="image/*" multiple>
+    <div class="thumbs" id="thumbs"></div>
   </details>
 
   <div class="stats">
-    <span>סוכנים <b id="sAg">0/5</b></span><span>קבצים <b id="sFi">0/5</b></span><span>זמן <b id="sTm">0:00</b></span>
+    <span>סוכנים <b id="sAg">0/8</b></span><span>קבצים <b id="sFi">0/8</b></span><span>מקורות <b id="sSo">0</b></span><span>תווים <b id="sCh">0</b></span><span>זמן <b id="sTm">0:00</b></span>
     <div class="prog"><i id="prog"></i></div>
   </div>
   <div class="pipe" id="pipe" aria-label="צוות הסוכנים"></div>
+  <div class="sstrip idle" id="sstrip"><div class="hd"><i></i><span id="shd">חיפוש חי ברשת</span></div><div id="schips"></div></div>
   <div class="banner" id="banner"></div>
 
   <div class="grid">
@@ -159,13 +221,18 @@ pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:
   </div>
 
   <section class="panel deliver" id="deliver" hidden>
-    <div class="cap" style="margin:0 0 8px">התוצרים (קבצים שהסוכנים העבירו ביניהם)</div>
+    <div class="cap" style="margin:0 0 8px">התוצרים</div>
     <div class="tabs" id="tabs"></div>
-    <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dl">הורדת הכול (md)</button></div>
-    <pre class="stream" id="view" style="min-height:120px"></pre>
+    <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dlHtml">הורדת המאמר (HTML)</button><button class="btn" id="dl">הורדת הכול (md)</button></div>
+    <div id="article" class="article" hidden></div>
+    <pre class="stream" id="view" style="min-height:120px" hidden></pre>
     <div class="gal" id="dgal"></div>
   </section>
+
+  <section class="panel next" id="next"><div class="cap">המנהל מציע להמשך</div><div class="chips" id="nextchips"></div></section>
 </div>
+
+<div class="hist" id="hist"><div class="box"><div class="cap" style="margin:0 0 8px">משימות קודמות (נשמרות בדפדפן הזה)</div><ul id="histlist" style="margin:0;padding:0"></ul><button class="btn" id="histClose" style="margin-top:12px">סגירה</button></div></div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -180,157 +247,309 @@ const ICONS = {
   yuval: '<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 18l5-5 4 4 2-2 3 3"/>'
 };
 const svg = id => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id] || ''}</svg>`;
-const EXAMPLES = ['פוסט לפייסבוק על בדיקת עור לפני טיפול ראשון', 'קרוסלה לאינסטגרם: סקין בוסטר או פולינוקלאוטידים', 'תסריט לרילס: מיתוס או אמת על בוטוקס', 'פוסט רוסי לקבוצת נשים בנתניה'];
+const EXAMPLES = ['פוסט היכרות שמציג את העסק ואת השירות הראשי שלנו', 'מאמר שעונה על השאלה שלקוחות שואלים הכי הרבה', 'סדרת סטוריז: 3 דברים שכדאי לדעת לפני שמתחילים'];
 
-let INFO = { agents: [], live: false }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, runStart = 0, tick = null, TAB = 0;
-
+let INFO = { agents: [], live: false }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, SRC = {}, REFS = [], runStart = 0, tick = null, TAB = 'article', NEXT = [], busy = false, ENERGY = 0;
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
-const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 const A = id => INFO.agents.find(a => a.id === id);
+const dom = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 
+// ---------- רקע חי ----------
+(function bg() {
+  const c = $('#bg'), x = c.getContext('2d'); let W, H, P = [], mx = .5, my = .5;
+  const size = () => { W = c.width = innerWidth; H = c.height = innerHeight; P = Array.from({ length: Math.min(70, Math.floor(W / 18)) }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3, r: Math.random() * 1.6 + .6 })); };
+  addEventListener('resize', size); size();
+  addEventListener('pointermove', e => { mx = e.clientX / W; my = e.clientY / H; });
+  (function loop() {
+    x.clearRect(0, 0, W, H);
+    const sp = 1 + ENERGY * 2.2;
+    for (const p of P) { p.x += p.vx * sp + (mx - .5) * .15; p.y += p.vy * sp + (my - .5) * .15; if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < 0) p.y = H; if (p.y > H) p.y = 0; }
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) { const dx = P[i].x - P[j].x, dy = P[i].y - P[j].y, d = dx * dx + dy * dy; if (d < 16000) { x.strokeStyle = `rgba(224,181,103,${(1 - d / 16000) * (.12 + ENERGY * .22)})`; x.beginPath(); x.moveTo(P[i].x, P[i].y); x.lineTo(P[j].x, P[j].y); x.stroke(); } }
+    for (const p of P) { x.fillStyle = `rgba(255,255,255,${.25 + ENERGY * .4})`; x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.3); x.fill(); }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const c = $('#fx'), x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#e0b567', '#8fd16a', '#c58bf2', '#f28bb6', '#7fb3ff', '#ffb347'];
+  const P = Array.from({ length: 150 }, () => ({ x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35, vx: (Math.random() - .5) * 14, vy: -Math.random() * 13 - 3, s: Math.random() * 7 + 3, c: cols[Math.floor(Math.random() * cols.length)], r: Math.random() * 6 }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, c.width, c.height);
+    for (const p of P) { p.vy += .35; p.x += p.vx; p.y += p.vy; p.r += .2; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore(); }
+    if (t - t0 < 2800) requestAnimationFrame(f); else x.clearRect(0, 0, c.width, c.height);
+  })(t0);
+}
+
+// ---------- markdown בטוח ----------
+function md(src, imgs) {
+  const inline = t => esc(t)
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt) => { const n = (/(\d+)\s*$/.exec(alt) || [])[1]; return imgs[n] ? `<img src="${imgs[n]}" alt="${alt}">` : `<em>[${alt}]</em>`; })
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  let out = '', list = null;
+  const close = () => { if (list) { out += `</${list}>`; list = null; } };
+  for (const raw of src.replace(/\r/g, '').split('\n')) {
+    const l = raw.trim(); let m;
+    if (!l) { close(); continue; }
+    if ((m = /^(#{1,3})\s+(.*)$/.exec(l))) { close(); out += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
+    else if (/^---+$/.test(l)) { close(); out += '<hr>'; }
+    else if ((m = /^[-*]\s+(.*)$/.exec(l))) { if (list !== 'ul') { close(); out += '<ul>'; list = 'ul'; } out += `<li>${inline(m[1])}</li>`; }
+    else if ((m = /^\d+\.\s+(.*)$/.exec(l))) { if (list !== 'ol') { close(); out += '<ol>'; list = 'ol'; } out += `<li>${inline(m[1])}</li>`; }
+    else { close(); out += /^!\[/.test(l) ? inline(l) : `<p>${inline(l)}</p>`; }
+  }
+  close(); return out;
+}
+const imgMap = () => Object.fromEntries((IMGS.yuval || []).map(i => [i.n, i.url]));
+
+// ---------- אתחול ----------
 async function init() {
   const r = await fetch('/api/agents'); if (r.status === 401) { location.href = '/login'; return; }
   INFO = await r.json();
+  loadProfile(); renderPresets(); applyBrand();
   if (INFO.auth) { const a = el('a', null, 'התנתקות'); a.href = '/logout'; $('.top').append(a); }
-  $('#ctx').placeholder = INFO.defaultContext ? 'ברירת מחדל: פרופיל הקליניקה (CLINIC.md)' : 'אין ברירת מחדל. כתבי תחום, טון וקהל.';
-  try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; const p = sessionStorage.getItem('etel_provider'); if (p) $('#provider').value = p; } catch {}
-  EXAMPLES.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; $('#task').focus(); }; $('#chips').append(c); });
+  try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; } catch {}
+  $('#model').value = store.get('model') || '';
+  renderExamples(EXAMPLES);
   updateMode(); reset();
 }
-
 function updateMode() {
-  const key = $('#apikey').value.trim(), m = $('#mode');
-  const live = Boolean(key) || INFO.live;
+  const key = $('#apikey').value.trim(), m = $('#mode'), live = Boolean(key) || INFO.live;
   m.className = 'mode ' + (live ? 'live' : 'demo');
-  m.textContent = key ? `מצב חי · ${$('#provider').selectedOptions[0].textContent} (המפתח שלך)` : INFO.live ? `מצב חי · ${INFO.model}` : 'מצב הדגמה · טקסטים לדוגמה, בלי מפתח';
-  $('#cfgsum').textContent = key ? 'הגדרות: מפתח API מוגדר ✓' : 'הגדרות: מפתח API והקשר';
-  try { sessionStorage.setItem('etel_key', key); sessionStorage.setItem('etel_provider', $('#provider').value); } catch {}
+  m.textContent = key ? 'מצב חי · OpenAI (המפתח שלך)' : INFO.live ? `מצב חי · ${INFO.model}` : 'מצב הדגמה · בלי מפתח';
+  $('#cfgsum').textContent = key ? 'חיבור: מפתח OpenAI מוגדר ✓' : 'חיבור: מפתח OpenAI ותמונות reference';
+  try { sessionStorage.setItem('etel_key', key); } catch {}
 }
+const body = extra => ({ apiKey: $('#apikey').value.trim(), model: $('#model').value.trim(), context: $('#ctx').value, businessName: $('#pName').value.trim(), ...extra });
 
 function reset() {
-  ST = {}; FILES = []; IMGS = {}; TAB = 0; INFO.agents.forEach(a => ST[a.id] = { status: 'idle', text: '', ms: 0, t0: 0 });
+  ST = {}; FILES = []; IMGS = {}; SRC = {}; NEXT = []; TAB = 'article'; ENERGY = 0;
+  INFO.agents.forEach(a => ST[a.id] = { status: 'idle', text: '', ms: 0, t0: 0 });
   const pipe = $('#pipe'); pipe.replaceChildren();
   INFO.agents.forEach((a, i) => {
-    const n = el('div', 'node', `<div class="core" style="--c:${a.color}">${svg(a.id)}<span class="badge">✓</span></div><div><div class="nm">${a.title}</div><div class="st">ממתין</div></div>`);
+    const n = el('div', 'node', `<div class="core" style="--c:${a.color}">${svg(a.id)}<span class="badge">✓</span></div><div><div class="nm">${a.title}</div><div class="st">ממתין</div><div class="tk"></div></div>`);
     n.dataset.id = a.id; n.style.setProperty('--c', a.color); n.onclick = () => setFocus(a.id); pipe.append(n);
     if (i < INFO.agents.length - 1) { const l = el('div', 'link', '<span class="packet"></span><span class="tag"></span>'); l.dataset.i = i; l.style.setProperty('--pc', a.color); pipe.append(l); }
   });
   const first = el('li', null, 'הפעילות תופיע כאן אחרי שיגור משימה.'); first.style.color = 'var(--muted)'; $('#log').replaceChildren(first);
-  $('#deliver').hidden = true; $('#banner').className = 'banner'; setStats();
-  setFocus(INFO.agents[0].id);
+  $('#deliver').hidden = true; $('#banner').className = 'banner'; $('#next').classList.remove('on'); $('#sstrip').className = 'sstrip idle'; $('#schips').replaceChildren(); $('#shd').textContent = 'חיפוש חי ברשת';
+  setStats(); setFocus(INFO.agents[0].id);
 }
-
 function setStats() {
-  const done = Object.values(ST).filter(s => s.status === 'done').length;
-  const N = INFO.agents.length;
-  $('#sAg').textContent = `${done}/${N}`; $('#sFi').textContent = `${FILES.length}/${N}`;
-  $('#prog').style.width = (done / N * 100) + '%';
+  const done = Object.values(ST).filter(s => s.status === 'done').length, N = INFO.agents.length;
+  $('#sAg').textContent = `${done}/${N}`; $('#sFi').textContent = `${FILES.length}/${N}`; $('#prog').style.width = (done / N * 100) + '%';
+  $('#sSo').textContent = Object.values(SRC).reduce((a, b) => a + b.length, 0);
+  $('#sCh').textContent = Object.values(ST).reduce((a, s) => a + (s.text || '').length, 0).toLocaleString('he-IL');
   $('#sTm').textContent = runStart ? fmt(Date.now() - runStart) : '0:00';
 }
-
-function nodeEl(id) { return document.querySelector(`.node[data-id="${id}"]`); }
-function linkEl(i) { return document.querySelector(`.link[data-i="${i}"]`); }
-
-function setFocus(id) {
-  FOCUS = id;
-  document.querySelectorAll('.node').forEach(n => n.classList.toggle('focus', n.dataset.id === id));
-  renderFocus();
-}
+const nodeEl = id => document.querySelector(`.node[data-id="${id}"]`), linkEl = i => document.querySelector(`.link[data-i="${i}"]`);
+function setFocus(id) { FOCUS = id; document.querySelectorAll('.node').forEach(n => n.classList.toggle('focus', n.dataset.id === id)); renderFocus(); }
 
 function renderFocus() {
   const a = A(FOCUS), s = ST[FOCUS], box = $('#focus');
   box.style.setProperty('--c', a.color);
   const status = s.status === 'working' ? ['עובד עכשיו', 'on'] : s.status === 'done' ? ['הושלם', 'ok'] : ['ממתין', ''];
   const ins = a.inputs.length ? a.inputs.map(id => `<span class="file">מ${A(id).title}</span>`).join('') : '<span class="file">בקשת המשתמש</span>';
-  const todoCls = s.status === 'done' ? 'todo done' : s.status === 'working' ? 'todo run' : 'todo';
+  const todo = s.status === 'done' ? 'todo done' : s.status === 'working' ? 'todo run' : 'todo';
+  const tools = a.tools.map(t => `<span class="tool">${esc(t)}</span>`).join('') + (a.search ? '<span class="tool live">web_search חי</span>' : '');
   box.innerHTML = `<div class="fh"><div class="ico">${svg(a.id)}</div><h2>${a.title}</h2><span class="pill ${status[1]}">${status[0]}</span><span class="tm" id="ftm">${s.status === 'working' ? fmt(Date.now() - s.t0) : s.ms ? (s.ms / 1000).toFixed(1) + ' ש׳' : ''}</span></div>
   <p class="desc">${esc(a.description)}</p>
-  <div class="row">כלים בהגדרה: ${a.tools.map(t => `<span class="tool">${esc(t)}</span>`).join('')}</div>
-  <div class="row">מקבל: ${ins}</div>
-  <div class="row">מוציא: <span class="file out">${esc(a.out)}</span></div>
-  <ul class="${todoCls}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+  <div class="row">כלים: ${tools}</div><div class="row">מקבל: ${ins}</div><div class="row">מוציא: <span class="file out">${esc(a.out)}</span></div>
+  <ul class="${todo}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
   <div class="cap">מתוך קובץ ההגדרה של הסוכן. הרשימה מסומנת כשהסוכן מסיים.</div>
-  <pre class="stream" id="stream"></pre><div class="gal" id="gal"></div>`;
-  renderGallery($('#gal'), FOCUS);
+  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>`;
   const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'עדיין לא התחיל.' : '');
   if (s.status === 'working') pre.append(el('span', 'caret'));
   pre.scrollTop = pre.scrollHeight;
+  const sl = $('#srcl'); (SRC[FOCUS] || []).forEach(x => sl.append(el('li', null, `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>`)));
+  renderGallery($('#gal'), FOCUS);
 }
+function renderGallery(box, id) { box.replaceChildren(); (IMGS[id] || []).forEach(im => { const f = el('figure'); const i = el('img'); i.src = im.url; i.alt = `תמונה ${im.n}`; f.append(i, el('figcaption', null, esc(im.prompt))); box.append(f); }); }
 
 function log(id, msg) {
   const ul = $('#log'); if (ul.firstChild && !ul.firstChild.querySelector('time')) ul.replaceChildren();
   const a = id ? A(id) : null;
-  const li = el('li', null, `<time>${fmt(Date.now() - runStart)}</time><b style="color:${a ? a.color : 'var(--ink)'}">${a ? a.title : 'מערכת'}</b><span>${esc(msg)}</span>`);
-  ul.append(li); ul.scrollTop = ul.scrollHeight;
+  ul.append(el('li', null, `<time>${fmt(Date.now() - runStart)}</time><b style="color:${a ? a.color : 'var(--ink)'}">${a ? a.title : 'מערכת'}</b><span>${esc(msg)}</span>`)); ul.scrollTop = ul.scrollHeight;
 }
-
 const short = p => p.split('/').slice(-2).join('/');
-function renderGallery(box, id) {
-  box.replaceChildren();
-  (IMGS[id] || []).forEach(im => { const f = el('figure'); const i = el('img'); i.src = im.url; i.alt = `תמונה ${im.n}`; f.append(i, el('figcaption', null, esc(im.prompt))); box.append(f); });
-}
+let tkPending = false;
+function ticker(id) { if (tkPending) return; tkPending = true; requestAnimationFrame(() => { tkPending = false; const n = nodeEl(id); if (n) n.querySelector('.tk').textContent = (ST[id].text || '').replace(/\s+/g, ' ').slice(-34); }); }
+
+function chip(cls, html, href) { const c = href ? el('a', 'sc ' + cls, html) : el('span', 'sc ' + cls, html); if (href) { c.href = href; c.target = '_blank'; c.rel = 'noopener noreferrer'; } $('#schips').append(c); }
 
 function handle(ev) {
   const a = ev.agent ? A(ev.agent) : null, s = a ? ST[a.id] : null, idx = a ? INFO.agents.indexOf(a) : -1;
-  if (ev.type === 'run') { runStart = Date.now(); log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug}`); }
+  if (ev.type === 'run') { runStart = Date.now(); log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug}${ev.refs ? ` · ${ev.refs} תמונות reference` : ''}`); }
   else if (ev.type === 'start') {
-    s.status = 'working'; s.t0 = Date.now(); s.text = '';
-    nodeEl(a.id).classList.add('working'); nodeEl(a.id).querySelector('.st').textContent = 'עובד…';
+    s.status = 'working'; s.t0 = Date.now(); s.text = ''; ENERGY = 1;
+    const n = nodeEl(a.id); n.classList.add('working'); n.querySelector('.st').textContent = 'עובד…';
     if (idx > 0) { const l = linkEl(idx - 1); l.classList.add('flowing'); l.querySelector('.tag').textContent = short(FILES[FILES.length - 1].path); }
-    setFocus(a.id);
-    log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש');
+    setFocus(a.id); log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש');
   } else if (ev.type === 'delta') {
-    s.text += ev.text;
+    s.text += ev.text; ticker(a.id);
     if (FOCUS === a.id) { const pre = $('#stream'); pre.querySelector('.caret')?.remove(); pre.append(document.createTextNode(ev.text)); pre.append(el('span', 'caret')); pre.scrollTop = pre.scrollHeight; }
-  } else if (ev.type === 'image') {
+  } else if (ev.type === 'search') {
+    const strip = $('#sstrip'); strip.className = 'sstrip on'; nodeEl(a.id).classList.add('searching');
+    $('#shd').textContent = `${a.title} מחפש ברשת…`;
+    if (ev.query) { chip('q', '⌕ ' + esc(ev.query)); log(a.id, `מחפש: ${ev.query}`); } else log(a.id, 'מבצע חיפוש ברשת');
+  } else if (ev.type === 'source') {
+    (SRC[a.id] = SRC[a.id] || []).push(ev); chip('s', esc(dom(ev.url)), ev.url); log(a.id, `מצא מקור: ${dom(ev.url)}`); setStats();
+    if (FOCUS === a.id) { $('#srcl').append(el('li', null, `<a href="${esc(ev.url)}" target="_blank" rel="noopener noreferrer">${esc(ev.title)}</a>`)); }
+  } else if (ev.type === 'style') { log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); }
+  else if (ev.type === 'image') {
     (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`);
-    if (FOCUS === a.id) renderGallery($('#gal'), a.id); renderDeliver();
-  } else if (ev.type === 'step') {
-    log(a.id, ev.text);
-  } else if (ev.type === 'done') {
+    if (FOCUS === a.id) renderGallery($('#gal'), a.id);
+  } else if (ev.type === 'step') { log(a.id, ev.text); }
+  else if (ev.type === 'done') {
     s.status = 'done'; s.ms = ev.ms; s.text = ev.file.content; FILES.push(ev.file);
-    const n = nodeEl(a.id); n.classList.remove('working'); n.classList.add('done'); n.querySelector('.st').textContent = `${(ev.ms / 1000).toFixed(1)} ש׳`;
+    const n = nodeEl(a.id); n.classList.remove('working', 'searching'); n.classList.add('done'); n.querySelector('.st').textContent = `${(ev.ms / 1000).toFixed(1)} ש׳`; n.querySelector('.tk').textContent = '';
     if (idx > 0) { const l = linkEl(idx - 1); l.classList.remove('flowing'); l.classList.add('sent'); }
-    log(a.id, `סיים · ${ev.chars} תווים · כתב ${short(ev.file.path)}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
+    if (a.search) $('#sstrip').classList.add('idle');
+    log(a.id, `סיים · ${ev.chars} תווים${ev.sources ? ` · ${ev.sources} מקורות` : ''} · כתב ${short(ev.file.path)}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
     if (ev.note) log(a.id, ev.note.split('\n')[0]);
-    if (FOCUS === a.id) renderFocus(); renderDeliver(); setStats();
+    if (FOCUS === a.id) renderFocus(); setStats();
   } else if (ev.type === 'final') {
-    const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה · ${FILES.length} קבצים · ${fmt(Date.now() - runStart)}`; log(null, 'כל הסוכנים סיימו');
+    ENERGY = .25; const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה · ${FILES.length} קבצים · ${fmt(Date.now() - runStart)}`;
+    log(null, 'כל הסוכנים סיימו'); TAB = 'article'; renderDeliver(); confetti(); saveHist();
+    $('#deliver').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (ev.type === 'next') {
+    NEXT = ev.ideas; const box = $('#nextchips'); box.replaceChildren();
+    NEXT.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; scrollTo({ top: 0, behavior: 'smooth' }); $('#task').focus(); }; box.append(c); });
+    if (NEXT.length) $('#next').classList.add('on');
   } else if (ev.type === 'error') {
-    const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message);
-    document.querySelectorAll('.node.working').forEach(n => n.classList.remove('working')); document.querySelectorAll('.link.flowing').forEach(l => l.classList.remove('flowing'));
+    ENERGY = 0; const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message);
+    document.querySelectorAll('.node.working').forEach(n => n.classList.remove('working', 'searching')); document.querySelectorAll('.link.flowing').forEach(l => l.classList.remove('flowing'));
   }
 }
 
+// ---------- תוצרים ----------
+const ed = () => FILES.find(f => f.agent === 'editor');
 function renderDeliver() {
   $('#deliver').hidden = !FILES.length;
   const tabs = $('#tabs'); tabs.replaceChildren();
-  FILES.forEach((f, i) => { const b = el('button', 'tab' + (i === TAB ? ' on' : ''), `${A(f.agent).title} · ${f.label}`); b.onclick = () => { TAB = i; renderDeliver(); }; tabs.append(b); });
-  if (FILES[TAB]) $('#view').textContent = FILES[TAB].content;
-  const g = $('#dgal'); g.replaceChildren(); if (FILES[TAB]?.agent === 'yuval') renderGallery(g, 'yuval');
+  const add = (k, t, cls) => { const b = el('button', 'tab ' + (cls || '') + (TAB === k ? ' on' : ''), t); b.onclick = () => { TAB = k; renderDeliver(); }; tabs.append(b); };
+  if (ed()) add('article', '★ המאמר המוכן', 'star');
+  FILES.forEach((f, i) => add(String(i), `${A(f.agent).title} · ${f.label}`));
+  const art = $('#article'), view = $('#view'), g = $('#dgal');
+  if (TAB === 'article' && ed()) { art.hidden = false; view.hidden = true; const im = imgMap(), has = /!\[/.test(ed().content);
+    art.innerHTML = (!has && Object.keys(im).length ? Object.values(im).map(u => `<img src="${u}" alt="">`).join('') : '') + md(ed().content, im); g.replaceChildren(); }
+  else { const f = FILES[Number(TAB)] || FILES[0]; art.hidden = true; view.hidden = false; view.textContent = f ? f.content : ''; g.replaceChildren(); if (f?.agent === 'yuval') renderGallery(g, 'yuval'); }
 }
-
-$('#copy').onclick = async () => { try { await navigator.clipboard.writeText(FILES[TAB]?.content || ''); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1400); } catch {} };
-$('#dl').onclick = () => {
-  const text = FILES.map(f => `<!-- ${f.path} -->\n${f.content}`).join('\n\n---\n\n');
-  const a = el('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/markdown' })); a.download = 'agents-output.md'; a.click();
+const curText = () => (TAB === 'article' && ed() ? ed().content : (FILES[Number(TAB)] || FILES[0] || {}).content || '');
+$('#copy').onclick = async () => { try { await navigator.clipboard.writeText(curText()); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1400); } catch {} };
+$('#dl').onclick = () => { const t = FILES.map(f => `<!-- ${f.path} -->\n${f.content}`).join('\n\n---\n\n'); download('agents-output.md', new Blob([t], { type: 'text/markdown' })); };
+function download(name, blob) { const a = el('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+$('#dlHtml').onclick = async () => {
+  if (!ed()) return;
+  const map = imgMap(), inl = {};
+  for (const [n, u] of Object.entries(map)) { try { const b = await (await fetch(u)).blob(); inl[n] = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); } catch { /* ללא תמונה */ } }
+  const html = `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(($('#task').value || 'מאמר').slice(0, 80))}</title><style>body{margin:0;background:#f4efe6;font-family:"Segoe UI",Arial,sans-serif}.a{max-width:760px;margin:0 auto;background:#fbf8f2;color:#2b2118;padding:36px 28px;line-height:1.85}h1,h2,h3{font-family:Georgia,serif;line-height:1.3}img{max-width:100%;border-radius:12px;display:block;margin:16px auto}a{color:#9a6b1f}</style></head><body><div class="a">${md(ed().content, inl)}</div></body></html>`;
+  download('article.html', new Blob([html], { type: 'text/html' }));
 };
 
+// ---------- היסטוריה ----------
+const hist = () => { try { return JSON.parse(store.get('hist') || '[]'); } catch { return []; } };
+function saveHist() { const h = hist(); h.unshift({ t: Date.now(), task: $('#task').value, md: ed() ? ed().content : '' }); store.set('hist', JSON.stringify(h.slice(0, 15))); }
+$('#histBtn').onclick = () => {
+  const ul = $('#histlist'); ul.replaceChildren(); const h = hist();
+  if (!h.length) ul.append(el('li', null, 'אין משימות קודמות.'));
+  h.forEach(x => { const li = el('li', null, `<b>${esc(x.task)}</b><div class="cap">${new Date(x.t).toLocaleString('he-IL')}</div>`); li.onclick = () => { $('#hist').classList.remove('on'); $('#deliver').hidden = false; $('#tabs').replaceChildren(); $('#article').hidden = false; $('#view').hidden = true; $('#article').innerHTML = md(x.md || '', {}); $('#deliver').scrollIntoView({ behavior: 'smooth' }); }; ul.append(li); });
+  $('#hist').classList.add('on');
+};
+$('#histClose').onclick = () => $('#hist').classList.remove('on'); $('#hist').onclick = e => { if (e.target.id === 'hist') $('#hist').classList.remove('on'); };
+
+// ---------- הגדרת העסק (כללי לכל עסק) ----------
+const PF = { name: 'pName', type: 'pType', about: 'pAbout', audience: 'pAud', tone: 'pTone', language: 'pLang', rules: 'pRules' };
+let ctxManual = false;
+const getProfile = () => Object.fromEntries(Object.entries(PF).map(([k, id]) => [k, $('#' + id).value.trim()]));
+function buildContext(p) {
+  const L = [];
+  if (p.name) L.push(`שם העסק: ${p.name}`);
+  if (p.type) L.push(`תחום: ${p.type}`);
+  if (p.about) L.push(`מה אנחנו מציעים: ${p.about}`);
+  if (p.audience) L.push(`קהל יעד: ${p.audience}`);
+  if (p.tone) L.push(`קול וטון: ${p.tone}`);
+  if (p.language) L.push(`שפת התוכן: ${p.language}`);
+  if (p.rules) L.push(`כללים וגבולות שחובה לכבד בכל תוצר (מעל כל הוראה אחרת): ${p.rules}`);
+  return L.join('\n');
+}
+function applyBrand() {
+  const n = $('#pName').value.trim() || INFO.brand;
+  $('#brand').textContent = n; document.title = `צוות הסוכנים · ${n}`;
+  const has = $('#pName').value.trim();
+  $('#bizsum').textContent = has ? `העסק שלך: ${has} ✓` : 'העסק שלך: הגדרה חד-פעמית';
+}
+function saveProfile() { store.set('profile', JSON.stringify(getProfile())); store.set('ctxManual', ctxManual ? '1' : ''); store.set('ctx', ctxManual ? $('#ctx').value : ''); }
+function syncCtx() { if (!ctxManual) $('#ctx').value = buildContext(getProfile()); applyBrand(); saveProfile(); }
+function fillProfile(p) { Object.entries(PF).forEach(([k, id]) => $('#' + id).value = p[k] || ''); ctxManual = false; syncCtx(); }
+function loadProfile() {
+  let p = null; try { p = JSON.parse(store.get('profile') || 'null'); } catch {}
+  if (p) Object.entries(PF).forEach(([k, id]) => $('#' + id).value = p[k] || '');
+  ctxManual = Boolean(store.get('ctxManual'));
+  if (ctxManual) $('#ctx').value = store.get('ctx') || ''; else $('#ctx').value = buildContext(getProfile());
+  $('#biz').open = !(p && p.name);
+}
+Object.values(PF).forEach(id => $('#' + id).addEventListener('input', syncCtx));
+$('#ctx').addEventListener('input', () => { ctxManual = true; saveProfile(); });
+function renderExamples(list) {
+  document.querySelectorAll('#chips .chip.ex').forEach(c => c.remove());
+  list.forEach(t => { const c = el('button', 'chip ex'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; $('#task').focus(); }; $('#chips').append(c); });
+}
+function renderPresets() {
+  const box = $('#presets'); box.replaceChildren();
+  const lab = el('span', 'cap', 'תבניות:'); lab.style.margin = '0'; box.append(lab);
+  (INFO.profiles || []).forEach(pr => { const c = el('button', 'chip pre'); c.type = 'button'; c.textContent = pr.name; c.onclick = () => { fillProfile(pr); renderExamples(pr.examples || EXAMPLES); $('#biz').open = true; }; box.append(c); });
+  const blank = el('button', 'chip'); blank.type = 'button'; blank.textContent = 'ריק: אמלא בעצמי'; blank.onclick = () => { fillProfile({}); renderExamples(EXAMPLES); }; box.append(blank);
+}
+
+// ---------- רדאר טרנדים ----------
+$('#radar').onclick = async () => {
+  const btn = $('#radar'); if (btn.classList.contains('scan')) return; btn.classList.add('scan'); btn.querySelector('span').textContent = 'סורק את הרשת…';
+  const box = $('#ideas'); box.replaceChildren();
+  try {
+    const r = await fetch('/api/trends', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body({})) });
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || 'שגיאה');
+    d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; $('#form').requestSubmit(); }; c.append(b); box.append(c); });
+  } catch (e) { box.append(el('div', 'banner err', 'שגיאה: ' + esc(e.message))); }
+  btn.classList.remove('scan'); btn.querySelector('span').textContent = 'סרוק טרנדים עכשיו';
+};
+
+// ---------- תמונות reference ----------
+$('#refin').addEventListener('change', async e => {
+  for (const f of [...e.target.files].slice(0, 3 - REFS.length)) {
+    try {
+      const bmp = await createImageBitmap(f), k = Math.min(1, 768 / Math.max(bmp.width, bmp.height)), c = document.createElement('canvas');
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      REFS.push(c.toDataURL('image/jpeg', .8));
+    } catch { /* קובץ לא נתמך */ }
+  }
+  e.target.value = ''; drawRefs();
+});
+function drawRefs() { const t = $('#thumbs'); t.replaceChildren(); REFS.forEach((u, i) => { const d = el('div'); const im = el('img'); im.src = u; const b = el('button', null, '×'); b.type = 'button'; b.onclick = () => { REFS.splice(i, 1); drawRefs(); }; d.append(im, b); t.append(d); }); }
+
+// ---------- שיגור ----------
 $('#form').addEventListener('submit', async e => {
-  e.preventDefault();
+  e.preventDefault(); if (busy) return; busy = true;
+  saveProfile(); store.set('model', $('#model').value);
   const btn = $('#go'); btn.disabled = true; btn.textContent = 'הצוות עובד…';
   reset(); runStart = Date.now(); clearInterval(tick);
   tick = setInterval(() => { setStats(); const t = $('#ftm'); if (t && ST[FOCUS]?.status === 'working') t.textContent = fmt(Date.now() - ST[FOCUS].t0); }, 500);
   try {
-    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ task: $('#task').value, context: $('#ctx').value, apiKey: $('#apikey').value.trim(), provider: $('#provider').value, model: $('#model').value.trim() }) });
+    const res = await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body({ task: $('#task').value, refs: REFS })) });
     if (res.status === 401) { location.href = '/login'; return; }
+    if (!res.ok) throw new Error(res.status === 413 ? 'הבקשה גדולה מדי (תמונות reference)' : 'שגיאת שרת ' + res.status);
     const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '';
     for (;;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n')) >= 0) { const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (ln) handle(JSON.parse(ln)); } }
   } catch (err) { handle({ type: 'error', message: err.message }); }
-  clearInterval(tick); setStats(); btn.disabled = false; btn.textContent = 'שגר משימה';
+  clearInterval(tick); setStats(); ENERGY = 0; busy = false; btn.disabled = false; btn.textContent = 'שגר משימה';
 });
-$('#apikey').addEventListener('input', updateMode); $('#provider').addEventListener('change', updateMode);
+$('#apikey').addEventListener('input', updateMode);
 $('#task').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#form').requestSubmit(); } });
 init();
 </script>

@@ -12,5 +12,7 @@ services:
     envVars:
       - key: APP_PASSWORD
         sync: false
+      - key: BRAND_NAME
+        sync: false
       - key: NODE_VERSION
         value: "22"
