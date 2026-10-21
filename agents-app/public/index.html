@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<script>if (!/\/$/.test(location.pathname) && !/\.html?$/.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);</script>
+<title>צוות הסוכנים</title>
+<style>
+:root{--bg:#0a0c11;--bg2:#12151d;--card:#141821;--line:#262c3a;--ink:#eef0f6;--muted:#8d95a8;--gold:#e0b567;--ok:#59d39a;--err:#ff7a6b}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,Arial,sans-serif;line-height:1.55;overflow-x:hidden}
+#bg,#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#bg{z-index:-1}#fx{z-index:50}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(900px 500px at 85% -10%,#2a2113 0,transparent 60%),radial-gradient(700px 500px at 5% 20%,#13262b 0,transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 80px;position:relative}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
+.logo{font-family:Georgia,serif;letter-spacing:.14em;font-size:1.05rem;text-transform:uppercase}
+.logo small{display:block;font-family:inherit;letter-spacing:.02em;color:var(--muted);font-size:.78rem;text-transform:none}
+.sp{flex:1}
+.mode{padding:4px 12px;border-radius:99px;font-size:.78rem;border:1px solid var(--line);background:#ffffff08}
+.mode.live{color:var(--ok);border-color:#59d39a66;animation:glow 2.4s ease-in-out infinite}.mode.demo{color:var(--gold);border-color:#e0b56766}
+@keyframes glow{50%{box-shadow:0 0 14px #59d39a55}}
+.top a,.top button.lnk{font-size:.82rem;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit}
+.hero{font-size:clamp(1.7rem,4.4vw,2.6rem);margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+.hero span{background:linear-gradient(90deg,var(--gold),#ff8f6b 45%,#c58bf2 75%,#7fb3ff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:200% 0}}
+.sub{margin:0 0 14px;color:var(--muted);font-size:.95rem}
+.bar{display:flex;gap:10px;padding:8px;border-radius:18px;background:linear-gradient(var(--card),var(--card)) padding-box,linear-gradient(120deg,#e0b567,#5bc0be,#c58bf2,#e0b567) border-box;background-size:auto,300% 100%;border:1.5px solid transparent;animation:bd 8s linear infinite;box-shadow:0 12px 50px -20px #e0b56755}
+@keyframes bd{to{background-position:0 0,300% 0}}
+.bar textarea{flex:1;resize:none;height:56px;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:1.05rem;padding:15px 12px}
+.bar button{border:0;border-radius:12px;padding:0 28px;font:inherit;font-weight:800;color:#1a1305;background:linear-gradient(120deg,#f6d58a,#e0b567);cursor:pointer;white-space:nowrap;transition:transform .15s,box-shadow .2s}
+.bar button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px -6px #e0b567aa}
+.bar button:disabled{opacity:.55;cursor:wait}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0;align-items:center}
+.chip{font-size:.8rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer;font-family:inherit}
+.chip:hover{color:var(--ink);border-color:var(--gold)}
+.radar{display:inline-flex;align-items:center;gap:8px;color:#8fd16a;border-color:#8fd16a66;background:#8fd16a12;font-weight:700}
+.radar i{width:12px;height:12px;border-radius:50%;border:2px solid currentColor;position:relative}
+.radar.scan i::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;animation:ping 1s ease-out infinite}
+@keyframes ping{from{transform:scale(.5);opacity:1}to{transform:scale(1.6);opacity:0}}
+.ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.idea{padding:12px 14px;border-radius:14px;border:1px solid #8fd16a44;background:linear-gradient(#8fd16a10,#ffffff04);animation:pop .4s both}
+.idea b{display:block;margin-bottom:2px}.idea p{margin:0 0 8px;font-size:.8rem;color:var(--muted)}
+.idea button{font:inherit;font-size:.78rem;padding:4px 12px;border-radius:99px;border:1px solid #8fd16a88;background:transparent;color:#8fd16a;cursor:pointer}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}}
+details.cfg{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:#ffffff05;padding:10px 14px}
+details.cfg summary{cursor:pointer;color:var(--muted);font-size:.88rem}
+.cfggrid{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}
+label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px}
+input.f,textarea.f{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--ink);font:inherit}
+textarea.f{min-height:110px}
+.note{font-size:.78rem;color:var(--muted);margin:10px 0 0}
+.cfggrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.cfggrid2 .wide{grid-column:1/-1}
+.pre{border-color:#e0b56788;color:var(--gold)}
+.kit{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}.kit>div{padding:12px;border:1px dashed var(--line);border-radius:12px}.logoprev img{max-height:48px;max-width:140px;background:#ffffff14;padding:6px;border-radius:8px;margin-top:8px;display:block}
+.ctrl{display:flex;gap:14px;flex-wrap:wrap;align-items:end;margin-top:12px}.ctrl label{margin:0;font-size:.78rem;color:var(--muted)}.ctrl select{width:auto;max-width:100%;display:block;margin-top:4px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--ink);font:inherit}
+.lrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0;font-size:.8rem;color:var(--muted)}.lrow label{display:inline-flex;gap:6px;align-items:center;margin:0}.lrow select{padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--ink)}
+.stagewrap{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.stage{position:relative;width:min(100%,230px);margin:8px 0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(135deg,#e9dcc6,#b8a285);background-size:cover;background-position:center;touch-action:none;cursor:crosshair}
+.stage.real{border-color:var(--gold)}
+#stageLogo{position:absolute;transform:translate(-50%,-50%);cursor:grab;user-select:none;-webkit-user-drag:none;max-width:90%;filter:drop-shadow(0 1px 3px #0007);display:none}
+.dlrow{display:flex;gap:6px;align-items:center;margin-top:4px}.dlrow select{padding:2px;font-size:.7rem;width:auto;border:1px solid var(--line);border-radius:6px;background:var(--bg2);color:var(--ink)}.dlrow .btn{font-size:.7rem;padding:2px 8px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumbs div{position:relative}.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.thumbs button{position:absolute;top:-6px;inset-inline-end:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--err);color:#fff;cursor:pointer;line-height:1}
+.stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:28px 0 8px;font-size:.85rem;color:var(--muted)}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.prog{flex:1;min-width:160px;height:6px;border-radius:9px;background:#ffffff10;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0b567,#5bc0be,#c58bf2);transition:width .5s;box-shadow:0 0 12px #e0b567}
+.pipe{display:flex;align-items:flex-start;justify-content:space-between;padding:26px 0 8px}
+.node{position:relative;flex:none;width:92px;text-align:center;cursor:pointer;opacity:.5;transition:opacity .3s}
+.node.working,.node.done,.node.focus{opacity:1}
+.core{position:relative;width:66px;height:66px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:2px solid var(--line);color:var(--c);transition:box-shadow .3s,border-color .3s,transform .3s}
+.core svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.node.focus .core{transform:scale(1.07)}
+.node.working .core{border-color:var(--c);box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 18%,transparent),0 0 40px color-mix(in srgb,var(--c) 50%,transparent)}
+.node.working .core::before{content:"";position:absolute;inset:-9px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 70%,var(--c));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));animation:spin 1.1s linear infinite}
+.node.searching .core::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--c);animation:ping 1.2s ease-out infinite}
+.node.done .core{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
+.badge{position:absolute;top:-4px;inset-inline-end:-2px;width:24px;height:24px;border-radius:50%;background:var(--ok);color:#06210f;font-size:.8rem;font-weight:800;display:none;place-items:center;animation:pop .35s both}
+.node.done .badge{display:grid}
+.nm{font-weight:700;font-size:.86rem;line-height:1.2}
+.st{font-size:.74rem;color:var(--muted);min-height:1.1em}
+.node.working .st{color:var(--c)}
+.tk{font-size:.66rem;color:var(--muted);height:1.3em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:92px;opacity:.85}
+.link{position:relative;flex:1;height:2px;margin-top:33px;min-width:14px;background:repeating-linear-gradient(90deg,#ffffff22 0 6px,transparent 6px 12px)}
+.link .packet{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 14px 4px var(--pc,#e0b567);opacity:0}
+.link.flowing .packet{opacity:1;animation:flowx 1s linear infinite}
+.link .tag{position:absolute;top:-34px;inset-inline-start:50%;transform:translateX(50%);font-size:.68rem;white-space:nowrap;padding:2px 8px;border-radius:99px;background:#ffffff18;color:var(--ink);opacity:0;transition:opacity .3s;direction:ltr}
+.link.flowing .tag{opacity:1;z-index:3}
+.link.sent{background:var(--pc,#e0b567)}
+@keyframes flowx{from{inset-inline-start:-4%}to{inset-inline-start:100%}}
+@keyframes flowy{from{inset-block-start:-4%}to{inset-block-start:100%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sstrip{margin:6px 0 0;padding:10px 14px;border-radius:14px;border:1px solid #8fd16a33;background:#8fd16a0d;display:none}
+.sstrip.on{display:block;animation:pop .4s both}
+.sstrip .hd{font-size:.78rem;color:#8fd16a;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.sstrip .hd i{width:8px;height:8px;border-radius:50%;background:#8fd16a;animation:blink 1s steps(2) infinite}
+.sstrip.idle .hd i{animation:none;opacity:.4}
+.sc{display:inline-block;margin:3px 4px 3px 0;padding:3px 10px;border-radius:99px;font-size:.74rem;animation:pop .35s both}
+.sc.q{border:1px dashed #8fd16a88;color:#8fd16a}.sc.s{border:1px solid var(--line);background:#ffffff0c;color:var(--ink);text-decoration:none;direction:ltr}
+.banner{margin:14px 0 0;padding:12px 16px;border-radius:12px;font-weight:600;display:none}
+.banner.ok{display:block;background:#59d39a14;border:1px solid #59d39a55;color:var(--ok);animation:pop .4s both}
+.banner.err{display:block;background:#ff7a6b14;border:1px solid #ff7a6b55;color:var(--err)}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:10px}
+.panel{background:linear-gradient(var(--card),#11151d);border:1px solid var(--line);border-radius:18px;padding:18px}
+.fcard{border-top:3px solid var(--c,var(--gold))}
+.fh{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.fh .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.fh .ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fh h2{margin:0;font-size:1.2rem}
+.fh .tm{margin-inline-start:auto;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem}
+.pill{font-size:.72rem;padding:2px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.pill.on{color:var(--c);border-color:var(--c)}.pill.ok{color:var(--ok);border-color:var(--ok)}
+.desc{margin:6px 0 12px;font-size:.88rem;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0;font-size:.8rem;color:var(--muted)}
+.tool,.file{padding:2px 9px;border-radius:7px;background:#ffffff0c;border:1px solid var(--line);color:var(--ink);font-size:.74rem;direction:ltr}
+.file.out{border-color:var(--c);color:var(--c)}.tool.live{border-color:#8fd16a;color:#8fd16a}
+.todo{list-style:none;margin:10px 0;padding:0;font-size:.84rem;display:grid;gap:5px}
+.todo li{display:flex;gap:8px;color:var(--muted)}.todo li::before{content:"○";flex:none}
+.todo.done li{color:var(--ink)}.todo.done li::before{content:"✓";color:var(--ok)}
+.todo.run li::before{content:"◌";color:var(--c)}
+.cap{font-size:.72rem;color:var(--muted);margin-top:10px}
+pre.stream{white-space:pre-wrap;word-break:break-word;margin:8px 0 0;min-height:160px;max-height:340px;overflow:auto;background:#090b10;border:1px solid var(--line);border-radius:12px;padding:12px;font:.84rem/1.6 ui-monospace,Consolas,monospace;color:#d9deea}
+.caret{display:inline-block;width:8px;height:1em;vertical-align:-2px;background:var(--c);animation:blink .8s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.gal{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.gal figure{margin:0;width:150px;animation:pop .4s both}.gal img{width:150px;height:150px;object-fit:contain;background:#0006;border-radius:10px;border:1px solid var(--line);display:block}
+.gal figcaption{font-size:.68rem;color:var(--muted);direction:ltr;margin-top:3px;max-height:2.8em;overflow:hidden}
+.srclist{margin:8px 0 0;padding:0;list-style:none;font-size:.78rem}.srclist a{color:#8fd16a;direction:ltr;unicode-bidi:plaintext}
+#log{list-style:none;margin:0;padding:0;max-height:430px;overflow:auto;font-size:.8rem;font-family:ui-monospace,Consolas,monospace}
+#log li{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed #ffffff12;animation:in .25s}
+#log time{color:var(--muted);flex:none}#log b{flex:none}
+@keyframes in{from{opacity:0;transform:translateY(4px)}}
+.deliver{margin-top:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{padding:6px 14px;border-radius:9px;border:1px solid var(--line);background:#ffffff06;color:var(--muted);cursor:pointer;font:inherit;font-size:.85rem}
+.tab.on{color:var(--ink);border-color:var(--gold);background:#e0b56714}
+.tab.star{border-color:#e0b56788;color:var(--gold)}
+.acts{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.btn{padding:6px 14px;border-radius:9px;border:1px solid var(--line);background:#ffffff08;color:var(--ink);cursor:pointer;font:inherit;font-size:.82rem}
+.btn:hover{border-color:var(--gold)}
+.article{background:#fbf8f2;color:#2b2118;border-radius:16px;padding:28px clamp(18px,4vw,44px);max-width:760px;margin:0 auto;line-height:1.85;font-size:1.02rem;animation:pop .5s both}
+.article h1,.article h2,.article h3{font-family:Georgia,"Times New Roman",serif;line-height:1.3;margin:1.1em 0 .4em;color:#1d140c}
+.article h1{font-size:1.8rem;margin-top:0}.article h2{font-size:1.3rem}
+.article img{max-width:100%;border-radius:12px;display:block;margin:16px auto}
+.article ul,.article ol{padding-inline-start:1.3em}.article hr{border:0;border-top:1px solid #d9cfbf;margin:22px 0}
+.article a{color:#9a6b1f}.article p{margin:.7em 0}
+.next{display:none;margin-top:16px}.next.on{display:block;animation:pop .5s both}
+.next .cap{margin:0 0 8px;color:var(--gold)}
+.hist{position:fixed;inset:0;z-index:40;background:#000a;display:none;place-items:center}.hist.on{display:grid}
+.hist .box{width:min(560px,92vw);max-height:80vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.hist li{padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer;list-style:none}.hist li:hover{color:var(--gold)}
+@media(max-width:900px){
+ .grid{grid-template-columns:1fr}.cfggrid,.cfggrid2,.kit{grid-template-columns:1fr}
+ .pipe{flex-direction:column;align-items:stretch;padding:10px 0}
+ .node{width:auto;display:grid;grid-template-columns:60px 1fr;gap:14px;align-items:center;text-align:start}
+ .tk{max-width:none}
+ .core{margin:0;width:60px;height:60px}.core svg{width:28px;height:28px}
+ .link{flex:none;width:2px;height:34px;margin:0 29px;background:repeating-linear-gradient(180deg,#ffffff22 0 6px,transparent 6px 12px)}
+ .link .packet{top:auto;inset-inline-start:-4px}
+ .link.flowing .packet{animation:flowy 1s linear infinite}
+ .link .tag{top:6px;inset-inline-start:14px;transform:none}
+ .link.sent{background:var(--pc)}
+ .bar{flex-direction:column}.bar button{height:46px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#bg,#fx{display:none}}
+
+/* ---------- אשף שלבים ---------- */
+.stepper{display:flex;gap:6px;margin:22px 0 14px;counter-reset:s}
+.si{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);cursor:pointer;position:relative;background:none;border:0;font-family:inherit;padding:0}
+.si::before{content:attr(data-n);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--card);font-weight:700;font-size:.95rem;color:var(--muted);transition:all .25s}
+.si::after{content:"";position:absolute;top:17px;inset-inline-start:calc(50% + 22px);width:calc(100% - 44px);height:2px;background:var(--line)}
+.si:last-child::after{display:none}
+.si.done::before{content:"✓";background:var(--ok);border-color:var(--ok);color:#06210f}.si.done::after{background:var(--ok)}
+.si.cur::before{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 5px #e0b56722,0 0 22px #e0b56755}.si.cur{color:var(--ink);font-weight:700}
+.si.lock{cursor:not-allowed;opacity:.45}.si.lock::before{content:"🔒";font-size:.8rem}
+.step{background:linear-gradient(var(--card),#11151d);border:1px solid var(--line);border-radius:18px;padding:20px;animation:pop .35s both}
+.sh{margin:0 0 10px;font-size:1.35rem}
+.how{background:#e0b5670f;border:1px solid #e0b56744;border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:.92rem;line-height:1.6}
+.req{color:var(--err);font-style:normal;font-weight:700}
+label small{color:var(--muted);font-weight:400}
+.gate{margin-top:14px;background:#0d1017;border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.gh{font-weight:700;margin-bottom:6px}
+#gatelist{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px;font-size:.88rem}
+#gatelist li{display:flex;gap:8px;color:var(--err)}#gatelist li::before{content:"☐"}
+#gatelist li.ok{color:var(--ok)}#gatelist li.ok::before{content:"☑"}
+.nav{display:flex;gap:10px;justify-content:space-between}
+button.primary{padding:10px 26px;border:0;border-radius:12px;font:inherit;font-weight:800;color:#1a1305;background:linear-gradient(120deg,#f6d58a,#e0b567);cursor:pointer;transition:transform .15s,box-shadow .2s}
+button.primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px -6px #e0b567aa}
+button.primary:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6)}
+.taskbox{width:100%;min-height:96px;resize:vertical;padding:14px;border:1.5px solid #e0b56766;border-radius:14px;background:#0d1017;color:var(--ink);font:inherit;font-size:1.05rem}
+.sumbox{margin-top:12px;font-size:.85rem;color:var(--muted);line-height:1.8}.sumbox b{color:var(--ink)}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:12px 0}
+.plan{position:relative;text-align:start;padding:16px;border:2px solid var(--line);border-radius:16px;background:#0d1017;color:var(--ink);cursor:pointer;font:inherit;transition:all .2s}
+.plan:hover:not(:disabled){border-color:#e0b56788}.plan.sel{border-color:var(--gold);background:#e0b5670f;box-shadow:0 0 24px -8px #e0b567}
+.plan:disabled{opacity:.4;cursor:not-allowed}
+.plan .pt{font-weight:800;font-size:1.02rem}.plan .pp{font-size:1.7rem;font-weight:800;color:var(--gold);margin:4px 0}.plan .pp small{font-size:.8rem;color:var(--muted);font-weight:400}
+.plan ul{margin:6px 0 0;padding-inline-start:1.1em;font-size:.82rem;color:var(--muted);line-height:1.6}
+.plan .tag2{position:absolute;top:-10px;inset-inline-end:14px;background:var(--gold);color:#1a1305;font-size:.7rem;font-weight:800;padding:2px 10px;border-radius:99px}
+.acctbox,.keybox,.paybox{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:#0d1017}
+.acctbox .row2{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end}
+.codebox{margin-top:8px;padding:8px 12px;border:1px dashed var(--gold);border-radius:10px;font-family:ui-monospace,Consolas,monospace;font-size:.82rem;direction:ltr;word-break:break-all;color:var(--gold)}
+.warnbox{margin-top:8px;padding:8px 12px;border-radius:10px;background:#ff7a6b14;border:1px solid #ff7a6b55;color:var(--err);font-size:.85rem}
+.qbox{padding:14px;border:1px solid var(--line);border-radius:14px;background:#0d1017}
+.radio{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:.95rem;color:var(--ink);cursor:pointer}
+.runbar{display:flex;gap:12px;align-items:center;margin:6px 0 0}
+#acct{color:var(--gold);border-color:#e0b56766}
+@media(max-width:900px){.si{font-size:.66rem}.acctbox .row2{grid-template-columns:1fr}.nav{flex-direction:column-reverse}.nav button{width:100%}}
+
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas><canvas id="fx"></canvas>
+<div class="wrap">
+  <div class="top">
+    <div class="logo"><span id="brand">…</span><small>צוות 8 הסוכנים · OpenAI</small></div>
+    <span class="sp"></span>
+    <span id="acct" class="mode" hidden></span>
+    <span id="mode" class="mode">טוען…</span>
+    <button class="lnk" id="histBtn" type="button">היסטוריה</button>
+  </div>
+
+  <h1 class="hero">צוות סוכנים <span>לכל עסק</span></h1>
+  <p class="sub">עוברים שלב אחר שלב. בכל שלב כתוב מה צריך לעשות, ואי אפשר להמשיך עד שמסמנים או ממלאים את הכול.</p>
+
+  <nav class="stepper" id="stepper" aria-label="שלבים"></nav>
+
+  <section class="wiz" id="wiz">
+    <!-- שלב 1 -->
+    <article class="step" id="st1" hidden>
+      <h2 class="sh">1. ספרו לנו על העסק</h2>
+      <div class="how"><b>מה עושים כאן:</b> בחרו תבנית שדומה לעסק שלכם (או התחילו מאפס), ואז מלאו את ארבעת השדות המסומנים בכוכבית. כל הסוכנים יעבדו לפי מה שתכתבו.</div>
+      <div class="chips" id="presets"></div>
+      <div class="cfggrid2">
+        <div><label for="pName">שם העסק <i class="req">*</i></label><input class="f" id="pName" placeholder="למשל: סטודיו נועה"></div>
+        <div><label for="pType">תחום / סוג העסק <i class="req">*</i></label><input class="f" id="pType" placeholder="למשל: סטודיו לעיצוב פנים"></div>
+        <div class="wide"><label for="pAbout">מה אתם מציעים <i class="req">*</i></label><textarea class="f" id="pAbout" style="min-height:70px" placeholder="שירותים, מה מייחד אתכם"></textarea></div>
+        <div><label for="pAud">קהל יעד <i class="req">*</i></label><input class="f" id="pAud" placeholder="מי הלקוחות שלכם"></div>
+        <div><label for="pTone">טון וסגנון <small>(לא חובה)</small></label><input class="f" id="pTone" placeholder="חם, מקצועי, קליל, יוקרתי…"></div>
+        <div><label for="pLang">שפה <small>(לא חובה)</small></label><input class="f" id="pLang" placeholder="עברית, אנגלית, רוסית…"></div>
+        <div class="wide"><label for="pRules">כללים וגבולות שחובה לכבד <small>(לא חובה)</small></label><textarea class="f" id="pRules" style="min-height:70px" placeholder="למשל: בלי מחירים, בלי הבטחות, בלי להזכיר מתחרים"></textarea></div>
+      </div>
+      <details style="margin-top:10px"><summary class="note" style="cursor:pointer">ההקשר המלא שהסוכנים מקבלים (נבנה אוטומטית, אפשר לערוך ידנית)</summary><textarea class="f" id="ctx" style="margin-top:8px" placeholder="יתמלא אוטומטית מהשדות למעלה"></textarea></details>
+    </article>
+
+    <!-- שלב 2 -->
+    <article class="step" id="st2" hidden>
+      <h2 class="sh">2. בחרו איך עובדים</h2>
+      <div class="how"><b>מה עושים כאן:</b> <span id="how2"></span></div>
+      <div id="acctBox"></div>
+      <div class="plans" id="planCards"></div>
+      <div id="payBox"></div>
+      <div id="keyBox" class="keybox" hidden>
+        <b>מפתח OpenAI שלכם</b>
+        <div class="note" style="margin:4px 0 8px">המפתח נשמר רק בלשונית הזו ונשלח בזמן הרצה. הוא לא נשמר אצלנו. <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">איפה מקבלים מפתח</a></div>
+        <div class="cfggrid">
+          <div><label for="apikey">מפתח OpenAI API <i class="req">*</i></label><input class="f" id="apikey" type="password" autocomplete="off" placeholder="sk-..." dir="ltr"></div>
+          <div><label for="model">מודל <small>(לא חובה)</small></label><input class="f" id="model" dir="ltr" placeholder="gpt-4.1"></div>
+        </div>
+        <div style="margin-top:8px"><button class="btn" id="chk" type="button">בדוק חיבור</button> <span class="note">חובה: הבדיקה חינמית ומוודאת שהמפתח עובד.</span></div>
+        <ul id="chkout" class="srclist" style="margin-top:10px"></ul>
+      </div>
+    </article>
+
+    <!-- שלב 3 -->
+    <article class="step" id="st3" hidden>
+      <h2 class="sh">3. המותג שלכם</h2>
+      <div class="how"><b>מה עושים כאן:</b> עונים על שתי שאלות. לוגו: מוטבע על התמונות במקום שתבחרו. תמונות reference: עוזרות ליצור תמונות שנראות כמו העסק שלכם.</div>
+      <div class="kit">
+        <div class="qbox"><b>האם יש לכם לוגו? <i class="req">*</i></b>
+          <label class="radio"><input type="radio" name="logoChoice" value="none"> אין לי לוגו כרגע</label>
+          <label class="radio"><input type="radio" name="logoChoice" value="has"> יש לי לוגו</label>
+          <div id="logoPanel" hidden>
+            <div class="note" style="margin:6px 0">הלוגו לא נשלח למודל. הוא מוטבע על התמונות בדפדפן, אחרי שהמערכת מסירה את הרקע ומשאירה את האותיות.</div>
+            <input type="file" id="logoin" accept="image/*"> <button class="btn" id="logoClear" type="button" style="font-size:.72rem;padding:2px 8px">הסר לוגו</button>
+            <div class="lrow"><label><input type="checkbox" id="lrm" checked> אותיות בלבד (הסר רקע)</label><label>רגישות <input type="range" id="ltol" min="8" max="140" value="55"></label><label>צבע <select id="ltint"><option value="orig">מקורי</option><option value="white">לבן</option><option value="black">שחור</option></select></label></div>
+            <div class="lrow"><label><input type="checkbox" id="logoOn" checked> הטבע על התמונות</label><label>גודל <input type="range" id="lw" min="5" max="60" value="20"></label></div>
+            <div class="note" style="margin:4px 0">גררו את הלוגו או לחצו על התמונה כדי לבחור איפה הוא יופיע.</div>
+            <div class="stagewrap"><div class="stage" id="stage"><img id="stageLogo" alt=""></div></div>
+          </div>
+        </div>
+        <div class="qbox"><b>האם יש תמונות reference לסגנון? <i class="req">*</i></b>
+          <label class="radio"><input type="radio" name="refChoice" value="none"> בלי reference</label>
+          <label class="radio"><input type="radio" name="refChoice" value="has"> יש לי תמונות (עד 3)</label>
+          <div id="refPanel" hidden>
+            <div class="note" style="margin:6px 0">תמונות של העסק, המוצרים או הסגנון הרצוי. המעצב הוויזואלי מנתח אותן ומתאים אליהן את התמונות.</div>
+            <input type="file" id="refin" accept="image/*" multiple><div class="thumbs" id="thumbs"></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- שלב 4 -->
+    <article class="step" id="st4" hidden>
+      <h2 class="sh">4. איפה מפרסמים, ואיך מלווים</h2>
+      <div class="how"><b>מה עושים כאן:</b> בחרו לאיזו רשת התמונות מיועדות (הגודל והחיתוך מותאמים אוטומטית), ובחרו אם המערכת תספר בקול מה כל סוכן עושה.</div>
+      <div class="ctrl">
+        <label>פורמט התמונות לפי רשת <i class="req">*</i><select id="fmt"></select></label>
+        <label>הקראה בקול <i class="req">*</i><select id="narr"><option value="" disabled selected>בחרו…</option><option value="off">בלי הקראה</option><option value="browser">הקראה בדפדפן (חינם)</option><option value="openai">הקראה איכותית (OpenAI, במסלול מפתח עצמי)</option></select></label>
+        <label id="voiceWrap" hidden>קול<select id="voice"><option>coral</option><option>nova</option><option>alloy</option><option>shimmer</option><option>sage</option><option>onyx</option></select></label>
+      </div>
+      <p class="note" id="narrNote"></p>
+    </article>
+
+    <!-- שלב 5 -->
+    <article class="step" id="st5" hidden>
+      <h2 class="sh">5. מה המשימה?</h2>
+      <div class="how"><b>מה עושים כאן:</b> כתבו מה הצוות צריך להכין (לפחות כמה מילים), או בחרו רעיון מוכן. אחרי זה לוחצים "שגר משימה".</div>
+      <textarea id="task" class="taskbox" placeholder="למשל: פוסט שמציג את השירות החדש שלנו"></textarea>
+      <div class="chips" id="chips"><button class="chip radar" id="radar" type="button"><i></i><span>סרוק טרנדים עכשיו</span></button></div>
+      <div class="ideas" id="ideas"></div>
+      <div class="sumbox" id="sumbox"></div>
+    </article>
+
+    <div class="gate" id="gate">
+      <div class="gh">כדי להמשיך:</div><ul id="gatelist"></ul>
+      <div class="nav"><button class="btn" id="back" type="button">חזרה</button><button class="primary" id="next" type="button">המשך לשלב הבא</button></div>
+    </div>
+  </section>
+
+  <section id="runview" hidden>
+    <div class="runbar"><button class="btn" id="again" type="button" disabled>משימה חדשה</button><span class="note" id="runnote"></span></div>
+    <div class="stats">
+      <span>סוכנים <b id="sAg">0/8</b></span><span>קבצים <b id="sFi">0/8</b></span><span>מקורות <b id="sSo">0</b></span><span>תווים <b id="sCh">0</b></span><span>זמן <b id="sTm">0:00</b></span>
+      <div class="prog"><i id="prog"></i></div>
+    </div>
+    <div class="pipe" id="pipe" aria-label="צוות הסוכנים"></div>
+    <div class="sstrip idle" id="sstrip"><div class="hd"><i></i><span id="shd">חיפוש חי ברשת</span></div><div id="schips"></div></div>
+    <div class="banner" id="banner"></div>
+
+    <div class="grid">
+      <article class="panel fcard" id="focus"></article>
+      <aside class="panel"><div class="cap" style="margin:0 0 8px">יומן פעילות חי</div><ul id="log"><li style="color:var(--muted)">הפעילות תופיע כאן אחרי שיגור משימה.</li></ul></aside>
+    </div>
+
+    <section class="panel deliver" id="deliver" hidden>
+      <div class="cap" style="margin:0 0 8px">התוצרים</div>
+      <div class="tabs" id="tabs"></div>
+      <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dlHtml">הורדת המאמר (HTML)</button><button class="btn" id="dl">הורדת הכול (md)</button></div>
+      <div id="article" class="article" hidden></div>
+      <pre class="stream" id="view" style="min-height:120px" hidden></pre>
+      <div class="gal" id="dgal"></div>
+    </section>
+
+    <section class="panel next" id="next2"><div class="cap">המנהל מציע להמשך</div><div class="chips" id="nextchips"></div></section>
+  </section>
+</div>
+
+<div class="hist" id="hist"><div class="box"><div class="cap" style="margin:0 0 8px">משימות קודמות (נשמרות בדפדפן הזה)</div><ul id="histlist" style="margin:0;padding:0"></ul><button class="btn" id="histClose" style="margin-top:12px">סגירה</button></div></div>
+
+<script src="crew-engine.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const ICONS = {
+  orchestrator: '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+  researcher: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+  writer: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
+  editor: '<circle cx="12" cy="12" r="8"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/>',
+  publisher: '<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-8-8-4z"/>',
+  chen: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',
+  yael: '<path d="M6 4h9l3 3v13H6z"/><path d="M9 11h6M9 15h6"/>',
+  yuval: '<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 18l5-5 4 4 2-2 3 3"/>'
+};
+const svg = id => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id] || ''}</svg>`;
+const EXAMPLES = ['פוסט היכרות שמציג את העסק ואת השירות הראשי שלנו', 'מאמר שעונה על השאלה שלקוחות שואלים הכי הרבה', 'סדרת סטוריז: 3 דברים שכדאי לדעת לפני שמתחילים'];
+// שמות מקצועיים להקראה (ללא שמות פרטיים)
+const HEN = { orchestrator: 'מנהל התוכן', chen: 'חוקר הרשת', researcher: 'חוקר התוכן', writer: 'הקופירייטר', yael: 'עורך הסגנון', yuval: 'המעצב הוויזואלי', editor: 'העורך הראשי', publisher: 'מנהל ההפצה' };
+const HTO = { orchestrator: 'למנהל התוכן', chen: 'לחוקר הרשת', researcher: 'לחוקר התוכן', writer: 'לקופירייטר', yael: 'לעורך הסגנון', yuval: 'למעצב הוויזואלי', editor: 'לעורך הראשי', publisher: 'למנהל ההפצה' };
+const FEM = {};
+const SAY_START = {
+  orchestrator: 'מנהל התוכן מתחיל. הוא הופך את הבקשה לבריף: מגדיר מטרה, קהל ומסר מרכזי.',
+  chen: 'חוקר הרשת יוצא לחפש. הוא מחפש מקורות עדכניים ואמינים לנושא.',
+  researcher: 'חוקר התוכן עובד עכשיו. הוא אוסף עובדות ומאמת אותן מול מקורות.',
+  writer: 'הקופירייטר כותב את הטיוטה לפי הבריף והמחקר.',
+  yael: 'עורך הסגנון משכתב את הטקסט בקול של העסק, ומסמן איפה צריכה להיות תמונה.',
+  yuval: 'המעצב הוויזואלי מכין את התמונות ומתאים אותן לסגנון המותג ולפורמט שבחרת.',
+  editor: 'העורך הראשי מלטש את הגרסה הסופית ובודק אותה מול הבריף והמחקר.',
+  publisher: 'מנהל ההפצה מכין התאמות לרשתות חברתיות ורשימת בדיקה לפני פרסום.'
+};
+
+let STATIC = false, EIO = null, API_BASE = '', TOKEN = '', ACCOUNT = null, KEY_OK = false, CHOICE = '', PAID_POLL = null;
+let LOGO = '', LOGO_SRC = '', LCFG = { rm: true, tol: 55, tint: 'orig', x: .86, y: .9, w: .2, on: true };
+let INFO = { agents: [], live: false, formats: {} }, ST = {}, FOCUS = null, FILES = [], IMGS = {}, SRC = {}, REFS = [], runStart = 0, tick = null, TAB = 'article', NEXT = [], busy = false, ENERGY = 0;
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const A = id => INFO.agents.find(a => a.id === id);
+const dom = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// ---------- רקע חי ----------
+(function bg() {
+  const c = $('#bg'), x = c.getContext('2d'); let W, H, P = [], mx = .5, my = .5;
+  const size = () => { W = c.width = innerWidth; H = c.height = innerHeight; P = Array.from({ length: Math.min(70, Math.floor(W / 18)) }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3, r: Math.random() * 1.6 + .6 })); };
+  addEventListener('resize', size); size();
+  addEventListener('pointermove', e => { mx = e.clientX / W; my = e.clientY / H; });
+  (function loop() {
+    x.clearRect(0, 0, W, H);
+    const sp = 1 + ENERGY * 2.2;
+    for (const p of P) { p.x += p.vx * sp + (mx - .5) * .15; p.y += p.vy * sp + (my - .5) * .15; if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < 0) p.y = H; if (p.y > H) p.y = 0; }
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) { const dx = P[i].x - P[j].x, dy = P[i].y - P[j].y, d = dx * dx + dy * dy; if (d < 16000) { x.strokeStyle = `rgba(224,181,103,${(1 - d / 16000) * (.12 + ENERGY * .22)})`; x.beginPath(); x.moveTo(P[i].x, P[i].y); x.lineTo(P[j].x, P[j].y); x.stroke(); } }
+    for (const p of P) { x.fillStyle = `rgba(255,255,255,${.25 + ENERGY * .4})`; x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.3); x.fill(); }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const c = $('#fx'), x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#e0b567', '#8fd16a', '#c58bf2', '#f28bb6', '#7fb3ff', '#ffb347'];
+  const P = Array.from({ length: 150 }, () => ({ x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35, vx: (Math.random() - .5) * 14, vy: -Math.random() * 13 - 3, s: Math.random() * 7 + 3, c: cols[Math.floor(Math.random() * cols.length)], r: Math.random() * 6 }));
+  const t0 = performance.now();
+  (function f(t) {
+    x.clearRect(0, 0, c.width, c.height);
+    for (const p of P) { p.vy += .35; p.x += p.vx; p.y += p.vy; p.r += .2; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore(); }
+    if (t - t0 < 2800) requestAnimationFrame(f); else x.clearRect(0, 0, c.width, c.height);
+  })(t0);
+}
+
+// ---------- markdown בטוח ----------
+function md(src, imgs) {
+  const inline = t => esc(t)
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (m, alt) => { const n = (/(\d+)\s*$/.exec(alt) || [])[1]; return imgs[n] ? `<img src="${imgs[n]}" alt="${alt}">` : `<em>[${alt}]</em>`; })
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  let out = '', list = null;
+  const close = () => { if (list) { out += `</${list}>`; list = null; } };
+  for (const raw of src.replace(/\r/g, '').split('\n')) {
+    const l = raw.trim(); let m;
+    if (!l) { close(); continue; }
+    if ((m = /^(#{1,3})\s+(.*)$/.exec(l))) { close(); out += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
+    else if (/^---+$/.test(l)) { close(); out += '<hr>'; }
+    else if ((m = /^[-*]\s+(.*)$/.exec(l))) { if (list !== 'ul') { close(); out += '<ul>'; list = 'ul'; } out += `<li>${inline(m[1])}</li>`; }
+    else if ((m = /^\d+\.\s+(.*)$/.exec(l))) { if (list !== 'ol') { close(); out += '<ol>'; list = 'ol'; } out += `<li>${inline(m[1])}</li>`; }
+    else { close(); out += /^!\[/.test(l) ? inline(l) : `<p>${inline(l)}</p>`; }
+  }
+  close(); return out;
+}
+const imgMap = () => Object.fromEntries((IMGS.yuval || []).map(i => [i.n, i.shown || i.url]));
+
+// ---------- חיבור לשרת, מצב סטטי וחשבון ----------
+class ApiErr extends Error { constructor(code, data) { super(code); this.code = code; this.data = data || {}; } }
+const urlOf = p => (API_BASE ? API_BASE + '/' + p : p);
+const authHdr = () => (TOKEN ? { authorization: 'Bearer ' + TOKEN } : {});
+const post = (p, b) => fetch(urlOf(p), { method: 'POST', headers: { 'content-type': 'application/json', ...authHdr() }, body: JSON.stringify(b) });
+async function apiJson(r) { let d = {}; try { d = await r.json(); } catch { /* ריק */ } if (!r.ok) throw new ApiErr(d.error || 'http_' + r.status, d); return d; }
+const scfg = b => ({ live: Boolean(b.apiKey), key: b.apiKey, model: b.model || CrewEngine.DEFAULT_MODEL, base: INFO.base || 'https://api.openai.com' });
+async function readNdjson(res, onEv) {
+  const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '';
+  for (;;) { const { done, value } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf('\n')) >= 0) { const ln = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (ln) onEv(JSON.parse(ln)); } }
+}
+const API = {
+  async run(b, onEv) {
+    if (STATIC) return CrewEngine.runCrew(b, onEv, EIO, scfg(b));
+    const res = await post('api/run', b); if (!res.ok) await apiJson(res);
+    await readNdjson(res, onEv);
+  },
+  async trends(b) { return STATIC ? CrewEngine.trends(b, EIO, scfg(b)) : apiJson(await post('api/trends', b)); },
+  async check(b) { return STATIC ? CrewEngine.checkConn(scfg(b)) : apiJson(await post('api/check', b)); },
+  async tts(b, text) {
+    if (STATIC) return new Blob([await CrewEngine.tts(scfg(b), text, { voice: b.voice, model: b.ttsModel })], { type: 'audio/mpeg' });
+    const r = await post('api/tts', { ...b, text }); if (!r.ok) await apiJson(r); return r.blob();
+  },
+  register: async b => apiJson(await post('api/account/register', b)),
+  login: async token => apiJson(await post('api/account/login', { token })),
+  me: async () => apiJson(await fetch(urlOf('api/account/me'), { headers: authHdr() })),
+  checkout: async plan => apiJson(await post('api/billing/checkout', { plan })),
+  cancelReq: async () => apiJson(await post('api/billing/cancel-request', {}))
+};
+async function loadInfo() {
+  let cfg = {};
+  try { const r = await fetch('config.json'); if (r.ok && (r.headers.get('content-type') || '').includes('json')) cfg = await r.json(); } catch { /* אין */ }
+  API_BASE = String(cfg.apiBase || '').replace(/\/$/, '');
+  try {
+    const r = await fetch(urlOf('api/agents'));
+    if (r.status === 401) { location.href = '/login'; return null; }
+    if (r.ok && (r.headers.get('content-type') || '').includes('json')) return await r.json();
+  } catch { /* אין שרת */ }
+  if (API_BASE) throw new Error('שרת המנויים לא זמין כרגע');
+  STATIC = true; // אין שרת: הדפדפן מדבר ישירות עם OpenAI
+  const [agents, profiles] = await Promise.all(['agents.json', 'profiles.json'].map(f => fetch(f).then(r => r.json())));
+  const ag = CrewEngine.buildAgents(agents);
+  EIO = { agents: ag, defaultCtx: cfg.defaultContext || '', brand: cfg.brand,
+    putFile() {}, putImage(rel, p, mime) { return p.b64 ? `data:${mime};base64,${p.b64}` : `data:${mime};charset=utf-8,${encodeURIComponent(p.svg)}`; } };
+  return { brand: cfg.brand || 'Agent Crew', auth: false, live: false, model: null, defaultContext: cfg.defaultContext || '', profiles, formats: CrewEngine.FORMATS, agents: CrewEngine.meta(ag), base: cfg.base };
+}
+
+// ---------- אתחול ----------
+async function init() {
+  try { INFO = await loadInfo(); } catch (e) { $('#mode').textContent = e.message; return; }
+  if (!INFO) return;
+  INFO.formats = INFO.formats || CrewEngine.FORMATS;
+  TOKEN = store.get('crew_token') || '';
+  loadProfile(); renderPresets(); applyBrand();
+  if (INFO.auth) { const a = el('a', null, 'התנתקות'); a.href = '/logout'; $('.top').append(a); }
+  try { const k = sessionStorage.getItem('etel_key'); if (k) $('#apikey').value = k; } catch {}
+  $('#model').value = store.get('model') || '';
+  renderFormats(); loadNarr(); renderExamples(EXAMPLES);
+  await loadKit(); applyChoices();
+  CHOICE = store.get('planChoice') || '';
+  if (INFO.accounts && TOKEN) await refreshAccount();
+  normalizeChoice(); updateMode(); reset(); renderPlan();
+  const paid = new URLSearchParams(location.search).get('paid');
+  if (paid) { history.replaceState(null, '', location.pathname); }
+  show(paid === '1' ? 2 : maxStep());
+  if (paid === '1') startPaidPoll();
+}
+const PLAN_LABEL = { demo: 'הדגמה', trial: 'ניסיון חינם', own: 'מפתח OpenAI משלך', managed: 'המפתח של המערכת', server: 'מפתח השרת' };
+function updateMode() {
+  const m = $('#mode'); const live = CHOICE && CHOICE !== 'demo';
+  m.className = 'mode ' + (live ? 'live' : 'demo');
+  m.textContent = (!CHOICE ? 'טרם נבחר מסלול' : CHOICE === 'demo' ? 'מצב הדגמה · תוכן לדוגמה' : `מצב חי · ${PLAN_LABEL[CHOICE]}`) + (STATIC ? ' · גרסה סטטית' : '');
+  try { sessionStorage.setItem('etel_key', $('#apikey').value.trim()); } catch {}
+}
+const keyOf = () => (CHOICE === 'own' ? $('#apikey').value.trim() : '');
+const body = extra => ({ apiKey: keyOf(), model: CHOICE === 'own' ? $('#model').value.trim() : '', context: $('#ctx').value, businessName: $('#pName').value.trim(), format: $('#fmt').value, voice: $('#voice').value, demo: CHOICE === 'demo', ...extra });
+
+function reset() {
+  ST = {}; FILES = []; IMGS = {}; SRC = {}; NEXT = []; TAB = 'article'; ENERGY = 0;
+  INFO.agents.forEach(a => ST[a.id] = { status: 'idle', text: '', ms: 0, t0: 0 });
+  const pipe = $('#pipe'); pipe.replaceChildren();
+  INFO.agents.forEach((a, i) => {
+    const n = el('div', 'node', `<div class="core" style="--c:${a.color}">${svg(a.id)}<span class="badge">✓</span></div><div><div class="nm">${a.title}</div><div class="st">ממתין</div><div class="tk"></div></div>`);
+    n.dataset.id = a.id; n.style.setProperty('--c', a.color); n.onclick = () => setFocus(a.id); pipe.append(n);
+    if (i < INFO.agents.length - 1) { const l = el('div', 'link', '<span class="packet"></span><span class="tag"></span>'); l.dataset.i = i; l.style.setProperty('--pc', a.color); pipe.append(l); }
+  });
+  const first = el('li', null, 'הפעילות תופיע כאן אחרי שיגור משימה.'); first.style.color = 'var(--muted)'; $('#log').replaceChildren(first);
+  $('#deliver').hidden = true; $('#banner').className = 'banner'; $('#next2').classList.remove('on'); $('#sstrip').className = 'sstrip idle'; $('#schips').replaceChildren(); $('#shd').textContent = 'חיפוש חי ברשת';
+  setStats(); setFocus(INFO.agents[0].id);
+}
+function setStats() {
+  const done = Object.values(ST).filter(s => s.status === 'done').length, N = INFO.agents.length;
+  $('#sAg').textContent = `${done}/${N}`; $('#sFi').textContent = `${FILES.length}/${N}`; $('#prog').style.width = (done / N * 100) + '%';
+  $('#sSo').textContent = Object.values(SRC).reduce((a, b) => a + b.length, 0);
+  $('#sCh').textContent = Object.values(ST).reduce((a, s) => a + (s.text || '').length, 0).toLocaleString('he-IL');
+  $('#sTm').textContent = runStart ? fmt(Date.now() - runStart) : '0:00';
+}
+const nodeEl = id => document.querySelector(`.node[data-id="${id}"]`), linkEl = i => document.querySelector(`.link[data-i="${i}"]`);
+function setFocus(id) { FOCUS = id; document.querySelectorAll('.node').forEach(n => n.classList.toggle('focus', n.dataset.id === id)); renderFocus(); }
+
+function renderFocus() {
+  const a = A(FOCUS), s = ST[FOCUS], box = $('#focus');
+  box.style.setProperty('--c', a.color);
+  const status = s.status === 'working' ? ['עובד עכשיו', 'on'] : s.status === 'done' ? ['הושלם', 'ok'] : ['ממתין', ''];
+  const ins = a.inputs.length ? a.inputs.map(id => `<span class="file">מ${A(id).title}</span>`).join('') : '<span class="file">בקשת המשתמש</span>';
+  const todo = s.status === 'done' ? 'todo done' : s.status === 'working' ? 'todo run' : 'todo';
+  const tools = a.tools.map(t => `<span class="tool">${esc(t)}</span>`).join('') + (a.search ? '<span class="tool live">web_search חי</span>' : '');
+  box.innerHTML = `<div class="fh"><div class="ico">${svg(a.id)}</div><h2>${a.title}</h2><span class="pill ${status[1]}">${status[0]}</span><span class="tm" id="ftm">${s.status === 'working' ? fmt(Date.now() - s.t0) : s.ms ? (s.ms / 1000).toFixed(1) + ' ש׳' : ''}</span></div>
+  <p class="desc">${esc(a.description)}</p>
+  <div class="row">כלים: ${tools}</div><div class="row">מקבל: ${ins}</div><div class="row">מוציא: <span class="file out">${esc(a.out)}</span></div>
+  <ul class="${todo}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+  <div class="cap">מתוך קובץ ההגדרה של הסוכן. הרשימה מסומנת כשהסוכן מסיים.</div>
+  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>${s.style ? `<div class="cap" style="color:var(--gold)">ניתוח ה-reference של המעצב</div><pre class="stream" style="min-height:0">${esc(s.style)}</pre>` : ''}`;
+  const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'עדיין לא התחיל.' : '');
+  if (s.status === 'working') pre.append(el('span', 'caret'));
+  pre.scrollTop = pre.scrollHeight;
+  const sl = $('#srcl'); (SRC[FOCUS] || []).forEach(x => sl.append(el('li', null, `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>`)));
+  renderGallery($('#gal'), FOCUS);
+}
+function downloadUrl(name, url) { const a = el('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); }
+function renderGallery(box, id) {
+  box.replaceChildren();
+  (IMGS[id] || []).forEach(im => {
+    const f = el('figure'), i = el('img'); i.src = im.shown || im.url; i.alt = `תמונה ${im.n}`;
+    const row = el('div', 'dlrow'), sel = el('select', 'f');
+    Object.entries(INFO.formats).forEach(([k, v]) => { const o = el('option'); o.value = k; o.textContent = k; o.title = v.label; if (k === im.ratio) o.selected = true; sel.append(o); });
+    const b = el('button', 'btn', 'הורדה'); b.type = 'button';
+    b.onclick = async () => { try { downloadUrl(`image-${im.n}-${sel.value.replace(':', 'x')}.png`, await compose(im.url, sel.value)); } catch { b.textContent = 'שגיאה'; } };
+    row.append(sel, b); f.append(i, el('figcaption', null, esc(im.prompt)), row); box.append(f);
+  });
+}
+
+function log(id, msg) {
+  const ul = $('#log'); if (ul.firstChild && !ul.firstChild.querySelector('time')) ul.replaceChildren();
+  const a = id ? A(id) : null;
+  ul.append(el('li', null, `<time>${fmt(Date.now() - runStart)}</time><b style="color:${a ? a.color : 'var(--ink)'}">${a ? a.title : 'מערכת'}</b><span>${esc(msg)}</span>`)); ul.scrollTop = ul.scrollHeight;
+}
+const short = p => p.split('/').slice(-2).join('/');
+let tkPending = false;
+function ticker(id) { if (tkPending) return; tkPending = true; requestAnimationFrame(() => { tkPending = false; const n = nodeEl(id); if (n) n.querySelector('.tk').textContent = (ST[id].text || '').replace(/\s+/g, ' ').slice(-34); }); }
+function chip(cls, html, href) { const c = href ? el('a', 'sc ' + cls, html) : el('span', 'sc ' + cls, html); if (href) { c.href = href; c.target = '_blank'; c.rel = 'noopener noreferrer'; } $('#schips').append(c); }
+
+// ---------- הקראה בקול ----------
+const NARR = { mode: 'off', q: [], busy: false, warned: false, srcSaid: {} };
+function loadNarr() {
+  NARR.mode = store.get('narr') || 'off'; $('#narr').value = NARR.mode; $('#voice').value = store.get('voice') || 'coral'; $('#voiceWrap').hidden = NARR.mode !== 'openai';
+}
+function say(text, minor) {
+  if (NARR.mode === 'off') return;
+  if (minor && NARR.q.length > 0) return;       // פרטים משניים לא נערמים
+  NARR.q.push(text); if (NARR.q.length > 3) NARR.q.splice(0, NARR.q.length - 3);
+  pump();
+}
+async function pump() {
+  if (NARR.busy) return; NARR.busy = true;
+  while (NARR.q.length && NARR.mode !== 'off') {
+    const t = NARR.q.shift();
+    try { await (NARR.mode === 'openai' ? speakOpenAI(t) : speakBrowser(t)); }
+    catch (e) {
+      if (NARR.mode === 'openai') { if (!NARR.warned) { NARR.warned = true; log(null, 'הקראה דרך OpenAI נכשלה (' + String(e.message || e).slice(0, 80) + '). עוברת להקראת הדפדפן.'); } NARR.mode = 'browser'; $('#narr').value = 'browser'; await speakBrowser(t).catch(() => {}); }
+    }
+  }
+  NARR.busy = false;
+}
+function speakBrowser(t) {
+  return new Promise(res => {
+    if (!('speechSynthesis' in window)) { res(); return; }
+    const u = new SpeechSynthesisUtterance(t); u.lang = 'he-IL'; u.rate = 1.02;
+    const v = speechSynthesis.getVoices().find(v => /^he/i.test(v.lang)); if (v) u.voice = v;
+    else if (!NARR.warned) { NARR.warned = true; log(null, 'לא נמצא קול עברי בדפדפן. אפשר לבחור הקראה דרך OpenAI בהגדרות.'); }
+    const done = () => res(); u.onend = done; u.onerror = done; speechSynthesis.speak(u); setTimeout(done, 25000);
+  });
+}
+async function speakOpenAI(t) {
+  const blob = await API.tts(body({}), t), url = URL.createObjectURL(blob), a = new Audio(url);
+  try { await new Promise((res, rej) => { a.onended = res; a.onerror = () => rej(new Error('audio')); a.play().catch(rej); }); } finally { URL.revokeObjectURL(url); }
+}
+$('#narr').addEventListener('change', () => {
+  NARR.mode = $('#narr').value; NARR.q = []; NARR.warned = false; store.set('narr', NARR.mode); $('#voiceWrap').hidden = NARR.mode !== 'openai';
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  if (NARR.mode !== 'off') say('ההקראה פועלת. אני אספר לך מה כל סוכן עושה בזמן אמת.');
+});
+$('#voice').addEventListener('change', () => { store.set('voice', $('#voice').value); if (NARR.mode === 'openai') say('כך נשמע הקול הזה.'); });
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
+
+function handle(ev) {
+  const a = ev.agent ? A(ev.agent) : null, s = a ? ST[a.id] : null, idx = a ? INFO.agents.indexOf(a) : -1;
+  if (ev.type === 'run') { runStart = Date.now(); NARR.srcSaid = {}; log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug} · פורמט ${ev.format}${ev.refs ? ` · ${ev.refs} תמונות reference` : ''}`); say('המשימה נקלטה. שמונה סוכנים מתחילים לעבוד.'); }
+  else if (ev.type === 'start') {
+    s.status = 'working'; s.t0 = Date.now(); s.text = ''; ENERGY = 1;
+    const n = nodeEl(a.id); n.classList.add('working'); n.querySelector('.st').textContent = 'עובד…';
+    if (idx > 0) { const l = linkEl(idx - 1); l.classList.add('flowing'); l.querySelector('.tag').textContent = short(FILES[FILES.length - 1].path); }
+    setFocus(a.id); log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש'); say(SAY_START[a.id] || `${a.title} מתחיל לעבוד.`);
+  } else if (ev.type === 'delta') {
+    s.text += ev.text; ticker(a.id);
+    if (FOCUS === a.id) { const pre = $('#stream'); pre.querySelector('.caret')?.remove(); pre.append(document.createTextNode(ev.text)); pre.append(el('span', 'caret')); pre.scrollTop = pre.scrollHeight; }
+  } else if (ev.type === 'search') {
+    const strip = $('#sstrip'); strip.className = 'sstrip on'; nodeEl(a.id).classList.add('searching');
+    $('#shd').textContent = `${a.title} מחפש ברשת…`;
+    if (ev.query) { chip('q', '⌕ ' + esc(ev.query)); log(a.id, `מחפש: ${ev.query}`); say(`${HEN[a.id]} ${FEM[a.id] ? 'מחפשת' : 'מחפש'} ברשת: ${ev.query.split(/\s+/).slice(0, 6).join(' ')}`, true); } else log(a.id, 'מבצע חיפוש ברשת');
+  } else if (ev.type === 'source') {
+    (SRC[a.id] = SRC[a.id] || []).push(ev); chip('s', esc(dom(ev.url)), ev.url); log(a.id, `מצא מקור: ${dom(ev.url)}`); setStats();
+    if (!NARR.srcSaid[a.id]) { NARR.srcSaid[a.id] = 1; say(`נמצא מקור ראשון, מאתר ${dom(ev.url).replace(/\./g, ' נקודה ')}.`, true); }
+    if (FOCUS === a.id) { $('#srcl').append(el('li', null, `<a href="${esc(ev.url)}" target="_blank" rel="noopener noreferrer">${esc(ev.title)}</a>`)); }
+  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); say('המעצב הוויזואלי ניתח את תמונות ה-reference ומתאים אליהן את הסגנון.', true); if (FOCUS === a.id) renderFocus(); }
+  else if (ev.type === 'image') {
+    (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`); say(`תמונה ${ev.n} מוכנה.`, true); setStage(ev.url);
+    if (FOCUS === a.id) renderGallery($('#gal'), a.id);
+    compose(ev.url, ev.ratio).then(u => { ev.shown = u; if (FOCUS === a.id) renderGallery($('#gal'), a.id); if (FILES.length === INFO.agents.length) renderDeliver(); }).catch(() => {});
+  } else if (ev.type === 'step') { log(a.id, ev.text); if (/מייצר תמונה/.test(ev.text)) say(`${HEN[a.id]} מייצר ${ev.text.replace(/\(.*\)/, '').replace('מייצר ', '')}`, true); }
+  else if (ev.type === 'done') {
+    s.status = 'done'; s.ms = ev.ms; s.text = ev.file.content; FILES.push(ev.file);
+    const n = nodeEl(a.id); n.classList.remove('working', 'searching'); n.classList.add('done'); n.querySelector('.st').textContent = `${(ev.ms / 1000).toFixed(1)} ש׳`; n.querySelector('.tk').textContent = '';
+    if (idx > 0) { const l = linkEl(idx - 1); l.classList.remove('flowing'); l.classList.add('sent'); }
+    if (a.search) $('#sstrip').classList.add('idle');
+    log(a.id, `סיים · ${ev.chars} תווים${ev.sources ? ` · ${ev.sources} מקורות` : ''} · כתב ${short(ev.file.path)}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
+    if (ev.note) log(a.id, ev.note.split('\n')[0]);
+    say(`${HEN[a.id]} ${FEM[a.id] ? 'סיימה' : 'סיים'}${idx < INFO.agents.length - 1 ? ` ו${FEM[a.id] ? 'מעבירה' : 'מעביר'} ${HTO[INFO.agents[idx + 1].id]}` : ''}.`);
+    if (FOCUS === a.id) renderFocus(); setStats();
+  } else if (ev.type === 'final') {
+    ENERGY = .25; const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה · ${FILES.length} קבצים · ${fmt(Date.now() - runStart)}`;
+    log(null, 'כל הסוכנים סיימו'); say('כל הסוכנים סיימו. המאמר והתמונות מוכנים.'); TAB = 'article'; renderDeliver(); confetti(); saveHist();
+    $('#deliver').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (ev.type === 'next') {
+    NEXT = ev.ideas; const box = $('#nextchips'); box.replaceChildren();
+    NEXT.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; scrollTo({ top: 0, behavior: 'smooth' }); $('#task').focus(); }; box.append(c); });
+    if (NEXT.length) $('#next2').classList.add('on');
+  } else if (ev.type === 'error') {
+    ENERGY = 0; const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message); say('אירעה שגיאה. פרטים בדף.');
+    document.querySelectorAll('.node.working').forEach(n => n.classList.remove('working', 'searching')); document.querySelectorAll('.link.flowing').forEach(l => l.classList.remove('flowing'));
+  }
+}
+
+// ---------- תוצרים ----------
+const ed = () => FILES.find(f => f.agent === 'editor');
+function renderDeliver() {
+  $('#deliver').hidden = !FILES.length;
+  const tabs = $('#tabs'); tabs.replaceChildren();
+  const add = (k, t, cls) => { const b = el('button', 'tab ' + (cls || '') + (TAB === k ? ' on' : ''), t); b.onclick = () => { TAB = k; renderDeliver(); }; tabs.append(b); };
+  if (ed()) add('article', '★ המאמר המוכן', 'star');
+  FILES.forEach((f, i) => add(String(i), `${A(f.agent).title} · ${f.label}`));
+  const art = $('#article'), view = $('#view'), g = $('#dgal');
+  if (TAB === 'article' && ed()) {
+    art.hidden = false; view.hidden = true;
+    const im = imgMap(), has = /!\[/.test(ed().content);
+    art.innerHTML = (!has && Object.keys(im).length ? Object.values(im).map(u => `<img src="${u}" alt="">`).join('') : '') + md(ed().content, im); g.replaceChildren();
+  } else { const f = FILES[Number(TAB)] || FILES[0]; art.hidden = true; view.hidden = false; view.textContent = f ? f.content : ''; g.replaceChildren(); if (f?.agent === 'yuval') renderGallery(g, 'yuval'); }
+}
+const curText = () => (TAB === 'article' && ed() ? ed().content : (FILES[Number(TAB)] || FILES[0] || {}).content || '');
+$('#copy').onclick = async () => { try { await navigator.clipboard.writeText(curText()); $('#copy').textContent = 'הועתק ✓'; setTimeout(() => $('#copy').textContent = 'העתקה', 1400); } catch {} };
+function download(name, blob) { const u = URL.createObjectURL(blob); downloadUrl(name, u); setTimeout(() => URL.revokeObjectURL(u), 4000); }
+$('#dl').onclick = () => { const t = FILES.map(f => `<!-- ${f.path} -->\n${f.content}`).join('\n\n---\n\n'); download('agents-output.md', new Blob([t], { type: 'text/markdown' })); };
+$('#dlHtml').onclick = async () => {
+  if (!ed()) return;
+  const map = imgMap(), inl = {};
+  for (const [n, u] of Object.entries(map)) { try { const b = await (await fetch(u)).blob(); inl[n] = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); } catch { /* ללא תמונה */ } }
+  const html = `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(($('#task').value || 'מאמר').slice(0, 80))}</title><style>body{margin:0;background:#f4efe6;font-family:"Segoe UI",Arial,sans-serif}.a{max-width:760px;margin:0 auto;background:#fbf8f2;color:#2b2118;padding:36px 28px;line-height:1.85}h1,h2,h3{font-family:Georgia,serif;line-height:1.3}img{max-width:100%;border-radius:12px;display:block;margin:16px auto}a{color:#9a6b1f}</style></head><body><div class="a">${md(ed().content, inl)}</div></body></html>`;
+  download('article.html', new Blob([html], { type: 'text/html' }));
+};
+
+// ---------- היסטוריה ----------
+const hist = () => { try { return JSON.parse(store.get('hist') || '[]'); } catch { return []; } };
+function saveHist() { const h = hist(); h.unshift({ t: Date.now(), task: $('#task').value, md: ed() ? ed().content : '' }); store.set('hist', JSON.stringify(h.slice(0, 15))); }
+$('#histBtn').onclick = () => {
+  const ul = $('#histlist'); ul.replaceChildren(); const h = hist();
+  if (!h.length) ul.append(el('li', null, 'אין משימות קודמות.'));
+  h.forEach(x => { const li = el('li', null, `<b>${esc(x.task)}</b><div class="cap">${new Date(x.t).toLocaleString('he-IL')}</div>`); li.onclick = () => { $('#hist').classList.remove('on'); $('#deliver').hidden = false; $('#tabs').replaceChildren(); $('#article').hidden = false; $('#view').hidden = true; $('#article').innerHTML = md(x.md || '', {}); $('#deliver').scrollIntoView({ behavior: 'smooth' }); }; ul.append(li); });
+  $('#hist').classList.add('on');
+};
+$('#histClose').onclick = () => $('#hist').classList.remove('on'); $('#hist').onclick = e => { if (e.target.id === 'hist') $('#hist').classList.remove('on'); };
+
+// ---------- הגדרת העסק (כללי לכל עסק) ----------
+const PF = { name: 'pName', type: 'pType', about: 'pAbout', audience: 'pAud', tone: 'pTone', language: 'pLang', rules: 'pRules' };
+let ctxManual = false;
+const getProfile = () => Object.fromEntries(Object.entries(PF).map(([k, id]) => [k, $('#' + id).value.trim()]));
+function buildContext(p) {
+  const L = [];
+  if (p.name) L.push(`שם העסק: ${p.name}`);
+  if (p.type) L.push(`תחום: ${p.type}`);
+  if (p.about) L.push(`מה אנחנו מציעים: ${p.about}`);
+  if (p.audience) L.push(`קהל יעד: ${p.audience}`);
+  if (p.tone) L.push(`קול וטון: ${p.tone}`);
+  if (p.language) L.push(`שפת התוכן: ${p.language}`);
+  if (p.rules) L.push(`כללים וגבולות שחובה לכבד בכל תוצר (מעל כל הוראה אחרת): ${p.rules}`);
+  return L.join('\n');
+}
+function applyBrand() {
+  const n = $('#pName').value.trim() || INFO.brand;
+  $('#brand').textContent = n; document.title = `צוות הסוכנים · ${n}`;
+  const has = $('#pName').value.trim();
+}
+function saveProfile() { store.set('profile', JSON.stringify(getProfile())); store.set('ctxManual', ctxManual ? '1' : ''); store.set('ctx', ctxManual ? $('#ctx').value : ''); }
+function syncCtx() { if (!ctxManual) $('#ctx').value = buildContext(getProfile()); applyBrand(); saveProfile(); }
+function fillProfile(p) { Object.entries(PF).forEach(([k, id]) => $('#' + id).value = p[k] || ''); ctxManual = false; syncCtx(); if (typeof refreshGate === 'function' && typeof STEP !== 'undefined') refreshGate(); }
+function loadProfile() {
+  let p = null; try { p = JSON.parse(store.get('profile') || 'null'); } catch {}
+  if (p) Object.entries(PF).forEach(([k, id]) => $('#' + id).value = p[k] || '');
+  ctxManual = Boolean(store.get('ctxManual'));
+  if (ctxManual) $('#ctx').value = store.get('ctx') || ''; else $('#ctx').value = buildContext(getProfile());
+}
+Object.values(PF).forEach(id => $('#' + id).addEventListener('input', syncCtx));
+$('#ctx').addEventListener('input', () => { ctxManual = true; saveProfile(); });
+function renderExamples(list) {
+  document.querySelectorAll('#chips .chip.ex').forEach(c => c.remove());
+  list.forEach(t => { const c = el('button', 'chip ex'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; $('#task').focus(); }; $('#chips').append(c); });
+}
+function renderPresets() {
+  const box = $('#presets'); box.replaceChildren();
+  const lab = el('span', 'cap', 'תבניות:'); lab.style.margin = '0'; box.append(lab);
+  (INFO.profiles || []).forEach(pr => { const c = el('button', 'chip pre'); c.type = 'button'; c.textContent = pr.name; c.onclick = () => { fillProfile(pr); renderExamples(pr.examples || EXAMPLES); }; box.append(c); });
+  const blank = el('button', 'chip'); blank.type = 'button'; blank.textContent = 'ריק: אמלא בעצמי'; blank.onclick = () => { fillProfile({}); renderExamples(EXAMPLES); }; box.append(blank);
+}
+
+// ---------- פורמט התמונות לרשתות ----------
+function renderFormats() {
+  const s = $('#fmt'); s.replaceChildren(); { const o = el('option'); o.value = ''; o.textContent = 'בחרו רשת ופורמט…'; o.disabled = true; s.append(o); }
+  Object.entries(INFO.formats).forEach(([k, v]) => { const o = el('option'); o.value = k; o.textContent = v.label; s.append(o); });
+  s.value = INFO.formats[store.get('fmt')] ? store.get('fmt') : ''; applyStageRatio();
+}
+$('#fmt').addEventListener('change', () => { store.set('fmt', $('#fmt').value); applyStageRatio(); refreshGate(); });
+const ratioOf = id => { const f = INFO.formats[id]; return f ? f.w / f.h : 1; };
+
+// ---------- לוגו: אותיות בלבד, הסרת רקע ומיקום שבעל המערכת בוחר ----------
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+async function fileToData(f, max, mime) {
+  const u = URL.createObjectURL(f);
+  try {
+    const im = await loadImg(u), w0 = im.naturalWidth || 300, h0 = im.naturalHeight || 300, k = Math.min(1, max / Math.max(w0, h0));
+    const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w0 * k)); c.height = Math.max(1, Math.round(h0 * k));
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); return c.toDataURL(mime, .85);
+  } finally { URL.revokeObjectURL(u); }
+}
+// מסיר רקע אחיד (לפי צבע הפינות), מצבע את האותיות אם התבקש, וחותך שוליים שקופים
+async function processLogo() {
+  if (!LOGO_SRC) { LOGO = ''; drawStageLogo(); return; }
+  const im = await loadImg(LOGO_SRC), w = im.naturalWidth, h = im.naturalHeight;
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
+  const img = x.getImageData(0, 0, w, h), d = img.data;
+  if (LCFG.rm) {
+    const at = (px, py) => { const i = (py * w + px) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; };
+    const cs = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+    if (cs.every(p => p[3] > 200)) { // הרקע לא שקוף כבר
+      const bg = [0, 1, 2].map(k => cs.reduce((s, p) => s + p[k], 0) / 4), tol = LCFG.tol;
+      for (let i = 0; i < d.length; i += 4) {
+        const dist = Math.hypot(d[i] - bg[0], d[i + 1] - bg[1], d[i + 2] - bg[2]);
+        const a = dist <= tol ? 0 : dist >= tol * 1.8 ? 255 : Math.round(255 * (dist - tol) / (tol * .8));
+        d[i + 3] = Math.min(d[i + 3], a);
+      }
+    }
+  }
+  if (LCFG.tint !== 'orig') { const v = LCFG.tint === 'white' ? 255 : 0; for (let i = 0; i < d.length; i += 4) { d[i] = d[i + 1] = d[i + 2] = v; } }
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let py = 0; py < h; py++) for (let px = 0; px < w; px++) if (d[(py * w + px) * 4 + 3] > 12) { if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py; }
+  x.putImageData(img, 0, 0);
+  if (x1 < 0) { LOGO = ''; drawStageLogo(); return; }
+  const t = document.createElement('canvas'); t.width = x1 - x0 + 1; t.height = y1 - y0 + 1; t.getContext('2d').drawImage(c, x0, y0, t.width, t.height, 0, 0, t.width, t.height);
+  LOGO = t.toDataURL('image/png'); drawStageLogo();
+}
+function applyStageRatio() { const s = $('#stage'); if (s) s.style.aspectRatio = String(ratioOf($('#fmt').value)); }
+function setStage(url) { $('#stage').style.backgroundImage = `url("${url}")`; $('#stage').classList.add('real'); }
+function drawStageLogo() {
+  const l = $('#stageLogo'); if (!LOGO) { l.style.display = 'none'; return; }
+  l.style.display = 'block'; l.src = LOGO; l.style.width = (LCFG.w * 100) + '%'; l.style.left = (LCFG.x * 100) + '%'; l.style.top = (LCFG.y * 100) + '%';
+  l.style.opacity = LCFG.on ? 1 : .35;
+}
+function saveLogoCfg() { store.set('logoCfg', JSON.stringify(LCFG)); }
+(function stageDrag() {
+  const st = $('#stage'), lg = $('#stageLogo'); let drag = false;
+  const move = e => { const r = st.getBoundingClientRect(); LCFG.x = clamp((e.clientX - r.left) / r.width, .02, .98); LCFG.y = clamp((e.clientY - r.top) / r.height, .02, .98); drawStageLogo(); };
+  lg.addEventListener('pointerdown', e => { drag = true; lg.setPointerCapture(e.pointerId); e.preventDefault(); });
+  lg.addEventListener('pointermove', e => { if (drag) move(e); });
+  lg.addEventListener('pointerup', () => { if (drag) { drag = false; saveLogoCfg(); } });
+  st.addEventListener('click', e => { if (e.target === st) { move(e); saveLogoCfg(); } });
+})();
+let procT = null; const reproc = () => { clearTimeout(procT); procT = setTimeout(() => { processLogo().catch(() => {}); }, 120); };
+$('#logoin').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { LOGO_SRC = await fileToData(f, 600, 'image/png'); store.set('logoSrc', LOGO_SRC); await processLogo(); } catch { const b = $('#banner'); b.className = 'banner err'; b.textContent = 'לא הצלחתי לקרוא את הלוגו'; } e.target.value = ''; });
+$('#lrm').addEventListener('change', () => { LCFG.rm = $('#lrm').checked; saveLogoCfg(); reproc(); });
+$('#ltol').addEventListener('input', () => { LCFG.tol = +$('#ltol').value; saveLogoCfg(); reproc(); });
+$('#ltint').addEventListener('change', () => { LCFG.tint = $('#ltint').value; saveLogoCfg(); reproc(); });
+$('#lw').addEventListener('input', () => { LCFG.w = +$('#lw').value / 100; saveLogoCfg(); drawStageLogo(); });
+$('#logoOn').addEventListener('change', () => { LCFG.on = $('#logoOn').checked; saveLogoCfg(); drawStageLogo(); });
+$('#logoClear').addEventListener('click', () => { LOGO_SRC = ''; LOGO = ''; store.set('logoSrc', ''); drawStageLogo(); });
+
+// מחתך את התמונה בדיוק ליחס הרשת, ומטביע את הלוגו במיקום שנבחר
+async function compose(url, rid) {
+  const im = await loadImg(url), W = im.naturalWidth || 1024, H = im.naturalHeight || 1024, r = ratioOf(rid || $('#fmt').value);
+  let sw = W, sh = H; if (W / H > r) sw = Math.round(H * r); else sh = Math.round(W / r);
+  const c = document.createElement('canvas'); c.width = sw; c.height = sh; const x = c.getContext('2d');
+  x.drawImage(im, (W - sw) / 2, (H - sh) / 2, sw, sh, 0, 0, sw, sh);
+  if (LOGO && LCFG.on) {
+    const lg = await loadImg(LOGO), lw = sw * LCFG.w, lh = lw * (lg.naturalHeight / lg.naturalWidth);
+    x.drawImage(lg, clamp(sw * LCFG.x - lw / 2, 0, sw - lw), clamp(sh * LCFG.y - lh / 2, 0, sh - lh), lw, lh);
+  }
+  return c.toDataURL('image/png');
+}
+
+// ---------- תמונות reference ----------
+$('#refin').addEventListener('change', async e => {
+  for (const f of [...e.target.files].slice(0, 3 - REFS.length)) { try { REFS.push(await fileToData(f, 768, 'image/jpeg')); } catch { /* לא נתמך */ } }
+  e.target.value = ''; store.set('refs', JSON.stringify(REFS)); drawRefs();
+});
+function drawRefs() { const t = $('#thumbs'); t.replaceChildren(); REFS.forEach((u, i) => { const d = el('div'); const im = el('img'); im.src = u; const b = el('button', null, '×'); b.type = 'button'; b.onclick = () => { REFS.splice(i, 1); store.set('refs', JSON.stringify(REFS)); drawRefs(); }; d.append(im, b); t.append(d); }); }
+async function loadKit() {
+  try { LCFG = { ...LCFG, ...JSON.parse(store.get('logoCfg') || '{}') }; } catch {}
+  $('#lrm').checked = LCFG.rm; $('#ltol').value = LCFG.tol; $('#ltint').value = LCFG.tint; $('#lw').value = Math.round(LCFG.w * 100); $('#logoOn').checked = LCFG.on;
+  LOGO_SRC = store.get('logoSrc') || ''; await processLogo().catch(() => {});
+  try { REFS = JSON.parse(store.get('refs') || '[]').filter(u => typeof u === 'string').slice(0, 3); } catch { REFS = []; }
+  drawRefs();
+}
+
+// ---------- בדיקת חיבור ----------
+$('#chk').onclick = async () => {
+  const ul = $('#chkout'), b = $('#chk'); ul.replaceChildren(el('li', null, 'בודק…')); b.disabled = true;
+  try {
+    const out = await API.check(body({})); ul.replaceChildren();
+    out.forEach(x => { const c = x.ok === true ? 'var(--ok)' : x.ok === false ? 'var(--err)' : 'var(--muted)'; ul.append(el('li', null, `<b style="color:${c}">${x.ok === true ? '✓' : x.ok === false ? '✗' : '•'} ${esc(x.name)}</b>: <span style="color:var(--muted)">${esc(x.detail)}</span>`)); });
+  } catch (e) { ul.replaceChildren(el('li', null, 'שגיאה: ' + esc(e.message))); }
+  b.disabled = false;
+};
+
+// ---------- רדאר טרנדים ----------
+$('#radar').onclick = async () => {
+  const btn = $('#radar'); if (btn.classList.contains('scan')) return; btn.classList.add('scan'); btn.querySelector('span').textContent = 'סורק את הרשת…';
+  const box = $('#ideas'); box.replaceChildren();
+  try {
+    const d = await API.trends(body({}));
+    d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; $('#form').requestSubmit(); }; c.append(b); box.append(c); });
+  } catch (e) { box.append(el('div', 'banner err', 'שגיאה: ' + esc(e.message))); }
+  btn.classList.remove('scan'); btn.querySelector('span').textContent = 'סרוק טרנדים עכשיו';
+};
+
+// ---------- אשף שלבים: אי אפשר להתקדם עד שמסמנים או ממלאים ----------
+const fld = id => $('#' + id).value.trim();
+let STEP = 1, RUN_SHOWN = false, SHOW_CODE = false, PLAN_MSG = '';
+const hasLogo = () => store.get('logoChoice') === 'has';
+const hasRefs = () => store.get('refChoice') === 'has';
+const useLogo = () => hasLogo() && LOGO && LCFG.on;
+const remaining = () => (ACCOUNT && ACCOUNT.usage.runLimit ? Math.max(0, ACCOUNT.usage.runLimit - ACCOUNT.usage.runs) : null);
+const canOpenAITTS = () => CHOICE === 'own' && Boolean($('#apikey').value.trim());
+const chk = (ok, label) => ({ ok: Boolean(ok), label });
+
+function checks1() { return [chk(fld('pName'), 'שם העסק'), chk(fld('pType'), 'תחום / סוג העסק'), chk(fld('pAbout'), 'מה אתם מציעים'), chk(fld('pAud'), 'קהל יעד')]; }
+function checks2() {
+  const L = [chk(CHOICE, 'בחרו מסלול')]; if (!CHOICE || CHOICE === 'demo' || CHOICE === 'server') return L;
+  if (INFO.accounts) {
+    L.push(chk(ACCOUNT, 'פתחו חשבון (שם ואימייל), או היכנסו עם קוד גישה'));
+    if (!ACCOUNT) return L;
+    if (CHOICE === 'trial') L.push(chk(ACCOUNT.trialRuns > 0, 'ריצת הניסיון עדיין זמינה'));
+    if (CHOICE === 'own' || CHOICE === 'managed') {
+      const price = INFO.plans[CHOICE].price, act = ACCOUNT.state === 'active' && ACCOUNT.plan === CHOICE;
+      L.push(chk($('#terms') ? $('#terms').checked || act : act, 'אשרו את תנאי השימוש והחיוב החודשי האוטומטי'));
+      L.push(chk(act, `שלמו ₪${price} לחודש (לחצו "לתשלום" ואז חזרו לכאן)`));
+      if (CHOICE === 'managed' && act) L.push(chk(remaining() > 0, `נותרו תכנים החודש (נותרו ${remaining()})`));
+    }
+  }
+  if (CHOICE === 'own') { L.push(chk($('#apikey').value.trim(), 'הדביקו מפתח OpenAI')); L.push(chk(KEY_OK, 'לחצו "בדוק חיבור" וודאו שהמפתח עובד')); }
+  return L;
+}
+function checks3() {
+  const lc = store.get('logoChoice'), rc = store.get('refChoice'), L = [chk(lc, 'ענו: האם יש לכם לוגו?')];
+  if (lc === 'has') L.push(chk(LOGO, 'העלו קובץ לוגו'));
+  L.push(chk(rc, 'ענו: האם יש תמונות reference?'));
+  if (rc === 'has') L.push(chk(REFS.length > 0, 'העלו לפחות תמונה אחת'));
+  return L;
+}
+function checks4() { return [chk($('#fmt').value, 'בחרו פורמט תמונות'), chk($('#narr').value, 'בחרו אם להקריא בקול')]; }
+function checks5() { return [chk($('#task').value.trim().length >= 8, 'כתבו את המשימה (לפחות 8 תווים), או בחרו רעיון')]; }
+const STEPS = [
+  { n: 1, name: 'העסק', el: '#st1', checks: checks1 }, { n: 2, name: 'מסלול', el: '#st2', checks: checks2 }, { n: 3, name: 'מותג', el: '#st3', checks: checks3 },
+  { n: 4, name: 'פורמט', el: '#st4', checks: checks4 }, { n: 5, name: 'משימה', el: '#st5', checks: checks5 }, { n: 6, name: 'תוצאה', el: '#runview' }
+];
+const stepOk = i => STEPS[i - 1].checks().every(c => c.ok);
+const maxStep = () => { for (let i = 1; i <= 5; i++) if (!stepOk(i)) return i; return 5; };
+function renderStepper() {
+  const mx = maxStep(), box = $('#stepper'); box.replaceChildren();
+  STEPS.forEach(s => {
+    const locked = s.n === 6 ? !RUN_SHOWN : s.n > mx;
+    const b = el('button', 'si' + (s.n === STEP ? ' cur' : locked ? ' lock' : s.n < STEP && stepOk(s.n) ? ' done' : s.n < STEP ? ' done' : ''), s.name);
+    b.type = 'button'; b.dataset.n = s.n; b.title = locked ? 'צריך להשלים את השלבים הקודמים' : s.name;
+    b.onclick = () => { if (!locked) show(s.n); };
+    box.append(b);
+  });
+}
+function show(n) {
+  const mx = maxStep(); if (n !== 6 && n > mx) n = mx;
+  STEP = n; STEPS.forEach(s => { $(s.el).hidden = s.n !== n; });
+  $('#gate').hidden = n === 6; $('#wiz').hidden = n === 6; $('#runview').hidden = n !== 6;
+  if (n === 2) renderPlan(); if (n === 4) renderStep4(); if (n === 5) renderSummary();
+  refreshGate(); scrollTo({ top: 0, behavior: 'smooth' });
+}
+function refreshGate() {
+  if (STEP === 6) { renderStepper(); return; }
+  const mx = maxStep(); if (STEP > mx) { show(mx); return; }
+  const ch = STEPS[STEP - 1].checks(), all = ch.every(c => c.ok);
+  const ul = $('#gatelist'); ul.replaceChildren(...ch.map(c => el('li', c.ok ? 'ok' : '', esc(c.label))));
+  $('#next').disabled = !all; $('#next').textContent = STEP === 5 ? 'שגר משימה' : 'המשך לשלב הבא'; $('#back').hidden = STEP === 1;
+  $('.gh').textContent = all ? 'הכול מוכן. אפשר להמשיך:' : 'כדי להמשיך, חסר:';
+  renderStepper(); updateAcctChip(); updateMode();
+}
+$('#next').onclick = () => { if ($('#next').disabled) return; if (STEP === 5) startRun(); else show(STEP + 1); };
+$('#back').onclick = () => show(Math.max(1, STEP - 1));
+$('#again').onclick = () => { $('#banner').className = 'banner'; show(5); };
+document.addEventListener('input', e => { if (e.target.id === 'apikey') { KEY_OK = false; } if (STEP <= 5) refreshGate(); if (STEP === 5) renderSummary(); });
+document.addEventListener('change', e => { if (STEP <= 5) refreshGate(); if (STEP === 4 || e.target.id === 'narr') renderStep4(); });
+
+// ----- שלב 2: מסלול, חשבון ותשלום -----
+function normalizeChoice() {
+  if (INFO.accounts && ACCOUNT && ACCOUNT.state === 'active' && ACCOUNT.plan && CHOICE !== 'demo') CHOICE = ACCOUNT.plan;
+  const ids = plansList().map(p => p.id); if (CHOICE && !ids.includes(CHOICE)) CHOICE = '';
+}
+function plansList() {
+  const P = INFO.plans || {}, L = [{ id: 'demo', title: 'הדגמה בלבד', price: 'חינם', bullets: ['תוכן לדוגמה קבוע', 'בלי חשבון ובלי מפתח', 'כדי לראות איך זה עובד'] }];
+  if (INFO.accounts) {
+    const trialOn = !ACCOUNT ? (P.trial && P.trial.runs > 0) : ACCOUNT.trialRuns > 0 && ACCOUNT.state !== 'active';
+    if (trialOn) L.push({ id: 'trial', title: 'ניסיון חינם', price: 'חינם', bullets: [`${P.trial.runs} ריצה אמיתית ומלאה`, 'חיפוש ברשת, כתיבה ותמונות', 'על חשבוננו'] });
+    L.push({ id: 'own', title: 'מפתח OpenAI משלך', price: `₪${P.own.price}`, sub: 'לחודש', bullets: ['שימוש ללא הגבלה', 'משלמים ל-OpenAI ישירות על הצריכה', 'כולל הקראה איכותית בקול'] });
+    L.push({ id: 'managed', title: 'המפתח שלנו', price: `₪${P.managed.price}`, sub: 'לחודש', tag: 'הכי נוח', bullets: [`עד ${P.managed.limit} תכנים בחודש`, 'בלי לפתוח חשבון OpenAI', 'הכול כלול'] });
+  } else {
+    if (INFO.live) L.push({ id: 'server', title: 'המפתח של השרת', price: '', bullets: ['הוגדר מראש בשרת'] });
+    L.push({ id: 'own', title: 'מפתח OpenAI שלי', price: '', bullets: ['מדביקים מפתח בדף', 'המפתח נשאר בדפדפן שלכם', 'בדיקת חיבור חינמית'] });
+  }
+  return L;
+}
+function renderPlan() {
+  $('#how2').textContent = INFO.accounts ? 'בחרו מסלול. אם בחרתם ניסיון או מנוי, פתחו חשבון, ובמנוי גם אשרו ושלמו. במסלול "מפתח משלך" הדביקו גם את המפתח ובדקו חיבור.' : 'בחרו הדגמה (תוכן לדוגמה), או "מפתח OpenAI שלי": הדביקו מפתח ולחצו "בדוק חיבור".';
+  const box = $('#planCards'); box.replaceChildren();
+  plansList().forEach(p => {
+    const lockedPlan = INFO.accounts && ACCOUNT && ACCOUNT.state === 'active' && ACCOUNT.plan && (p.id === 'own' || p.id === 'managed') && p.id !== ACCOUNT.plan;
+    const b = el('button', 'plan' + (CHOICE === p.id ? ' sel' : ''), `${p.tag ? `<span class="tag2">${p.tag}</span>` : ''}<div class="pt">${esc(p.title)}</div><div class="pp">${esc(p.price)} <small>${esc(p.sub || '')}</small></div><ul>${p.bullets.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`);
+    b.type = 'button'; b.disabled = Boolean(lockedPlan); b.title = lockedPlan ? 'יש לכם כבר מנוי במסלול אחר. לשינוי מסלול פנו אלינו.' : '';
+    b.onclick = () => { CHOICE = p.id; PLAN_MSG = ''; store.set('planChoice', CHOICE); renderPlan(); refreshGate(); };
+    box.append(b);
+  });
+  $('#keyBox').hidden = CHOICE !== 'own';
+  const needAcct = INFO.accounts && (CHOICE === 'trial' || CHOICE === 'own' || CHOICE === 'managed' || ACCOUNT);
+  $('#acctBox').innerHTML = needAcct ? acctHtml() : '';
+  $('#payBox').innerHTML = INFO.accounts && ACCOUNT && (CHOICE === 'own' || CHOICE === 'managed') ? payHtml() : '';
+  if (PLAN_MSG) $('#payBox').insertAdjacentHTML('afterbegin', `<div class="warnbox">${esc(PLAN_MSG)}</div>`);
+}
+function acctHtml() {
+  if (!ACCOUNT) return `<div class="acctbox"><b>פתחו חשבון</b><div class="note" style="margin:4px 0 8px">כדי לשמור את המנוי והשימוש שלכם. נשלח קוד גישה אישי, ובלעדיו אי אפשר להיכנס ממכשיר אחר.</div>
+    <div class="row2"><div><label>שם מלא <i class="req">*</i></label><input class="f" id="rName" value="${esc(fld('pName'))}"></div><div><label>אימייל <i class="req">*</i></label><input class="f" id="rEmail" type="email" dir="ltr"></div><div><label>טלפון <small>(לא חובה)</small></label><input class="f" id="rPhone" dir="ltr"></div><button class="btn" id="rGo" type="button">פתח חשבון</button></div><div id="rMsg" class="note"></div>
+    <details style="margin-top:10px"><summary class="note" style="cursor:pointer">כבר יש לי חשבון: כניסה עם קוד גישה</summary><div style="display:flex;gap:8px;margin-top:8px"><input class="f" id="lCode" dir="ltr" placeholder="crew_..."><button class="btn" id="lGo" type="button">כניסה</button></div><div id="lMsg" class="note"></div></details></div>`;
+  const a = ACCOUNT, st = { active: 'מנוי פעיל', trial: 'ניסיון חינם', expired: 'המנוי פג', none: 'ללא מנוי' }[a.state];
+  const use = a.plan === 'managed' ? ` · ${a.usage.runs}/${a.usage.runLimit} תכנים החודש` : '';
+  return `<div class="acctbox"><b>שלום ${esc(a.name)}</b> <span class="note">${esc(a.email)}</span><div style="margin:6px 0">${st}${a.plan ? ' · ' + esc(PLAN_LABEL[a.plan]) : ''}${a.state === 'trial' ? ` · נותרו ${a.trialRuns} ריצות ניסיון` : ''}${use}${a.paidUntil && a.state === 'active' ? ' · עד ' + new Date(a.paidUntil).toLocaleDateString('he-IL') : ''}</div>
+    ${SHOW_CODE ? `<div class="warnbox">שמרו את קוד הגישה! בלעדיו אי אפשר להיכנס ממכשיר אחר.</div><div class="codebox">${esc(TOKEN)}</div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="codeBtn" type="button">${SHOW_CODE ? 'הסתר' : 'הצג'} קוד גישה</button><button class="btn" id="outBtn" type="button">יציאה</button>${a.state === 'active' && !a.cancelRequested ? '<button class="btn" id="cancelBtn" type="button">בקשת ביטול מנוי</button>' : ''}${a.cancelRequested ? '<span class="note">בקשת הביטול התקבלה. המנוי נשאר פעיל עד סוף התקופה ששולמה.</span>' : ''}</div></div>`;
+}
+function payHtml() {
+  const a = ACCOUNT, plan = CHOICE, P = INFO.plans[plan], act = a.state === 'active' && a.plan === plan;
+  if (act) return `<div class="paybox"><b style="color:var(--ok)">המנוי פעיל.</b> ${plan === 'managed' ? `נותרו ${remaining()} מתוך ${P.limit} תכנים החודש.` : 'שימוש ללא הגבלה.'}</div>`;
+  return `<div class="paybox"><b>תשלום: ₪${P.price} לחודש</b><div class="note" style="margin:6px 0">חיוב חודשי אוטומטי דרך GROW. אפשר לבטל בכל עת. ${plan === 'managed' ? `כולל עד ${P.limit} תכנים בחודש.` : 'את הצריכה ב-OpenAI משלמים ישירות לחשבון שלכם.'}</div>
+    <label class="radio"><input type="checkbox" id="terms"> קראתי ואני מאשר/ת את ${INFO.termsUrl ? `<a href="${esc(INFO.termsUrl)}" target="_blank" rel="noopener noreferrer">תנאי השימוש</a>` : 'תנאי השימוש'} ואת החיוב החודשי האוטומטי <i class="req">*</i></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="primary" id="payBtn" type="button" disabled>לתשלום ₪${P.price}</button><button class="btn" id="paidBtn" type="button">כבר שילמתי: בדקו שוב</button></div><div id="payMsg" class="note" style="margin-top:6px"></div></div>`;
+}
+$('#st2').addEventListener('click', async e => {
+  const id = e.target.id, msg = (s, t) => { const m = $(s); if (m) m.textContent = t; };
+  try {
+    if (id === 'rGo') {
+      const r = await API.register({ name: fld('rName'), email: fld('rEmail'), phone: fld('rPhone') });
+      TOKEN = r.token; store.set('crew_token', TOKEN); ACCOUNT = r.account; SHOW_CODE = true; normalizeChoice(); renderPlan(); refreshGate();
+    } else if (id === 'lGo') {
+      const r = await API.login(fld('lCode')); TOKEN = r.token; store.set('crew_token', TOKEN); ACCOUNT = r.account; SHOW_CODE = false; normalizeChoice(); renderPlan(); refreshGate();
+    } else if (id === 'outBtn') { TOKEN = ''; ACCOUNT = null; SHOW_CODE = false; store.set('crew_token', ''); renderPlan(); refreshGate();
+    } else if (id === 'codeBtn') { SHOW_CODE = !SHOW_CODE; renderPlan();
+    } else if (id === 'cancelBtn') { if (confirm('לשלוח בקשת ביטול מנוי? המנוי יישאר פעיל עד סוף התקופה ששולמה.')) { ACCOUNT = (await API.cancelReq()).account; renderPlan(); }
+    } else if (id === 'payBtn') {
+      msg('#payMsg', 'מעביר לדף התשלום…'); const r = await API.checkout(CHOICE); if (r.manual) store.set('payPending', '1'); location.href = r.url;
+    } else if (id === 'paidBtn') { msg('#payMsg', 'בודק…'); await refreshAccount(); renderPlan(); refreshGate(); if (ACCOUNT && ACCOUNT.state !== 'active') msg('#payMsg', 'התשלום עדיין לא אושר. זה יכול לקחת כמה דקות, נסו שוב.'); }
+  } catch (err) {
+    const T = { email_exists: 'האימייל כבר רשום. היכנסו עם קוד הגישה.', invalid_details: 'מלאו שם ואימייל תקינים.', too_many_requests: 'יותר מדי ניסיונות. נסו שוב מאוחר יותר.', invalid_token: 'קוד הגישה לא נכון.', billing_not_configured: 'התשלום עדיין לא הוגדר במערכת. פנו אלינו.', billing_error: 'שגיאה בחיבור למערכת התשלומים. נסו שוב.' };
+    msg('#rMsg', T[err.code] || err.message); msg('#lMsg', T[err.code] || err.message); msg('#payMsg', T[err.code] || err.message);
+  }
+});
+document.addEventListener('change', e => { if (e.target.id === 'terms') { const b = $('#payBtn'); if (b) b.disabled = !e.target.checked; } });
+async function refreshAccount() {
+  if (!INFO.accounts || !TOKEN) { ACCOUNT = null; return; }
+  try { ACCOUNT = (await API.me()).account; } catch (e) { if (e.code === 'login_required') { TOKEN = ''; store.set('crew_token', ''); } ACCOUNT = null; }
+}
+function updateAcctChip() {
+  const c = $('#acct'); if (!INFO.accounts || !ACCOUNT) { c.hidden = true; return; }
+  const a = ACCOUNT, left = remaining();
+  c.hidden = false; c.textContent = a.state === 'trial' ? `ניסיון חינם · נותרו ${a.trialRuns}` : a.state === 'active' ? `${PLAN_LABEL[a.plan]}${left !== null ? ` · נותרו ${left}/${a.usage.runLimit}` : ''}` : 'ללא מנוי פעיל';
+}
+let paidTries = 0;
+function startPaidPoll() {
+  clearInterval(PAID_POLL); paidTries = 0; if (!INFO.accounts || !TOKEN) return;
+  PLAN_MSG = ''; const tick = async () => { paidTries++; await refreshAccount(); normalizeChoice(); if (STEP === 2) renderPlan(); refreshGate(); if ((ACCOUNT && ACCOUNT.state === 'active') || paidTries > 40) { clearInterval(PAID_POLL); if (ACCOUNT && ACCOUNT.state === 'active') { store.set('planChoice', CHOICE); renderPlan(); } } };
+  PAID_POLL = setInterval(tick, 3000); tick();
+}
+
+// ----- שלב 3: לוגו ו-reference -----
+function applyChoices() {
+  const lc = store.get('logoChoice') || '', rc = store.get('refChoice') || '';
+  document.querySelectorAll('input[name=logoChoice]').forEach(r => { r.checked = r.value === lc; });
+  document.querySelectorAll('input[name=refChoice]').forEach(r => { r.checked = r.value === rc; });
+  $('#logoPanel').hidden = lc !== 'has'; $('#refPanel').hidden = rc !== 'has';
+}
+document.addEventListener('change', e => {
+  if (e.target.name === 'logoChoice') { store.set('logoChoice', e.target.value); applyChoices(); drawStageLogo(); refreshGate(); }
+  if (e.target.name === 'refChoice') { store.set('refChoice', e.target.value); applyChoices(); refreshGate(); }
+});
+
+// ----- שלב 4 ו-5 -----
+function renderStep4() {
+  const ok = canOpenAITTS(), o = [...$('#narr').options].find(x => x.value === 'openai'); if (o) o.disabled = !ok;
+  if ($('#narr').value === 'openai' && !ok) { $('#narr').value = ''; NARR.mode = 'off'; store.set('narr', ''); }
+  $('#narrNote').textContent = ok ? '' : 'הקראה איכותית (OpenAI) זמינה במסלול "מפתח OpenAI משלך". ההקראה בדפדפן תלויה בקול עברי שמותקן במחשב.';
+  $('#voiceWrap').hidden = $('#narr').value !== 'openai';
+}
+function renderSummary() {
+  const f = INFO.formats[$('#fmt').value], nr = { off: 'בלי הקראה', browser: 'הקראה בדפדפן', openai: 'הקראה איכותית' }[$('#narr').value];
+  $('#sumbox').innerHTML = `<b>העסק:</b> ${esc(fld('pName'))} · <b>מסלול:</b> ${esc(PLAN_LABEL[CHOICE] || '')} · <b>פורמט:</b> ${esc(f ? f.label : '')} · <b>הקראה:</b> ${esc(nr || '')} · <b>לוגו:</b> ${hasLogo() ? 'כן' : 'לא'} · <b>reference:</b> ${hasRefs() ? REFS.length : 'לא'}`;
+}
+
+// ---------- שיגור ----------
+const ERR_MSG = { blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
+function apiProblem(err) {
+  if (!(err instanceof ApiErr)) return false;
+  if (err.data && err.data.account) ACCOUNT = err.data.account;
+  if (err.code === 'login_required') { TOKEN = ''; ACCOUNT = null; store.set('crew_token', ''); }
+  if (ERR_MSG[err.code]) { PLAN_MSG = ERR_MSG[err.code]; return true; }
+  return false;
+}
+async function startRun() {
+  if (busy) return; busy = true;
+  saveProfile(); store.set('model', $('#model').value);
+  RUN_SHOWN = true; show(6); $('#again').disabled = true; $('#runnote').textContent = '';
+  NARR.q = []; reset(); runStart = Date.now(); clearInterval(tick); $('#deliver').hidden = true;
+  tick = setInterval(() => { setStats(); const t = $('#ftm'); if (t && ST[FOCUS]?.status === 'working') t.textContent = fmt(Date.now() - ST[FOCUS].t0); }, 500);
+  let back = false;
+  try { await API.run(body({ task: $('#task').value, refs: hasRefs() ? REFS : [] }), handle); }
+  catch (err) { if (apiProblem(err)) back = true; else handle({ type: 'error', message: err.message }); }
+  clearInterval(tick); setStats(); ENERGY = 0; busy = false; $('#again').disabled = false;
+  if (INFO.accounts) { await refreshAccount(); }
+  if (back) { show(2); return; }
+  updateAcctChip();
+}
+
+$('#apikey').addEventListener('input', updateMode);
+init();
+</script>
+</body>
+</html>
