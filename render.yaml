@@ -1,18 +1,46 @@
-# פריסה ל-Render (Blueprint). לא נבדק מול Render עצמו.
-# APP_PASSWORD מוזן ידנית בלוח הבקרה של Render ולא נשמר בקובץ.
+# פריסה ל-Render (Blueprint) של שרת המנויים. לא נבדק מול Render עצמו.
+# כל הערכים עם sync:false מוזנים ידנית בלוח הבקרה של Render ולא נשמרים בקובץ.
+# אין כאן APP_PASSWORD: במצב מנויים הלקוחות נכנסים עם חשבון, וסיסמה כללית הייתה חוסמת אותם.
 services:
   - type: web
-    name: etel-agents
+    name: crew-saas
     runtime: node
     rootDir: agents-app
     branch: ccr-c26f43f2-x39v26
     buildCommand: echo "no build"
     startCommand: node server.js
-    plan: free
+    healthCheckPath: /api/agents
+    plan: starter          # דיסק קבוע לא זמין בתוכנית החינמית
+    disk:
+      name: crew-data
+      mountPath: /var/data # כאן נשמרים הלקוחות והשימוש (db.json)
+      sizeGB: 1
     envVars:
-      - key: APP_PASSWORD
-        sync: false
-      - key: BRAND_NAME
-        sync: false
       - key: NODE_VERSION
         value: "22"
+      - key: ACCOUNTS
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data
+      - key: BRAND_NAME
+        sync: false
+      - key: OPENAI_API_KEY      # מפתח המערכת. נשאר בשרת בלבד
+        sync: false
+      - key: ADMIN_TOKEN         # סיסמה לכניסה ל-/admin. מחרוזת ארוכה ואקראית
+        sync: false
+      - key: PUBLIC_URL          # הכתובת הציבורית, למשל https://crew-saas.onrender.com
+        sync: false
+      - key: ALLOWED_ORIGIN      # https://as-biz.com אם הממשק נשאר באתר
+        sync: false
+      - key: TERMS_URL
+        sync: false
+      - key: GROW_USER_ID
+        sync: false
+      - key: GROW_API_KEY
+        sync: false
+      - key: GROW_PAGECODE_OWN
+        sync: false
+      - key: GROW_PAGECODE_MANAGED
+        sync: false
+      - key: GROW_WEBHOOK_SECRET
+        sync: false
