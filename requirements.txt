@@ -1,3 +1,4 @@
+openai>=1.50
 anthropic>=0.40
 Pillow>=10.1
 python-bidi>=0.5

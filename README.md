@@ -4,7 +4,7 @@
 ואתה מקבל **התרעה בטלגרם** עם התמונה והטקסט המוכן להדבקה בערוץ הווטסאפ.
 
 ```
-RSS + Google News ──► סינון/כפילויות ──► סיכום Claude ──► כרטיס 1080x1350
+RSS + Google News ──► סינון/כפילויות ──► סיכום AI ──► כרטיס 1080x1350
                                                              │
             PUBLISH_TARGETS (רשימה מופרדת בפסיקים; ריק = טיוטה)
                        ├─► telegram   ערוץ טלגרם ציבורי   (אוטומטי מלא)
@@ -22,14 +22,14 @@ RSS + Google News ──► סינון/כפילויות ──► סיכום Cla
 ```
 pip install -r requirements.txt
 python -m netanya_news.main --demo      # כרטיס לדוגמה בלי רשת, בתיקיית out/
-python -m netanya_news.main --dry-run   # איסוף+סיכום אמיתיים, בלי פרסום והתרעה (דורש ANTHROPIC_API_KEY)
+python -m netanya_news.main --dry-run   # איסוף+סיכום אמיתיים, בלי פרסום והתרעה (דורש מפתח AI)
 ```
 
 ## הקמה (חד-פעמי)
 1. **טלגרם:** ב-@BotFather ליצור בוט ← `TELEGRAM_BOT_TOKEN`. לשלוח לבוט הודעה, ואז לפתוח
    `https://api.telegram.org/bot<TOKEN>/getUpdates` ולהעתיק את `chat.id` ← `TELEGRAM_CHAT_ID` (ההתרעות הפרטיות אליך).
    ליצור **ערוץ ציבורי**, להוסיף את הבוט כמנהל עם הרשאת פרסום, ולשמור את שם הערוץ (`@שם_הערוץ`) ← `TELEGRAM_CHANNEL_ID`.
-2. **Claude:** `ANTHROPIC_API_KEY`.
+2. **מודל AI:** `OPENAI_API_KEY` (או `ANTHROPIC_API_KEY` לשימוש ב-Claude). אם שניהם קיימים, OpenAI מקבל עדיפות. המודל נקבע ב-`NEWS_MODEL` (ברירת מחדל `gpt-4.1`).
 3. ב-GitHub: Settings → Secrets and variables → Actions, מוסיפים את הסודות. ה-workflow רץ רק מהענף הראשי, לכן צריך למזג אליו.
 4. Settings → Variables → `PUBLISH_TARGETS`: ריק = טיוטה (ברירת מחדל), `telegram`, או `telegram,instagram`.
    מומלץ להתחיל בטיוטה כמה ימים ולבדוק איכות.

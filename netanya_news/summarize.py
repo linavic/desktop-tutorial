@@ -1,9 +1,10 @@
-"""Summarise the day's items into an Instagram card, caption and WhatsApp text via Claude."""
+"""Summarise the day's items into an Instagram card, caption and WhatsApp text via OpenAI or Claude."""
 import json
 import os
 import re
 
-MODEL = os.environ.get("NEWS_MODEL", "claude-sonnet-5-5")
+OPENAI = bool(os.environ.get("OPENAI_API_KEY"))  # OpenAI if its key is set, otherwise Claude
+MODEL = os.environ.get("NEWS_MODEL") or ("gpt-4.1" if OPENAI else "claude-sonnet-5-5")
 
 SYSTEM = """אתה עורך חדשות של ערוץ "חדשות נתניה – סיכום יומי". תקבל רשימת ידיעות שנאספו היום ממקורות שונים.
 כללים מחייבים:
@@ -26,15 +27,20 @@ def _extract_json(text):
 
 
 def summarize(items, date_label):
-    import anthropic
-
     payload = [{k: i[k] for k in ("title", "source", "url", "published", "snippet")} for i in items[:60]]
-    client = anthropic.Anthropic()
-    msg = client.messages.create(
-        model=MODEL, max_tokens=3000, system=SYSTEM,
-        messages=[{"role": "user", "content": f"תאריך: {date_label}\nידיעות:\n" + json.dumps(payload, ensure_ascii=False)}],
-    )
-    result = _extract_json("".join(b.text for b in msg.content if b.type == "text"))
+    user = f"תאריך: {date_label}\nידיעות:\n" + json.dumps(payload, ensure_ascii=False)
+    if OPENAI:
+        from openai import OpenAI
+        r = OpenAI().chat.completions.create(
+            model=MODEL, response_format={"type": "json_object"},
+            messages=[{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}])
+        text = r.choices[0].message.content
+    else:
+        import anthropic
+        msg = anthropic.Anthropic().messages.create(
+            model=MODEL, max_tokens=3000, system=SYSTEM, messages=[{"role": "user", "content": user}])
+        text = "".join(b.text for b in msg.content if b.type == "text")
+    result = _extract_json(text)
     valid_urls = {i["url"] for i in items}
     result["items"] = [i for i in result.get("items", []) if i.get("url") in valid_urls][:6]  # drop hallucinated links
     if not result["items"]:
