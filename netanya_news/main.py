@@ -69,19 +69,32 @@ def run(args):
     if args.dry_run or args.demo:
         return 0
 
-    mode, link = os.environ.get("PUBLISH_MODE", "draft"), ""
-    if mode == "instagram":
-        from . import instagram
-        link = instagram.publish(image, result["instagram_caption"], day)
-        headline = f"✅ פורסם באינסטגרם: {link}\nעכשיו מעבירים לערוץ הווטסאפ: מצרפים את התמונה ומדביקים את הטקסט שבהודעה הבאה."
+    targets = [t.strip() for t in os.environ.get("PUBLISH_TARGETS", "").split(",") if t.strip()]
+    links, errors = {}, {}
+    for t in targets:  # each platform fails independently
+        try:
+            if t == "telegram":
+                links[t] = notify.post_to_channel(image, result["whatsapp_text"]) or "ערוץ טלגרם"
+            elif t == "instagram":
+                from . import instagram
+                links[t] = instagram.publish(image, result["instagram_caption"], day)
+            else:
+                raise ValueError(f"unknown target '{t}'")
+        except Exception as e:
+            errors[t] = str(e)[:300]
+    if not targets:
+        headline = "📝 הסיכום היומי מוכן (מצב טיוטה). מפרסמים ידנית: התמונה כאן, הטקסט בהודעה הבאה."
     else:
-        headline = "📝 הסיכום היומי מוכן (מצב טיוטה). מפרסמים באינסטגרם ובווטסאפ ידנית: התמונה כאן, הטקסט בהודעה הבאה."
+        lines = [f"✅ {t}: {l}" for t, l in links.items()] + [f"❌ {t}: {e}" for t, e in errors.items()]
+        headline = "פורסם:\n" + "\n".join(lines)
+        if "whatsapp" not in targets:
+            headline += "\n\nלווטסאפ: מצרפים את התמונה ומדביקים את הטקסט שבהודעה הבאה."
     if notify.configured():
         notify.send_package(headline, image, result["whatsapp_text"])
     else:
         print("[notify] Telegram not configured - no alert sent!", file=sys.stderr)
-    _save(day, mode, link)
-    return 0
+    _save(day, ",".join(links) or ("failed" if errors else "draft"), json.dumps(links, ensure_ascii=False))
+    return 1 if errors else 0
 
 
 def _save(day, status, link=""):
