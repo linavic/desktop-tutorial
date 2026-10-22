@@ -1,5 +1,56 @@
-# Welcome to GitHub Desktop!
+# חדשות נתניה – סיכום יומי
 
-This is your README. READMEs are where you can communicate what your project is and how to use it.
+צנרת חצי-אוטומטית: כל ערב ב-20:00 נאספות ידיעות על נתניה, Claude מסכם את המהותיות, נוצר כרטיס לאינסטגרם,
+ואתה מקבל **התרעה בטלגרם** עם התמונה והטקסט המוכן להדבקה בערוץ הווטסאפ.
 
-Write your name on line 6, save it, and then head back to GitHub Desktop.
+```
+RSS + Google News ──► סינון/כפילויות ──► סיכום AI ──► כרטיס 1080x1350
+                                                             │
+            PUBLISH_TARGETS (רשימה מופרדת בפסיקים; ריק = טיוטה)
+                       ├─► telegram   ערוץ טלגרם ציבורי   (אוטומטי מלא)
+                       └─► instagram  פוסט באינסטגרם       (אוטומטי, דורש הקמה)
+                                                             ▼
+                          התרעה פרטית אליך בטלגרם: מה פורסם + קישורים + טקסט לווטסאפ
+```
+
+- **טלגרם:** פרסום אוטומטי מלא ורשמי דרך בוט.
+- **אינסטגרם:** פרסום אוטומטי דרך Graph API (חשבון Business/Creator).
+- **ווטסאפ:** ל-API הרשמי אין פרסום לערוצים, ולכן ההעברה ידנית: ההתרעה כוללת תמונה וטקסט להדבקה (10 שניות).
+- **טיקטוק:** לא ממומש. ה-API הרשמי מאפשר פרסום, אבל עד שהאפליקציה עוברת audit של TikTok כל הפוסטים נשארים פרטיים.
+
+## הרצה מקומית
+```
+pip install -r requirements.txt
+python -m netanya_news.main --demo      # כרטיס לדוגמה בלי רשת, בתיקיית out/
+python -m netanya_news.main --dry-run   # איסוף+סיכום אמיתיים, בלי פרסום והתרעה (דורש מפתח AI)
+```
+
+## הקמה (חד-פעמי)
+1. **טלגרם:** ב-@BotFather ליצור בוט ← `TELEGRAM_BOT_TOKEN`. לשלוח לבוט הודעה, ואז לפתוח
+   `https://api.telegram.org/bot<TOKEN>/getUpdates` ולהעתיק את `chat.id` ← `TELEGRAM_CHAT_ID` (ההתרעות הפרטיות אליך).
+   ליצור **ערוץ ציבורי**, להוסיף את הבוט כמנהל עם הרשאת פרסום, ולשמור את שם הערוץ (`@שם_הערוץ`) ← `TELEGRAM_CHANNEL_ID`.
+2. **מודל AI:** `OPENAI_API_KEY` (או `ANTHROPIC_API_KEY` לשימוש ב-Claude). אם שניהם קיימים, OpenAI מקבל עדיפות. המודל נקבע ב-`NEWS_MODEL` (ברירת מחדל `gpt-4.1`).
+3. ב-GitHub: Settings → Secrets and variables → Actions, מוסיפים את הסודות. ה-workflow רץ רק מהענף הראשי, לכן צריך למזג אליו.
+4. Settings → Variables → `PUBLISH_TARGETS`: ריק = טיוטה (ברירת מחדל), `telegram`, או `telegram,instagram`.
+   מומלץ להתחיל בטיוטה כמה ימים ולבדוק איכות.
+
+### הקמת אינסטגרם (יעד `instagram`)
+- חשבון אינסטגרם **Business/Creator** מקושר לדף פייסבוק, ואפליקציה ב-Meta for Developers עם ההרשאות
+  `instagram_basic` ו-`instagram_content_publish`. לצורך השימוש בחשבון של עצמך מספיק מצב Development.
+- סודות: `IG_USER_ID`, `IG_ACCESS_TOKEN` (long-lived, מתחדש כל ~60 יום).
+- אינסטגרם דורשת כתובת ציבורית לתמונה, לכן התמונה עולה ל-bucket ציבורי ב-Supabase Storage
+  (שם ברירת מחדל `netanya-news`): `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_BUCKET` (אופציונלי).
+
+## התרעות
+כל הרצה מסתיימת בהתרעה פרטית בטלגרם: מה פורסם ואיפה (עם קישורים), כשל ביעד מסוים, טיוטה מוכנה, אין חדשות משמעותיות, לא נאספו ידיעות, או כשל.
+
+## התאמות
+- מקורות: `sources.json` (שאילתות Google News ופידים). אפשר להוסיף מקומונים/אתר העירייה ופידי RSS ממקורות רשתות
+  (למשל RSSHub או Apify), והם יסוננו לפי המילה "נתניה".
+- הנחיות העריכה והטון: `SYSTEM` ב-`netanya_news/summarize.py`.
+- המודל: משתנה סביבה `NEWS_MODEL`.
+
+## הערות
+- הכתיבה מבוססת רק על המקורות, והקישורים נבדקים מול הידיעות שנאספו. עדיין מומלץ להעיף מבט על ההודעה לפני העברה לווטסאפ.
+- סיכום במילים שלנו עם קישור למקור, בלי העתקת טקסט או תמונות.
+- הפונט Heebo ברישיון OFL (`fonts/OFL.txt`).
