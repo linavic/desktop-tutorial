@@ -23,3 +23,18 @@ def telegram_html(items, date_label):
 def instagram(items, date_label):
     lines = [f"חדשות נתניה – סיכום יומי | {date_label}\n"] + [f"• {i['title']}" for i in items]
     return "\n".join(lines) + "\n\nהסיכום המלא וקישורים לכתבות בערוץ הטלגרם והווטסאפ שלנו.\n\n" + TAGS
+
+
+def platforms(items, date_label):
+    """Ready-to-post captions per network. Telegram/WhatsApp keep full links; others point to the channel."""
+    heads = [i["title"] for i in items]
+    short = f"חדשות נתניה | {date_label}\n\n" + "\n".join(f"• {h}" for h in heads)
+    x = f"חדשות נתניה – סיכום יומי\n" + "\n".join(f"• {h}" for h in heads[:2])
+    return {
+        "whatsapp": whatsapp(items, date_label),
+        "instagram": instagram(items, date_label),
+        "facebook": short + "\n\nהקישורים לכתבות המלאות בערוץ הטלגרם שלנו.",
+        "tiktok": f"חדשות נתניה – סיכום יומי | {date_label}\n" + TAGS + " #fyp",
+        "x": x[:270],
+        "linkedin": short,
+    }

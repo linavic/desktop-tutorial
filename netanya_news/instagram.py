@@ -22,10 +22,10 @@ def _req(url, data=None, headers=None, method=None):
         raise RuntimeError(f"{url.split('?')[0]} -> {e.code}: {e.read().decode(errors='replace')[:300]}") from None
 
 
-def upload_public(path, name):
+def upload_public(path, name, content_type="image/jpeg"):
     base, key, bucket = os.environ["SUPABASE_URL"].rstrip("/"), os.environ["SUPABASE_SERVICE_KEY"], os.environ.get("SUPABASE_BUCKET", "netanya-news")
     _req(f"{base}/storage/v1/object/{bucket}/{name}", open(path, "rb").read(),
-         {"Authorization": f"Bearer {key}", "Content-Type": "image/jpeg", "x-upsert": "true"}, "POST")
+         {"Authorization": f"Bearer {key}", "Content-Type": content_type, "x-upsert": "true"}, "POST")
     return f"{base}/storage/v1/object/public/{bucket}/{name}"
 
 

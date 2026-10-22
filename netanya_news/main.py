@@ -7,7 +7,7 @@ import traceback
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from . import card, collect, compose, notify
+from . import card, collect, compose, notify, video
 
 TZ = ZoneInfo("Asia/Jerusalem")
 STATE = "state/posted.json"
@@ -68,6 +68,15 @@ def run(args):
     open(f"out/{day}-whatsapp.txt", "w", encoding="utf-8").write(result["whatsapp_text"])
     open(f"out/{day}-instagram.txt", "w", encoding="utf-8").write(result["instagram_caption"])
     print(f"[main] card: {image}")
+    try:
+        vid = video.render(result["items"], now, f"out/{day}.mp4")
+    except Exception as e:  # video is optional; never block the text/image post
+        print(f"[main] video failed: {e}", file=sys.stderr)
+        vid = None
+    package = {"date": day, "date_label": date_label, "items": result["items"],
+               "captions": compose.platforms(result["items"], date_label)}
+    json.dump(package, open(f"out/{day}-package.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print(f"[main] video: {vid}")
     if args.dry_run or args.demo:
         return 0
 
@@ -80,6 +89,9 @@ def run(args):
             elif t == "instagram":
                 from . import instagram
                 links[t] = instagram.publish(image, result["instagram_caption"], day)
+            elif t == "asbiz":
+                from . import deliver
+                links[t] = deliver.deliver(package, image, vid, day)
             else:
                 raise ValueError(f"unknown target '{t}'")
         except Exception as e:
@@ -93,6 +105,11 @@ def run(args):
             headline += "\n\nלווטסאפ: מצרפים את התמונה ומדביקים את הטקסט שבהודעה הבאה."
     if notify.configured():
         notify.send_package(headline, image, result["whatsapp_text"])
+        if vid:
+            try:
+                notify.send_video(vid, "סרטון קצר לרילס/טיקטוק")
+            except Exception as e:
+                print(f"[notify] video failed: {e}", file=sys.stderr)
     else:
         print("[notify] Telegram not configured - no alert sent!", file=sys.stderr)
     _save(day, ",".join(links) or ("failed" if errors else "draft"), json.dumps(links, ensure_ascii=False))
