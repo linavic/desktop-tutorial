@@ -1,0 +1,10 @@
+{
+  "keyword": "נתניה",
+  "max_age_hours": 30,
+  "google_news_queries": ["נתניה", "עיריית נתניה", "נתניה משטרה", "נתניה כבאות", "נתניה חינוך"],
+  "feeds": [
+    {"name": "ynet", "url": "https://www.ynet.co.il/Integration/StoryRss2.xml"},
+    {"name": "ישראל היום", "url": "https://www.israelhayom.co.il/rss.xml"},
+    {"name": "וואלה", "url": "https://rss.walla.co.il/feed/1"}
+  ]
+}
