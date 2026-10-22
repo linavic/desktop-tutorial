@@ -36,11 +36,11 @@ def send_text(text, chat=None):
     _api("sendMessage", {"chat_id": chat or os.environ["TELEGRAM_CHAT_ID"], "text": text[:4000], "disable_web_page_preview": True})
 
 
-def post_to_channel(image_path, text):
+def post_to_channel(image_path, html_text):
     """Public post to the Telegram channel (bot must be a channel admin). Returns the post link if public."""
     chan = os.environ["TELEGRAM_CHANNEL_ID"]  # e.g. @netanya_news_daily
     _api("sendPhoto", {"chat_id": chan}, ("photo", image_path))
-    res = _api("sendMessage", {"chat_id": chan, "text": text[:4000], "disable_web_page_preview": True})
+    res = _api("sendMessage", {"chat_id": chan, "text": html_text[:4000], "parse_mode": "HTML", "disable_web_page_preview": True})
     uname = res["result"]["chat"].get("username")
     return f"https://t.me/{uname}/{res['result']['message_id']}" if uname else ""
 
