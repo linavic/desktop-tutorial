@@ -1,6 +1,7 @@
 """Telegram alerts to the channel owner."""
 import json
 import os
+import urllib.error
 import urllib.request
 import uuid
 
@@ -19,8 +20,12 @@ def _api(method, fields, file_field=None):
         req = urllib.request.Request(url, body, {"Content-Type": f"multipart/form-data; boundary={b}"})
     else:
         req = urllib.request.Request(url, json.dumps(fields).encode(), {"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:  # surface Telegram's own explanation (e.g. "chat not found")
+        detail = e.read().decode(errors="replace")[:300]
+        raise RuntimeError(f"Telegram {method} -> {e.code}: {detail}") from None
 
 
 def configured():
