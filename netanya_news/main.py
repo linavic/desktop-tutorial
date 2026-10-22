@@ -7,7 +7,7 @@ import traceback
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from . import card, collect, notify
+from . import card, collect, compose, notify
 
 TZ = ZoneInfo("Asia/Jerusalem")
 STATE = "state/posted.json"
@@ -45,9 +45,7 @@ def run(args):
         return 0
 
     if args.demo:
-        result = {"skip": False, "items": DEMO_ITEMS,
-                  "whatsapp_text": "*חדשות נתניה - סיכום יומי*\n\n(דמו)\n" + "\n".join(f"• {i['title']}" for i in DEMO_ITEMS),
-                  "instagram_caption": "חדשות נתניה - סיכום יומי\n#נתניה #חדשות"}
+        result = {"skip": False, "items": DEMO_ITEMS}
     else:
         items = collect.collect()
         print(f"[main] {len(items)} unique recent items")
@@ -62,6 +60,10 @@ def run(args):
         _save(day, "skipped")
         return 0
 
+    date_label = card.hebrew_date(now)
+    result["whatsapp_text"] = compose.whatsapp(result["items"], date_label)
+    result["telegram_html"] = compose.telegram_html(result["items"], date_label)
+    result["instagram_caption"] = compose.instagram(result["items"], date_label)
     image = card.render(result["items"], now, f"out/{day}.jpg")
     open(f"out/{day}-whatsapp.txt", "w", encoding="utf-8").write(result["whatsapp_text"])
     open(f"out/{day}-instagram.txt", "w", encoding="utf-8").write(result["instagram_caption"])
@@ -74,7 +76,7 @@ def run(args):
     for t in targets:  # each platform fails independently
         try:
             if t == "telegram":
-                links[t] = notify.post_to_channel(image, result["whatsapp_text"]) or "ערוץ טלגרם"
+                links[t] = notify.post_to_channel(image, result["telegram_html"]) or "ערוץ טלגרם"
             elif t == "instagram":
                 from . import instagram
                 links[t] = instagram.publish(image, result["instagram_caption"], day)
