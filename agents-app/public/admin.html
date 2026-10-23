@@ -34,6 +34,11 @@ h3{margin:14px 0 6px;font-size:.95rem;color:var(--gold)}
 <div class="top"><h1>CRM מנויים</h1><span class="sp"></span>
   <input id="tok" type="password" placeholder="ADMIN_TOKEN" dir="ltr" style="width:220px"> <button id="go" class="gold">כניסה</button> <span id="msg" class="muted"></span></div>
 <div class="cards" id="sum"></div>
+<details class="card" id="setup"><summary style="cursor:pointer;font-weight:700">מוכנות להפעלה: מה מוגדר ומה חסר <span id="setupSum" class="muted"></span></summary>
+  <div id="setupBody" class="muted" style="margin-top:10px">טוען…</div>
+  <div class="acts"><button id="chkOA">בדוק את מפתח OpenAI של המערכת (חינם)</button></div><div id="oaOut" class="muted"></div>
+  <div class="muted" style="margin-top:8px;line-height:1.7"><b>הרצת דוגמה בלי עלות:</b> אין API חינמי של OpenAI. הדגמה (תוכן לדוגמה) חינמית ופתוחה לכולם בעמוד הראשי. להרצה אמיתית צריך מפתח עם יתרה קטנה, וכל ריצה עולה כ-1 עד 2 ₪. כדי לא לשלם בעצמך על ניסיונות של לקוחות, הגבילי את "ריצות הניסיון" (TRIAL_RUNS).</div>
+</details>
 
 <div class="card">
   <div class="bar">
@@ -120,5 +125,14 @@ async function openDrawer(id) {
   $('#del').onclick = async () => { if (!confirm('למחוק את הלקוח לצמיתות?')) return; await call('/api/admin/customer', { id, action: 'delete' }); closeD(); load(); };
   $('#tgs').onclick = () => act('tags', { value: $('#tg').value })(); $('#nts').onclick = () => act('note', { value: $('#nt').value })();
 }
-if (T) load();
+async function loadSetup() {
+  try {
+    const d = await call('/api/admin/setup'), ok = d.checks.filter(c => c.ok).length;
+    $('#setupSum').textContent = `· ${ok} מתוך ${d.checks.length} מוכנים`;
+    $('#setupBody').innerHTML = d.checks.map(c => `<div style="margin:6px 0"><span class="${c.ok ? 's-active' : 's-expired'}">${c.ok ? '✓' : '✗'}</span> <b style="color:var(--ink)">${esc(c.label)}</b> <code dir="ltr" class="muted">${esc(c.env)}</code>${c.ok ? '' : `<div class="muted">${esc(c.help)}</div>`}</div>`).join('') + `<h3>כתובות להזנה ב-GROW</h3><div class="muted">כתובת webhook (notify):</div><div class="codebox">${esc(d.webhookUrl)}</div><div class="muted">חזרה אחרי תשלום מוצלח:</div><div class="codebox">${esc(d.successUrl)}</div>${d.sandbox ? '<div class="muted">מצב sandbox פעיל.</div>' : '<div class="muted">מצב ייצור. לבדיקות הגדירי GROW_SANDBOX=1.</div>'}`;
+  } catch (e) { $('#setupBody').textContent = e.message; }
+}
+$('#chkOA').onclick = async () => { $('#oaOut').textContent = 'בודק…'; try { const r = await call('/api/admin/check-openai'); $('#oaOut').innerHTML = r.results.map(x => `<div><span class="${x.ok ? 's-active' : x.ok === false ? 's-expired' : ''}">${x.ok ? '✓' : x.ok === false ? '✗' : '•'}</span> ${esc(x.name)}: ${esc(x.detail)}</div>`).join(''); } catch (e) { $('#oaOut').textContent = e.message; } };
+$('#setup').addEventListener('toggle', () => { if ($('#setup').open) loadSetup(); });
+if (T) { load(); loadSetup(); }
 </script></body></html>

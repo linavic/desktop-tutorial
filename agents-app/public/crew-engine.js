@@ -140,20 +140,20 @@
 
   // ---------- הדגמה ----------
   const DEMO = {
-    orchestrator: t => `# בריף: ${t}\n\n**מטרה:** להפוך את הבקשה לתוכן אחד ברור.\n**קהל יעד:** לפי הקשר הפרויקט.\n**מסר מרכזי:** ערך קודם, בלי לחץ.\n**פורמט:** מאמר קצר עם תמונה.\n**טון:** חם, ישיר, מדובר.\n\n## נקודות מפתח\n1. הוק פותח שעוצר גלילה\n2. שלוש נקודות ערך\n3. קריאה לפעולה אחת`,
-    chen: t => `# מקורות: ${t}\n\n**מצב הדגמה: אין חיפוש אמיתי.** במצב חי חוקר הרשת מחפש ברשת ומחזיר קישורים אמיתיים.\n\n## מילות חיפוש\n- ${t}\n- מדריך למתחילות`,
-    researcher: t => `# מחקר: ${t}\n\n## ממצאים\n- נקודה 1: [מצב הדגמה]\n- נקודה 2: [צריך אימות]\n\n## מקורות\nאין מקורות במצב הדגמה.`,
-    writer: t => `# ${t}\n\nפתיח שמושך: שאלה שהקהל שואל את עצמו.\n\nגוף: שלוש נקודות קצרות לפי הבריף והמחקר.\n\nסיום: קריאה לפעולה אחת, ברורה.\n\n[צריך מקור] — נקודה 2`,
-    yael: t => `# ${t}\n\n{{IMAGE_NEEDED: "תמונת פתיחה: סצנה נקייה ומודרנית שמבטאת את המותג, תאורה רכה, פלטת צבעים עדינה"}}\n\nפתיח בקול שלנו: שאלה אחת שהקהל באמת שואל.\n\n## שלוש נקודות\n- נקודה ראשונה, קצרה וברורה\n- נקודה שנייה, בלי ז'רגון\n- נקודה שלישית, עם **דגש** אחד\n\n{{IMAGE_NEEDED: "המחשה לנקודה המרכזית: קומפוזיציה פשוטה עם אלמנט אחד בולט על רקע נקי"}}\n\nסיום: קריאה אחת לפעולה.`,
+    orchestrator: (t, b) => `# בריף: ${t}\n\n**עסק:** ${b}\n**מטרה:** להפוך את הבקשה לתוכן אחד ברור.\n**קהל יעד:** לפי הקשר העסק.\n**מסר מרכזי:** ערך קודם, בלי לחץ.\n**פורמט:** פוסט קצר עם תמונה.\n**טון:** חם, ישיר, מדובר.\n\n## נקודות מפתח\n1. פתיח שעוצר גלילה\n2. שלוש נקודות ערך\n3. קריאה לפעולה אחת`,
+    chen: t => `# מקורות: ${t}\n\n**זו הדגמה: לא בוצע חיפוש אמיתי.** בריצה חיה חוקר הרשת מחפש ברשת ומחזיר קישורים אמיתיים.\n\n## מילות חיפוש\n- ${t}\n- מדריך למתחילים`,
+    researcher: t => `# מחקר: ${t}\n\n## ממצאים (דוגמה)\n- נקודה 1: [הדגמה]\n- נקודה 2: [צריך אימות]\n\n## מקורות\nאין מקורות בהדגמה.`,
+    writer: (t, b) => `# ${t}\n\nפתיח: ${b} מתחיל מהשאלה שהלקוחות שלנו שואלים הכי הרבה.\n\nגוף: שלוש נקודות קצרות לפי הבריף והמחקר.\n\nסיום: קריאה לפעולה אחת, ברורה.\n\n[צריך מקור] — נקודה 2`,
+    yael: (t, b) => `# ${t}\n\n{{IMAGE_NEEDED: "תמונת פתיחה: סצנה נקייה ומודרנית שמבטאת את ${b}, תאורה רכה, פלטת צבעים עדינה"}}\n\n${b} כאן כדי להקל עליכם. רציתם לדעת מאיפה מתחילים? הנה שלושה דברים, בלי מילים גדולות ובלי לחץ.\n\n## שלושה דברים שכדאי לדעת\n- **מתחילים מהצורך שלכם:** מספרים לנו מה חשוב לכם, ואנחנו מתאימים.\n- **בלי הפתעות:** כל שלב מוסבר מראש, ואתם מחליטים.\n- **תוצאה שאפשר לראות:** מציגים דוגמאות לפני שמחליטים.\n\n{{IMAGE_NEEDED: "המחשה לנקודה המרכזית: קומפוזיציה פשוטה עם אלמנט אחד בולט על רקע נקי"}}\n\nרוצים לשמוע עוד? כתבו לנו ונחזור אליכם.`,
     yuval: () => '',
-    editor: t => `# ${t}\n\n![תמונה 1](yuval/outputs/demo-1.svg)\n\nפתיח מחודד: שאלה אחת שהקהל באמת שואל.\n\n## שלוש נקודות\n- נקודה ראשונה, קצרה וברורה\n- נקודה שנייה, בלי ז'רגון\n- נקודה שלישית, עם **דגש** אחד\n\n![תמונה 2](yuval/outputs/demo-2.svg)\n\nסיום: קריאה אחת לפעולה.\n\n---\n## הערות עורך\n- קוצר הפתיח, והתמונות שובצו.\n- ללא בעיות פתוחות. (מצב הדגמה)`,
-    publisher: t => `# התאמות הפצה: ${t}\n\n## פייסבוק\nפוסט קצר עם שאלה בסוף.\n\n## אינסטגרם\nקרוסלה של 5 שקפים.\n\n## Checklist פרסום\n- [ ] מדיה מוכנה\n- [ ] קישורים נבדקו\n- [ ] אישור לפני פרסום\n\nהפרסום בפועל ידני אחרי אישור.`
+    editor: (t, b) => `# ${t}\n\n![תמונה 1](yuval/outputs/demo-1.svg)\n\n**${b}** כאן כדי להקל עליכם. רציתם לדעת מאיפה מתחילים? הנה שלושה דברים, בלי מילים גדולות ובלי לחץ.\n\n## שלושה דברים שכדאי לדעת\n- **מתחילים מהצורך שלכם:** מספרים לנו מה חשוב לכם, ואנחנו מתאימים.\n- **בלי הפתעות:** כל שלב מוסבר מראש, ואתם מחליטים.\n- **תוצאה שאפשר לראות:** מציגים דוגמאות לפני שמחליטים.\n\n![תמונה 2](yuval/outputs/demo-2.svg)\n\nרוצים לשמוע עוד? כתבו לנו ונחזור אליכם.\n\n---\n## הערות עורך\n- זהו טקסט לדוגמה בלבד, כדי להראות איך נראה התוצר. בריצה אמיתית הסוכנים כותבים לפי העסק, הקהל והמחקר האמיתיים שלכם.`,
+    publisher: t => `# התאמות הפצה: ${t}\n\n## פייסבוק\nפוסט קצר עם שאלה בסוף.\n\n## אינסטגרם\nקרוסלה של 5 שקפים.\n\n## רשימת בדיקה לפני פרסום\n- [ ] התמונות מוכנות\n- [ ] הקישורים נבדקו\n- [ ] אישור סופי שלכם\n\nהפרסום בפועל נעשה ידנית אחרי אישור.`
   };
   const DEMO_QUERIES = { chen: ['טרנדים עכשיו בתחום', 'מדריכים אמינים לנושא'], researcher: ['נתונים ועובדות עדכניות', 'שאלות נפוצות של הקהל'] };
   const DEMO_SOURCES = [
-    { url: 'https://example.com/demo-1', title: 'מקור לדוגמה 1 (הדגמה)' },
-    { url: 'https://example.org/demo-2', title: 'מקור לדוגמה 2 (הדגמה)' },
-    { url: 'https://example.net/demo-3', title: 'מקור לדוגמה 3 (הדגמה)' }
+    { url: 'https://example.com/demo-1', title: 'מקור לדוגמה 1' },
+    { url: 'https://example.org/demo-2', title: 'מקור לדוגמה 2' },
+    { url: 'https://example.net/demo-3', title: 'מקור לדוגמה 3' }
   ];
 
   const NOTES = {
@@ -220,7 +220,7 @@
             let url;
             if (!cfg.live) {
               const [gw, gh] = fmt.gen.split('x').map(n => Math.round(n / 2.4)), hue = [36, 200][i % 2];
-              url = await io.putImage(rel, { svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${gw}" height="${gh}" viewBox="0 0 ${gw} ${gh}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},45%,86%)"/><stop offset="1" stop-color="hsl(${hue + 20},35%,70%)"/></linearGradient></defs><rect width="${gw}" height="${gh}" fill="url(#g)"/><text x="${gw / 2}" y="${gh / 2 - 6}" text-anchor="middle" font-family="Georgia,serif" font-size="${gw / 20}" letter-spacing="6" fill="#fff">${biz.toUpperCase().replace(/[<&>"]/g, '')}</text><text x="${gw / 2}" y="${gh / 2 + 28}" text-anchor="middle" font-family="sans-serif" font-size="${gw / 42}" fill="#ffffffcc">demo ${fid} · image ${i + 1}</text></svg>` }, 'image/svg+xml', runId);
+              url = await io.putImage(rel, { svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${gw}" height="${gh}" viewBox="0 0 ${gw} ${gh}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},45%,86%)"/><stop offset="1" stop-color="hsl(${hue + 20},35%,70%)"/></linearGradient></defs><rect width="${gw}" height="${gh}" fill="url(#g)"/><text x="${gw / 2}" y="${gh / 2 - 6}" text-anchor="middle" font-family="Georgia,serif" font-size="${gw / 20}" letter-spacing="6" fill="#fff">${biz.toUpperCase().replace(/[<&>"]/g, '')}</text><text x="${gw / 2}" y="${gh / 2 + 28}" text-anchor="middle" font-family="sans-serif" font-size="${gw / 42}" fill="#ffffffcc">דוגמה · תמונה ${i + 1}</text></svg>` }, 'image/svg+xml', runId);
             } else {
               emit({ type: 'step', agent: agent.id, text: `מייצר תמונה ${i + 1}/${prompts.length} בפורמט ${fid} (${IMAGE_MODEL})` });
               const full = `${prompts[i]}${style ? `\n\nStyle reference: ${style}` : ''}\n\nCompose for a ${fid} frame; keep the key subject centered with safe margins because the image will be cropped to exactly ${fid}.\n\nStrict: no text, no letters, no logos, no brand names, no signage, no watermarks anywhere in the image.`;
@@ -258,7 +258,7 @@
           for (const q of DEMO_QUERIES[agent.id]) { emit({ type: 'search', agent: agent.id, query: q }); await sleep(450); }
           for (const s of DEMO_SOURCES) { emit({ type: 'source', agent: agent.id, ...s }); await sleep(250); }
         }
-        text = DEMO[agent.id](task);
+        text = DEMO[agent.id](task, biz);
         for (let i = 0; i < text.length; i += 4) { onDelta(text.slice(i, i + 4)); await sleep(30); }
         await sleep(500);
       }

@@ -210,6 +210,39 @@ button.primary:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6)}
 #acct{color:var(--gold);border-color:#e0b56766}
 @media(max-width:900px){.si{font-size:.66rem}.acctbox .row2{grid-template-columns:1fr}.nav{flex-direction:column-reverse}.nav button{width:100%}}
 
+
+/* ---------- שדרוג UX ---------- */
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+.hero{font-size:clamp(1.8rem,4.6vw,3rem);line-height:1.15;margin:18px 0 8px}
+.sub{font-size:1.05rem;line-height:1.7;max-width:760px}
+.how3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.how3 div{background:#ffffff08;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.5}
+.how3 b{display:block;color:var(--gold);font-size:1.4rem}
+.quick{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:14px 0 6px}
+button.big{padding:14px 26px;font-size:1.05rem}
+.si{font-size:.88rem}
+.how{font-size:1rem}
+label{font-size:.9rem}
+.gate{position:sticky;bottom:10px;z-index:6;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#0d1017f2;backdrop-filter:blur(10px);box-shadow:0 -12px 32px #000b}
+.gate .gl{flex:1;min-width:220px}
+#gatelist{display:flex;flex-wrap:wrap;gap:4px 16px;margin:0}
+.gate .nav{gap:8px}
+pre.stream{direction:rtl;text-align:start;unicode-bidi:plaintext;font-family:"Segoe UI",Arial,sans-serif;font-size:.95rem;line-height:1.75}
+.runbar{flex-wrap:wrap}.rtask{color:var(--muted);font-size:.9rem;flex:1;min-width:200px}.rtask b{color:var(--ink)}
+.live{display:flex;gap:16px;align-items:center;background:linear-gradient(120deg,#141821,#10141c);border:1.5px solid var(--lc,var(--gold));border-radius:18px;padding:16px 20px;margin:12px 0 8px;box-shadow:0 0 30px -12px var(--lc,var(--gold))}
+.lico{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;flex:none;border:2px solid var(--lc,var(--gold));color:var(--lc,var(--gold));background:#ffffff08}
+.lico svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.lbody{flex:1;min-width:0}.lt{font-size:1.25rem;font-weight:800;line-height:1.3}.ls{color:var(--muted);font-size:.95rem;margin-top:2px}
+.lnum{text-align:center;flex:none}.lnum b{font-size:1.6rem;display:block;font-variant-numeric:tabular-nums}.lnum span{font-size:.75rem;color:var(--muted)}
+.minstats{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin:6px 0 10px}.minstats b{color:var(--ink)}
+.live.ok{--lc:var(--ok)}.live.err{--lc:var(--err)}
+.rhero{background:linear-gradient(120deg,#59d39a18,#e0b56714);border:1px solid #59d39a66;border-radius:14px;padding:14px 18px;margin:0 0 12px}
+.rhero h2{margin:0 0 4px;font-size:1.3rem}.rhero ol{margin:6px 0 0;padding-inline-start:1.2em;color:var(--muted);font-size:.92rem;line-height:1.7}
+details.how-it-worked{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:#0d1017}
+details.how-it-worked>summary{cursor:pointer;font-weight:700}
+.node .nm{font-size:.9rem}.node .st{font-size:.8rem}
+@media(max-width:700px){.how3{grid-template-columns:1fr}.live{padding:12px}.lt{font-size:1.05rem}.gate{bottom:6px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
@@ -223,8 +256,12 @@ button.primary:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6)}
     <button class="lnk" id="histBtn" type="button">היסטוריה</button>
   </div>
 
-  <h1 class="hero">צוות סוכנים <span>לכל עסק</span></h1>
-  <p class="sub">עוברים שלב אחר שלב. בכל שלב כתוב מה צריך לעשות, ואי אפשר להמשיך עד שמסמנים או ממלאים את הכול.</p>
+  <div id="landing">
+    <h1 class="hero">פוסט מוכן לפרסום תוך דקות, <span>לכל עסק</span></h1>
+    <p class="sub">שמונה מומחים דיגיטליים חוקרים ברשת, כותבים ומעצבים תמונות בפורמט של הרשת שלכם. מגדירים את העסק פעם אחת, ומקבלים טקסט ותמונות מוכנים.</p>
+    <div class="how3"><div><b>1</b>מספרים לנו על העסק</div><div><b>2</b>הצוות עובד, ואתם רואים כל שלב בזמן אמת</div><div><b>3</b>מקבלים פוסט ותמונות מוכנים</div></div>
+    <div class="quick"><button class="primary big" id="quick" type="button">▶ נסו עכשיו בדוגמה (בלי הרשמה)</button><span class="note">הדגמה עם תוכן לדוגמה, כדי לראות איך זה עובד. לתוכן אמיתי ממשיכים בשלבים למטה.</span></div>
+  </div>
 
   <nav class="stepper" id="stepper" aria-label="שלבים"></nav>
 
@@ -316,35 +353,36 @@ button.primary:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6)}
     </article>
 
     <div class="gate" id="gate">
-      <div class="gh">כדי להמשיך:</div><ul id="gatelist"></ul>
+      <div class="gl"><div class="gh">כדי להמשיך:</div><ul id="gatelist"></ul></div>
       <div class="nav"><button class="btn" id="back" type="button">חזרה</button><button class="primary" id="next" type="button">המשך לשלב הבא</button></div>
     </div>
   </section>
 
   <section id="runview" hidden>
-    <div class="runbar"><button class="btn" id="again" type="button" disabled>משימה חדשה</button><span class="note" id="runnote"></span></div>
-    <div class="stats">
-      <span>סוכנים <b id="sAg">0/8</b></span><span>קבצים <b id="sFi">0/8</b></span><span>מקורות <b id="sSo">0</b></span><span>תווים <b id="sCh">0</b></span><span>זמן <b id="sTm">0:00</b></span>
-      <div class="prog"><i id="prog"></i></div>
-    </div>
+    <div class="runbar"><span class="rtask" id="rtask"></span><button class="btn" id="again" type="button" disabled>משימה חדשה</button><span class="note" id="runnote"></span></div>
+    <div class="live" id="live" aria-live="polite"><div class="lico" id="lico"></div><div class="lbody"><div class="lt" id="liveT">הצוות מתחיל…</div><div class="ls" id="liveS">בדרך כלל לוקח 1 עד 3 דקות. אפשר להישאר בדף ולצפות.</div></div><div class="lnum"><b id="sTm">0:00</b><span>זמן</span></div></div>
+    <div class="prog"><i id="prog"></i></div>
+    <div class="minstats">סוכנים שסיימו <b id="sAg">0/8</b><span>מקורות <b id="sSo">0</b></span><span>שלבים מוכנים <b id="sFi">0/8</b></span><span hidden id="sCh"></span></div>
     <div class="pipe" id="pipe" aria-label="צוות הסוכנים"></div>
-    <div class="sstrip idle" id="sstrip"><div class="hd"><i></i><span id="shd">חיפוש חי ברשת</span></div><div id="schips"></div></div>
     <div class="banner" id="banner"></div>
-
-    <div class="grid">
-      <article class="panel fcard" id="focus"></article>
-      <aside class="panel"><div class="cap" style="margin:0 0 8px">יומן פעילות חי</div><ul id="log"><li style="color:var(--muted)">הפעילות תופיע כאן אחרי שיגור משימה.</li></ul></aside>
-    </div>
-
     <section class="panel deliver" id="deliver" hidden>
-      <div class="cap" style="margin:0 0 8px">התוצרים</div>
+      <div class="rhero" id="rhero"><h2>✓ הפוסט שלך מוכן</h2><ol><li>קראו את הטקסט והתמונות למטה.</li><li>העתיקו או הורידו (כפתורים מתחת ללשוניות).</li><li>בדקו הכול לפני שמפרסמים.</li></ol></div><div class="cap" style="margin:0 0 8px">התוצרים</div>
       <div class="tabs" id="tabs"></div>
-      <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dlHtml">הורדת המאמר (HTML)</button><button class="btn" id="dl">הורדת הכול (md)</button></div>
+      <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dlHtml">הורדת הפוסט (HTML)</button><button class="btn" id="dl">הורדת כל הקבצים</button></div>
       <div id="article" class="article" hidden></div>
       <pre class="stream" id="view" style="min-height:120px" hidden></pre>
       <div class="gal" id="dgal"></div>
     </section>
+    <details class="how-it-worked" id="hiw" open><summary>איך הצוות עבד (פירוט חי)</summary>
+    <div class="sstrip idle" id="sstrip"><div class="hd"><i></i><span id="shd">חיפוש חי ברשת</span></div><div id="schips"></div></div>
 
+    <div class="grid">
+      <article class="panel fcard" id="focus"></article>
+      <aside class="panel"><div class="cap" style="margin:0 0 8px">מה קורה עכשיו</div><ul id="log"><li style="color:var(--muted)">הפעילות תופיע כאן אחרי שיגור משימה.</li></ul></aside>
+    </div>
+
+
+    </details>
     <section class="panel next" id="next2"><div class="cap">המנהל מציע להמשך</div><div class="chips" id="nextchips"></div></section>
   </section>
 </div>
@@ -370,6 +408,15 @@ const EXAMPLES = ['פוסט היכרות שמציג את העסק ואת השי�
 const HEN = { orchestrator: 'מנהל התוכן', chen: 'חוקר הרשת', researcher: 'חוקר התוכן', writer: 'הקופירייטר', yael: 'עורך הסגנון', yuval: 'המעצב הוויזואלי', editor: 'העורך הראשי', publisher: 'מנהל ההפצה' };
 const HTO = { orchestrator: 'למנהל התוכן', chen: 'לחוקר הרשת', researcher: 'לחוקר התוכן', writer: 'לקופירייטר', yael: 'לעורך הסגנון', yuval: 'למעצב הוויזואלי', editor: 'לעורך הראשי', publisher: 'למנהל ההפצה' };
 const FEM = {};
+const WHAT = { orchestrator: 'הופך את הבקשה שלכם לבריף: מטרה, קהל ומסר מרכזי.', chen: 'מחפש ברשת מקורות, חדשות וטרנדים עדכניים לנושא.', researcher: 'אוסף עובדות ובודק אותן מול המקורות.', writer: 'כותב את הטיוטה הראשונה לפי הבריף והמחקר.', yael: 'משכתב בקול של העסק שלכם ומסמן איפה צריכות להיות תמונות.', yuval: 'מכין את התמונות בפורמט של הרשת שבחרתם.', editor: 'מלטש את הגרסה הסופית ובודק אותה מול הבריף והמחקר.', publisher: 'מכין התאמות לרשתות חברתיות ורשימת בדיקה לפני פרסום.' };
+const GIVES = { orchestrator: 'בריף', chen: 'מקורות', researcher: 'מחקר', writer: 'טיוטה', yael: 'טקסט בסגנון העסק', yuval: 'תמונות', editor: 'הפוסט הסופי', publisher: 'הנחיות פרסום' };
+const ACT = { orchestrator: 'מכין את הבריף', chen: 'מחפש מקורות ברשת', researcher: 'בודק עובדות', writer: 'כותב את הטיוטה', yael: 'משכתב בסגנון העסק', yuval: 'מכין את התמונות', editor: 'מלטש את הגרסה הסופית', publisher: 'מכין התאמות לרשתות' };
+const friendlyErr = m => { m = String(m || ''); return /401|incorrect api key|invalid_api_key/i.test(m) ? 'המפתח של OpenAI נדחה. בדקו שהעתקתם אותו נכון.' : /429|quota|rate limit|billing/i.test(m) ? 'OpenAI חסם זמנית בגלל מכסה או קצב. בדקו חיוב בחשבון OpenAI ונסו שוב עוד רגע.' : /failed to fetch|network|שרת/i.test(m) ? 'אין חיבור לשרת. בדקו אינטרנט ונסו שוב.' : 'משהו השתבש: ' + m; };
+function setLive(id, t, sub, cls) {
+  const a = id ? A(id) : null, box = $('#live'); box.className = 'live' + (cls ? ' ' + cls : '');
+  if (a) { box.style.setProperty('--lc', a.color); $('#lico').innerHTML = svg(a.id); }
+  if (t != null) $('#liveT').textContent = t; if (sub != null) $('#liveS').textContent = sub;
+}
 const SAY_START = {
   orchestrator: 'מנהל התוכן מתחיל. הוא הופך את הבקשה לבריף: מגדיר מטרה, קהל ומסר מרכזי.',
   chen: 'חוקר הרשת יוצא לחפש. הוא מחפש מקורות עדכניים ואמינים לנושא.',
@@ -528,8 +575,9 @@ function reset() {
     n.dataset.id = a.id; n.style.setProperty('--c', a.color); n.onclick = () => setFocus(a.id); pipe.append(n);
     if (i < INFO.agents.length - 1) { const l = el('div', 'link', '<span class="packet"></span><span class="tag"></span>'); l.dataset.i = i; l.style.setProperty('--pc', a.color); pipe.append(l); }
   });
-  const first = el('li', null, 'הפעילות תופיע כאן אחרי שיגור משימה.'); first.style.color = 'var(--muted)'; $('#log').replaceChildren(first);
+  const first = el('li', null, 'הפעילות תופיע כאן.'); first.style.color = 'var(--muted)'; $('#log').replaceChildren(first);
   $('#deliver').hidden = true; $('#banner').className = 'banner'; $('#next2').classList.remove('on'); $('#sstrip').className = 'sstrip idle'; $('#schips').replaceChildren(); $('#shd').textContent = 'חיפוש חי ברשת';
+  setLive(null, 'הצוות מתחיל…', 'בדרך כלל לוקח 1 עד 3 דקות. אפשר להישאר בדף ולצפות.', ''); $('#hiw').open = true; $('#rhero').hidden = true;
   setStats(); setFocus(INFO.agents[0].id);
 }
 function setStats() {
@@ -548,14 +596,12 @@ function renderFocus() {
   const status = s.status === 'working' ? ['עובד עכשיו', 'on'] : s.status === 'done' ? ['הושלם', 'ok'] : ['ממתין', ''];
   const ins = a.inputs.length ? a.inputs.map(id => `<span class="file">מ${A(id).title}</span>`).join('') : '<span class="file">בקשת המשתמש</span>';
   const todo = s.status === 'done' ? 'todo done' : s.status === 'working' ? 'todo run' : 'todo';
-  const tools = a.tools.map(t => `<span class="tool">${esc(t)}</span>`).join('') + (a.search ? '<span class="tool live">web_search חי</span>' : '');
   box.innerHTML = `<div class="fh"><div class="ico">${svg(a.id)}</div><h2>${a.title}</h2><span class="pill ${status[1]}">${status[0]}</span><span class="tm" id="ftm">${s.status === 'working' ? fmt(Date.now() - s.t0) : s.ms ? (s.ms / 1000).toFixed(1) + ' ש׳' : ''}</span></div>
-  <p class="desc">${esc(a.description)}</p>
-  <div class="row">כלים: ${tools}</div><div class="row">מקבל: ${ins}</div><div class="row">מוציא: <span class="file out">${esc(a.out)}</span></div>
-  <ul class="${todo}">${a.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
-  <div class="cap">מתוך קובץ ההגדרה של הסוכן. הרשימה מסומנת כשהסוכן מסיים.</div>
-  <pre class="stream" id="stream"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>${s.style ? `<div class="cap" style="color:var(--gold)">ניתוח ה-reference של המעצב</div><pre class="stream" style="min-height:0">${esc(s.style)}</pre>` : ''}`;
-  const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'עדיין לא התחיל.' : '');
+  <p class="desc">${esc(WHAT[a.id] || '')}</p>
+  <div class="row">מקבל: ${ins}</div><div class="row">מוסר הלאה: <span class="file out">${esc(GIVES[a.id] || '')}</span></div>
+  <div class="cap">מה נכתב עכשיו (בזמן אמת)</div>
+  <pre class="stream" id="stream" dir="auto"></pre><ul class="srclist" id="srcl"></ul><div class="gal" id="gal"></div>${s.style ? `<div class="cap" style="color:var(--gold)">ניתוח ה-reference של המעצב</div><pre class="stream" dir="auto" style="min-height:0">${esc(s.style)}</pre>` : ''}`;
+  const pre = $('#stream'); pre.textContent = s.text || (s.status === 'idle' ? 'ממתין לתורו.' : '');
   if (s.status === 'working') pre.append(el('span', 'caret'));
   pre.scrollTop = pre.scrollHeight;
   const sl = $('#srcl'); (SRC[FOCUS] || []).forEach(x => sl.append(el('li', null, `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>`)));
@@ -629,24 +675,25 @@ if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
 
 function handle(ev) {
   const a = ev.agent ? A(ev.agent) : null, s = a ? ST[a.id] : null, idx = a ? INFO.agents.indexOf(a) : -1;
-  if (ev.type === 'run') { runStart = Date.now(); NARR.srcSaid = {}; log(null, `משימה נקלטה · ${ev.mode === 'live' ? ev.model : 'מצב הדגמה'} · ${ev.slug} · פורמט ${ev.format}${ev.refs ? ` · ${ev.refs} תמונות reference` : ''}`); say('המשימה נקלטה. שמונה סוכנים מתחילים לעבוד.'); }
+  if (ev.type === 'run') { runStart = Date.now(); NARR.srcSaid = {}; log(null, `המשימה התקבלה (${ev.mode === 'live' ? 'ריצה אמיתית' : 'הדגמה'}). הצוות מתחיל.`); say('המשימה נקלטה. שמונה סוכנים מתחילים לעבוד.'); }
   else if (ev.type === 'start') {
     s.status = 'working'; s.t0 = Date.now(); s.text = ''; ENERGY = 1;
     const n = nodeEl(a.id); n.classList.add('working'); n.querySelector('.st').textContent = 'עובד…';
-    if (idx > 0) { const l = linkEl(idx - 1); l.classList.add('flowing'); l.querySelector('.tag').textContent = short(FILES[FILES.length - 1].path); }
-    setFocus(a.id); log(a.id, ev.inputs.length ? `קיבל ${ev.inputs.map(short).join(' + ')}` : 'קיבל את בקשת המשתמש'); say(SAY_START[a.id] || `${a.title} מתחיל לעבוד.`);
+    if (idx > 0) { const l = linkEl(idx - 1); l.classList.add('flowing'); l.querySelector('.tag').textContent = FILES[FILES.length - 1].label || ''; }
+    setLive(a.id, `${HEN[a.id]} ${ACT[a.id]}…`, `שלב ${idx + 1} מתוך ${INFO.agents.length} · ${WHAT[a.id] || ''}`);
+    setFocus(a.id); log(a.id, ev.inputs.length ? `קיבל עבודה מ${A(INFO.agents[idx - 1].id).title}` : 'קיבל את הבקשה שלכם'); say(SAY_START[a.id] || `${a.title} מתחיל לעבוד.`);
   } else if (ev.type === 'delta') {
     s.text += ev.text; ticker(a.id);
     if (FOCUS === a.id) { const pre = $('#stream'); pre.querySelector('.caret')?.remove(); pre.append(document.createTextNode(ev.text)); pre.append(el('span', 'caret')); pre.scrollTop = pre.scrollHeight; }
   } else if (ev.type === 'search') {
     const strip = $('#sstrip'); strip.className = 'sstrip on'; nodeEl(a.id).classList.add('searching');
     $('#shd').textContent = `${a.title} מחפש ברשת…`;
-    if (ev.query) { chip('q', '⌕ ' + esc(ev.query)); log(a.id, `מחפש: ${ev.query}`); say(`${HEN[a.id]} ${FEM[a.id] ? 'מחפשת' : 'מחפש'} ברשת: ${ev.query.split(/\s+/).slice(0, 6).join(' ')}`, true); } else log(a.id, 'מבצע חיפוש ברשת');
+    if (ev.query) { setLive(null, null, `מחפש ברשת: ${ev.query}`); chip('q', '⌕ ' + esc(ev.query)); log(a.id, `מחפש: ${ev.query}`); say(`${HEN[a.id]} ${FEM[a.id] ? 'מחפשת' : 'מחפש'} ברשת: ${ev.query.split(/\s+/).slice(0, 6).join(' ')}`, true); } else log(a.id, 'מבצע חיפוש ברשת');
   } else if (ev.type === 'source') {
     (SRC[a.id] = SRC[a.id] || []).push(ev); chip('s', esc(dom(ev.url)), ev.url); log(a.id, `מצא מקור: ${dom(ev.url)}`); setStats();
     if (!NARR.srcSaid[a.id]) { NARR.srcSaid[a.id] = 1; say(`נמצא מקור ראשון, מאתר ${dom(ev.url).replace(/\./g, ' נקודה ')}.`, true); }
     if (FOCUS === a.id) { $('#srcl').append(el('li', null, `<a href="${esc(ev.url)}" target="_blank" rel="noopener noreferrer">${esc(ev.title)}</a>`)); }
-  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את ה-reference: ' + ev.style.split('\n')[0].slice(0, 90)); say('המעצב הוויזואלי ניתח את תמונות ה-reference ומתאים אליהן את הסגנון.', true); if (FOCUS === a.id) renderFocus(); }
+  } else if (ev.type === 'style') { s.style = ev.style; log(a.id, 'ניתח את תמונות ה-reference'); say('המעצב הוויזואלי ניתח את תמונות ה-reference ומתאים אליהן את הסגנון.', true); if (FOCUS === a.id) renderFocus(); }
   else if (ev.type === 'image') {
     (IMGS[a.id] = IMGS[a.id] || []).push(ev); log(a.id, `תמונה ${ev.n} נוצרה`); say(`תמונה ${ev.n} מוכנה.`, true); setStage(ev.url);
     if (FOCUS === a.id) renderGallery($('#gal'), a.id);
@@ -657,12 +704,12 @@ function handle(ev) {
     const n = nodeEl(a.id); n.classList.remove('working', 'searching'); n.classList.add('done'); n.querySelector('.st').textContent = `${(ev.ms / 1000).toFixed(1)} ש׳`; n.querySelector('.tk').textContent = '';
     if (idx > 0) { const l = linkEl(idx - 1); l.classList.remove('flowing'); l.classList.add('sent'); }
     if (a.search) $('#sstrip').classList.add('idle');
-    log(a.id, `סיים · ${ev.chars} תווים${ev.sources ? ` · ${ev.sources} מקורות` : ''} · כתב ${short(ev.file.path)}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
+    log(a.id, `סיים: ${ev.file.label || 'העבודה'}${ev.sources ? ` · ${ev.sources} מקורות` : ''}${idx < INFO.agents.length - 1 ? ` · מעביר ל${INFO.agents[idx + 1].title}` : ''}`);
     if (ev.note) log(a.id, ev.note.split('\n')[0]);
     say(`${HEN[a.id]} ${FEM[a.id] ? 'סיימה' : 'סיים'}${idx < INFO.agents.length - 1 ? ` ו${FEM[a.id] ? 'מעבירה' : 'מעביר'} ${HTO[INFO.agents[idx + 1].id]}` : ''}.`);
     if (FOCUS === a.id) renderFocus(); setStats();
   } else if (ev.type === 'final') {
-    ENERGY = .25; const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה · ${FILES.length} קבצים · ${fmt(Date.now() - runStart)}`;
+    ENERGY = .25; const b = $('#banner'); b.className = 'banner ok'; b.textContent = `המשימה הושלמה ב-${fmt(Date.now() - runStart)}`; setLive(null, 'הפוסט שלך מוכן ✓', 'קראו, העתיקו או הורידו למטה. בדקו הכול לפני פרסום.', 'ok'); $('#hiw').open = false; $('#rhero').hidden = false;
     log(null, 'כל הסוכנים סיימו'); say('כל הסוכנים סיימו. המאמר והתמונות מוכנים.'); TAB = 'article'; renderDeliver(); confetti(); saveHist();
     $('#deliver').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else if (ev.type === 'next') {
@@ -670,7 +717,7 @@ function handle(ev) {
     NEXT.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => { $('#task').value = t; scrollTo({ top: 0, behavior: 'smooth' }); $('#task').focus(); }; box.append(c); });
     if (NEXT.length) $('#next2').classList.add('on');
   } else if (ev.type === 'error') {
-    ENERGY = 0; const b = $('#banner'); b.className = 'banner err'; b.textContent = 'שגיאה: ' + ev.message; log(null, 'שגיאה: ' + ev.message); say('אירעה שגיאה. פרטים בדף.');
+    ENERGY = 0; const b = $('#banner'); b.className = 'banner err'; b.textContent = friendlyErr(ev.message); setLive(null, 'משהו השתבש', friendlyErr(ev.message), 'err'); log(null, 'שגיאה: ' + ev.message); say('אירעה שגיאה. פרטים בדף.'); $('#hiw').open = true;
     document.querySelectorAll('.node.working').forEach(n => n.classList.remove('working', 'searching')); document.querySelectorAll('.link.flowing').forEach(l => l.classList.remove('flowing'));
   }
 }
@@ -681,7 +728,7 @@ function renderDeliver() {
   $('#deliver').hidden = !FILES.length;
   const tabs = $('#tabs'); tabs.replaceChildren();
   const add = (k, t, cls) => { const b = el('button', 'tab ' + (cls || '') + (TAB === k ? ' on' : ''), t); b.onclick = () => { TAB = k; renderDeliver(); }; tabs.append(b); };
-  if (ed()) add('article', '★ המאמר המוכן', 'star');
+  if (ed()) add('article', '★ הפוסט המוכן', 'star');
   FILES.forEach((f, i) => add(String(i), `${A(f.agent).title} · ${f.label}`));
   const art = $('#article'), view = $('#view'), g = $('#dgal');
   if (TAB === 'article' && ed()) {
@@ -928,7 +975,7 @@ function renderStepper() {
 function show(n) {
   const mx = maxStep(); if (n !== 6 && n > mx) n = mx;
   STEP = n; STEPS.forEach(s => { $(s.el).hidden = s.n !== n; });
-  $('#gate').hidden = n === 6; $('#wiz').hidden = n === 6; $('#runview').hidden = n !== 6;
+  $('#landing').hidden = n !== 1; $('#gate').hidden = n === 6; $('#wiz').hidden = n === 6; $('#runview').hidden = n !== 6;
   if (n === 2) renderPlan(); if (n === 4) renderStep4(); if (n === 5) renderSummary();
   refreshGate(); scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -938,7 +985,7 @@ function refreshGate() {
   const ch = STEPS[STEP - 1].checks(), all = ch.every(c => c.ok);
   const ul = $('#gatelist'); ul.replaceChildren(...ch.map(c => el('li', c.ok ? 'ok' : '', esc(c.label))));
   $('#next').disabled = !all; $('#next').textContent = STEP === 5 ? 'שגר משימה' : 'המשך לשלב הבא'; $('#back').hidden = STEP === 1;
-  $('.gh').textContent = all ? 'הכול מוכן. אפשר להמשיך:' : 'כדי להמשיך, חסר:';
+  $('.gh').textContent = `שלב ${STEP} מתוך 5 · ` + (all ? 'הכול מוכן, אפשר להמשיך' : 'כדי להמשיך, חסר:');
   renderStepper(); updateAcctChip(); updateMode();
 }
 $('#next').onclick = () => { if ($('#next').disabled) return; if (STEP === 5) startRun(); else show(STEP + 1); };
@@ -1070,7 +1117,7 @@ function apiProblem(err) {
 async function startRun() {
   if (busy) return; busy = true;
   saveProfile(); store.set('model', $('#model').value);
-  RUN_SHOWN = true; show(6); $('#again').disabled = true; $('#runnote').textContent = '';
+  RUN_SHOWN = true; show(6); $('#rtask').innerHTML = 'המשימה: <b>' + esc($('#task').value.trim().slice(0, 120)) + '</b>'; $('#again').disabled = true; $('#runnote').textContent = '';
   NARR.q = []; reset(); runStart = Date.now(); clearInterval(tick); $('#deliver').hidden = true;
   tick = setInterval(() => { setStats(); const t = $('#ftm'); if (t && ST[FOCUS]?.status === 'working') t.textContent = fmt(Date.now() - ST[FOCUS].t0); }, 500);
   let back = false;
@@ -1082,6 +1129,12 @@ async function startRun() {
   updateAcctChip();
 }
 
+$('#quick').onclick = () => {
+  const pr = (INFO.profiles || []).find(x => x.id === 'restaurant') || (INFO.profiles || [])[0]; if (pr) { fillProfile(pr); renderExamples(pr.examples || EXAMPLES); }
+  CHOICE = 'demo'; store.set('planChoice', 'demo'); store.set('logoChoice', 'none'); store.set('refChoice', 'none');
+  $('#fmt').value = '1:1'; $('#narr').value = 'off'; $('#task').value = ((pr && pr.examples && pr.examples[0]) || EXAMPLES[0]);
+  applyChoices(); updateMode(); startRun();
+};
 $('#apikey').addEventListener('input', updateMode);
 init();
 </script>

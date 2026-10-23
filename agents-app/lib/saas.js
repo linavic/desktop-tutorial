@@ -167,6 +167,22 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         store.all().forEach(c => { const r = row(c); lines.push([r.name, r.email, r.phone, r.plan || '', r.state, d(r.paidUntil), d(r.createdAt), d(r.lastSeen), r.totalRuns, r.costUsdTotal, (r.tags || []).join(' '), c.note || ''].map(q).join(',')); });
         res.writeHead(200, { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="customers.csv"' }); res.end('\ufeff' + lines.join('\n')); return true;
       }
+      if (p === '/api/admin/setup') {
+        const pu = baseUrl(req), has = k => Boolean(env[k]);
+        const checks = [
+          { ok: Boolean(C.serverKey), label: 'מפתח OpenAI של המערכת', env: 'OPENAI_API_KEY', help: 'נדרש למסלול 149 ולניסיון החינמי. אין API חינמי של OpenAI: פותחים חשבון ב-platform.openai.com, מטעינים יתרה קטנה ויוצרים מפתח. בלי זה עובדת רק ההדגמה.' },
+          { ok: has('SUPABASE_URL') && has('SUPABASE_SERVICE_KEY'), label: 'אחסון קבוע ללקוחות (Supabase)', env: 'SUPABASE_URL, SUPABASE_SERVICE_KEY', help: 'בלי זה הלקוחות נמחקים בכל הפעלה מחדש של השרת, אלא אם יש דיסק קבוע.' },
+          { ok: Boolean(C.publicUrl), label: 'כתובת ציבורית של השרת', env: 'PUBLIC_URL', help: 'נכנסת לקישורי החזרה מהתשלום ול-webhook.' },
+          { ok: Boolean(g.userId && g.apiKey), label: 'חשבון GROW (userId ו-apiKey)', env: 'GROW_USER_ID, GROW_API_KEY', help: 'מתקבלים מ-GROW אחרי שפותחים חשבון סולק.' },
+          { ok: Boolean(g.pages.own), label: 'דף תשלום חוזר ב-GROW: 99 ₪ (מפתח עצמי)', env: 'GROW_PAGECODE_OWN', help: 'יוצרים ב-GROW דף תשלום עם הוראת קבע חודשית ומעתיקים את ה-pageCode.' },
+          { ok: Boolean(g.pages.managed), label: 'דף תשלום חוזר ב-GROW: 149 ₪ (מפתח המערכת)', env: 'GROW_PAGECODE_MANAGED', help: 'כמו הקודם, בסכום 149.' },
+          { ok: Boolean(C.webhookSecret), label: 'סוד ל-webhook', env: 'GROW_WEBHOOK_SECRET', help: 'מחרוזת אקראית ארוכה שאת בוחרת. היא מגינה על כתובת ה-webhook.' },
+          { ok: has('TERMS_URL'), label: 'קישור לתקנון ותנאי שימוש', env: 'TERMS_URL', help: 'מוצג ללקוח לפני תשלום. מומלץ מאוד לפני מכירה.' }
+        ];
+        return json(res, 200, { checks, webhookUrl: `${pu}/api/billing/webhook?s=${C.webhookSecret || '<GROW_WEBHOOK_SECRET>'}`, successUrl: `${pu}/?paid=1`, cancelUrl: `${pu}/?paid=0`, sandbox: env.GROW_SANDBOX === '1' }), true;
+      }
+      if (p === '/api/admin/check-openai' && !C.serverKey) return json(res, 200, { results: [{ name: 'מפתח OpenAI של המערכת', ok: false, detail: 'לא הוגדר OPENAI_API_KEY בשרת (ב-Render: Environment).' }] }), true;
+      if (p === '/api/admin/check-openai') return json(res, 200, { results: await Engine.checkConn({ live: Boolean(C.serverKey), key: C.serverKey, model: C.model, base: C.base }) }), true;
       if (p === '/api/admin/events') return json(res, 200, { events: store.db.events.slice(-100).reverse() }), true;
       if (p === '/api/admin/customer' && req.method === 'POST') {
         const b = await readJson(req, 8000) || {}, c = store.get(b.id); if (!c) return json(res, 404, { error: 'not_found' }), true;
