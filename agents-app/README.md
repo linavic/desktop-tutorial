@@ -75,6 +75,20 @@ OPENAI_API_KEY=sk-... node server.js  # מצב חי
 כתובת ה-webhook: `PUBLIC_URL/api/billing/webhook?s=<GROW_WEBHOOK_SECRET>`. אם אין API, אפשר `GROW_LINK_OWN` ו-`GROW_LINK_MANAGED` (קישורי תשלום קבועים) ואז הלקוח לוחץ "כבר שילמתי".
 **לא נבדק מול GROW אמיתי.** את שדות הבקשה ואת פורמט ה-webhook חובה לבדוק ב-sandbox לפני שמוכרים. כל webhook נרשם בלוח הניהול.
 
+### הקמה חינמית: Render חינמי + Supabase חינמי + UptimeRobot
+1. **Supabase:** יוצרים פרויקט חינמי, ב-SQL Editor מריצים:
+   ```sql
+   create table kv (k text primary key, v jsonb not null, updated_at timestamptz default now());
+   alter table kv enable row level security;
+   ```
+   מ-Project Settings → API מעתיקים את `Project URL` ל-`SUPABASE_URL`, ואת מפתח `service_role` ל-`SUPABASE_SERVICE_KEY` (סודי: רק בשרת).
+2. **Render:** Blueprint מהריפו (`render.yaml`, תוכנית `free`), ומזינים את המשתנים.
+3. **UptimeRobot:** מוניטור HTTP שפונה כל 5 דקות אל `https://כתובת-השרת/api/agents`, כדי שהשרת לא יירדם.
+- הנתונים נשמרים ב-Supabase, ולכן הפעלה מחדש של Render לא מוחקת לקוחות.
+- בתוכנית חינמית של Supabase פרויקט שלא פעיל זמן רב מושהה. עם פנייה קבועה מ-UptimeRobot זה לא אמור לקרות, אבל לבדוק את התנאים העדכניים.
+- כל הנתונים נשמרים כמסמך אחד, וזה מתאים למאות לקוחות. מעל זה כדאי להעביר לטבלאות.
+- אם לא מגדירים `SUPABASE_*`, הנתונים נשמרים בקובץ ב-`DATA_DIR` כמקודם.
+
 ### CRM לבעל המערכת: `/admin`
 כניסה עם `ADMIN_TOKEN`. מציג לכל לקוח מסלול, מצב, תוקף, שימוש ועלות API. אפשר לחפש, לסנן (פעילים, ניסיון, פג תוקף, ביקשו ביטול, חסומים, מסתיימים השבוע), למיין ולייצא CSV. לחיצה על לקוח פותחת כרטיס: עריכת פרטים, הפעלה או הארכה או ביטול ידניים של מנוי, ריצות ניסיון, מכסה חודשית מותאמת, איפוס שימוש, חסימה, קוד גישה חדש, תגיות, הערות פנימיות, שימוש לפי חודש, ריצות ואירועים. אפשר גם להוסיף לקוח ידנית.
 

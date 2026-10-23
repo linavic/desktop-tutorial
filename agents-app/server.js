@@ -143,7 +143,7 @@ async function readJson(req, limit = 6_000_000) {
 }
 const sendJson = (res, code, obj) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); };
 
-http.createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   res.setHeader('x-content-type-options', 'nosniff'); res.setHeader('referrer-policy', 'no-referrer'); res.setHeader('cache-control', 'no-store');
   if (PASSWORD && await handleAuth(req, res, url)) return;
@@ -176,4 +176,5 @@ http.createServer(async (req, res) => {
   }
   if (p.startsWith('/runs/') && /\.(png|svg)$/.test(p)) return serveFrom(path.join(__dirname, 'runs'), p.slice(6), res);
   return serveFrom(path.join(__dirname, 'public'), p === '/' ? 'index.html' : p, res);
-}).listen(PORT, (PASSWORD || ACCOUNTS) ? '0.0.0.0' : '127.0.0.1', () => console.log(`Agent crew: http://localhost:${PORT}  [${ACCOUNTS ? 'ACCOUNTS mode' : PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE OpenAI ${MODEL}` : 'DEMO mode'})`));
+});
+(saas ? saas.ready : Promise.resolve()).then(() => server.listen(PORT, (PASSWORD || ACCOUNTS) ? '0.0.0.0' : '127.0.0.1', () => console.log(`Agent crew: http://localhost:${PORT}  [${ACCOUNTS ? 'ACCOUNTS mode' : PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE OpenAI ${MODEL}` : 'DEMO mode'})`)));

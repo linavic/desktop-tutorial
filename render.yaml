@@ -10,18 +10,16 @@ services:
     buildCommand: echo "no build"
     startCommand: node server.js
     healthCheckPath: /api/agents
-    plan: starter          # דיסק קבוע לא זמין בתוכנית החינמית
-    disk:
-      name: crew-data
-      mountPath: /var/data # כאן נשמרים הלקוחות והשימוש (db.json)
-      sizeGB: 1
+    plan: free             # חינם. הנתונים נשמרים ב-Supabase ולא בדיסק, והשרת נשמר ער ע"י UptimeRobot
     envVars:
       - key: NODE_VERSION
         value: "22"
       - key: ACCOUNTS
         value: "1"
-      - key: DATA_DIR
-        value: /var/data
+      - key: SUPABASE_URL        # https://xxxx.supabase.co
+        sync: false
+      - key: SUPABASE_SERVICE_KEY # מפתח service_role (סודי, לשרת בלבד)
+        sync: false
       - key: BRAND_NAME
         sync: false
       - key: OPENAI_API_KEY      # מפתח המערכת. נשאר בשרת בלבד

@@ -7,7 +7,7 @@ const { Store } = require('./store.js');
 const { growConfig, createCheckout, approveTransaction, parseBody, interpretWebhook } = require('./grow.js');
 
 module.exports = function createSaas({ env, Engine, streamRun, io }) {
-  const store = new Store(env.DATA_DIR || path.join(__dirname, '..', 'data'));
+  const store = new Store(env.DATA_DIR || path.join(__dirname, '..', 'data'), { url: env.SUPABASE_URL, key: env.SUPABASE_SERVICE_KEY });
   const g = growConfig(env);
   const num = (v, d) => (v !== undefined && v !== '' && !Number.isNaN(+v) ? +v : d);
   const C = {
@@ -240,5 +240,5 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     return false;
   }
 
-  return { handle, publicConfig, store, C, state, usageOf };
+  return { ready: store.ready, handle, publicConfig, store, C, state, usageOf };
 };
