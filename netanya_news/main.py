@@ -36,8 +36,8 @@ def alert(text):
 
 def run(args):
     now = datetime.now(TZ)
-    if args.only_at_hour is not None and now.hour != args.only_at_hour:
-        print(f"Israel time is {now:%H:%M}, not {args.only_at_hour}:00 - skipping (DST guard).")
+    if args.not_before_hour is not None and now.hour < args.not_before_hour:
+        print(f"Israel time is {now:%H:%M}, before {args.not_before_hour}:00 - skipping (cron slot fired early).")
         return 0
     day = f"{now:%Y-%m-%d}"
     if day in _posted() and not (args.force or args.demo):
@@ -128,7 +128,7 @@ def main():
     p.add_argument("--demo", action="store_true", help="sample data, no network, writes to out/")
     p.add_argument("--dry-run", action="store_true", help="collect+summarise+card, no publish/alert")
     p.add_argument("--force", action="store_true")
-    p.add_argument("--only-at-hour", type=int, help="run only if the Israel-time hour matches (DST guard for cron)")
+    p.add_argument("--not-before-hour", type=int, help="skip if the Israel-time hour is earlier (GitHub cron may fire late but never early; already-posted days are skipped via state)")
     args = p.parse_args()
     try:
         sys.exit(run(args))
