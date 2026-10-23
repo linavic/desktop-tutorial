@@ -2,10 +2,12 @@ name: Daily Netanya news
 
 on:
   schedule:
-    # Two UTC slots so that 20:00 Israel time is hit in both summer (UTC+3) and winter (UTC+2);
-    # --only-at-hour makes only the right one actually run.
+    # GitHub fires scheduled runs hours late. Several slots, and a run posts only if it is 20:00 Israel time
+    # or later and today has not been posted yet, so the first slot that fires late enough does the job.
     - cron: "0 17 * * *"
     - cron: "0 18 * * *"
+    - cron: "0 19 * * *"
+    - cron: "0 20 * * *"
   workflow_dispatch:
     inputs:
       force:
@@ -45,7 +47,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             python -m netanya_news.main ${{ inputs.force && '--force' || '' }}
           else
-            python -m netanya_news.main --only-at-hour 20
+            python -m netanya_news.main --not-before-hour 20
           fi
       - name: Save state
         if: always()
