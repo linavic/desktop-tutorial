@@ -9,6 +9,7 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 for (const f of ['index.html', 'crew-engine.js']) fs.copyFileSync(path.join(__dirname, 'public', f), path.join(out, f));
 fs.writeFileSync(path.join(out, 'agents.json'), JSON.stringify(loadAgentsData(path.join(__dirname, 'agents'))));
+try { fs.cpSync(path.join(__dirname, 'public', 'media'), path.join(out, 'media'), { recursive: true }); } catch { /* אין מדיה */ }
 fs.copyFileSync(path.join(__dirname, 'profiles.json'), path.join(out, 'profiles.json'));
 let defaultContext = '';
 try { defaultContext = fs.readFileSync(process.env.CONTEXT_FILE || path.join(__dirname, 'context.md'), 'utf8'); } catch { /* optional */ }

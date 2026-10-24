@@ -249,6 +249,39 @@ details.how-it-worked>summary{cursor:pointer;font-weight:700}
 .badge-ok{color:var(--ok);font-weight:700}
 @media(max-width:700px){.how3{grid-template-columns:1fr}.live{padding:12px}.lt{font-size:1.05rem}.gate{bottom:6px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ---------- שער הרשמה ---------- */
+#gatescreen{margin-top:8px}
+.gs-hero{text-align:center;margin:12px auto 18px;max-width:880px}
+.gs-hero h1{font-size:clamp(2rem,6vw,3.6rem);line-height:1.1;margin:8px 0}
+.gs-hero h1 span{background:linear-gradient(90deg,#f6d58a,#f28bb6,#c58bf2,#f6d58a);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+@keyframes flow{to{background-position:300% 0}}
+.gs-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start}
+.gs-show{background:linear-gradient(160deg,#141821,#0e1219);border:1px solid var(--line);border-radius:22px;padding:14px;position:relative;overflow:hidden;min-height:320px}
+.gs-show video{width:100%;border-radius:14px;display:block;background:#000;max-height:420px}
+.orbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 12px}
+.orb{border:1.5px solid var(--line);border-radius:14px;background:#ffffff06;padding:8px 4px;text-align:center;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .3s;font-family:inherit}
+.orb svg{width:26px;height:26px;display:block;margin:0 auto 4px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.orb.on{color:var(--c);border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);transform:translateY(-3px) scale(1.04);box-shadow:0 8px 24px -10px var(--c)}
+.orb.done{color:var(--ok);border-color:#59d39a55}
+.gs-cap{min-height:3.2em;text-align:center}
+.gs-cap b{display:block;font-size:1.1rem}.gs-cap span{color:var(--muted);font-size:.9rem}
+.gs-bar{height:5px;border-radius:9px;background:#ffffff10;overflow:hidden;margin:6px 0 12px}.gs-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#c58bf2);transition:width .6s}
+.gs-post{background:#fbf8f2;color:#2b2118;border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:90px 1fr;gap:12px;align-items:center;opacity:.25;transform:translateY(10px);transition:all .6s}
+.gs-post.on{opacity:1;transform:none}.gs-post .im{height:90px;border-radius:10px;background:linear-gradient(135deg,#e6d9bd,#c9b98a)}
+.gs-post h4{margin:0 0 4px;font-size:1rem}.gs-post p{margin:0;font-size:.82rem;color:#5b4c3a;line-height:1.5}
+.gs-snd{position:absolute;top:12px;inset-inline-start:12px;z-index:2}
+.gs-card{background:linear-gradient(var(--card),#11151d);border:1.5px solid #e0b56766;border-radius:22px;padding:20px;box-shadow:0 0 40px -18px var(--gold)}
+.gs-card h2{margin:0 0 4px;font-size:1.35rem}
+.gs-steps{display:flex;gap:6px;margin:10px 0 14px}.gs-steps i{flex:1;height:5px;border-radius:9px;background:#ffffff14}.gs-steps i.on{background:var(--gold)}
+.gs-card .f{width:100%;margin-top:6px}
+.gs-card .primary{width:100%;margin-top:10px}
+.gs-card label.chk{display:flex;gap:8px;font-size:.85rem;color:var(--muted);line-height:1.5;cursor:pointer;margin:10px 0}
+.gs-msg{min-height:1.4em;font-size:.88rem;margin-top:8px;color:var(--err)}.gs-msg.ok{color:var(--ok)}
+.gs-trust{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:12px}
+#gbtn{display:flex;justify-content:center;margin-top:10px;min-height:44px}
+[hidden]{display:none!important}
+@media(max-width:860px){.gs-grid{grid-template-columns:1fr}.gs-card{order:-1}.orbs{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
@@ -261,6 +294,28 @@ details.how-it-worked>summary{cursor:pointer;font-weight:700}
     <span id="mode" class="mode">טוען…</span>
     <button class="lnk" id="histBtn" type="button">היסטוריה</button>
   </div>
+
+  <section id="gatescreen" hidden>
+    <div class="gs-hero">
+      <h1>צוות של 8 מומחים דיגיטליים. <span>פוסט מוכן תוך דקות.</span></h1>
+      <p class="sub" style="margin:0 auto">חוקרים ברשת, כותבים בקול של העסק שלכם ומעצבים תמונות בפורמט המתאים לכל רשת חברתית. מתחברים, ורואים הדגמה חיה.</p>
+    </div>
+    <div class="gs-grid">
+      <div class="gs-show" id="gsShow">
+        <button class="btn gs-snd" id="gsSnd" type="button" hidden>🔊 שמעו הסבר</button>
+        <video id="gsVideo" autoplay muted loop playsinline preload="metadata" hidden></video>
+        <div id="gsAnim">
+          <div class="orbs" id="orbs"></div>
+          <div class="gs-bar"><i id="gsBar"></i></div>
+          <div class="gs-cap" aria-live="polite"><b id="gsT">הצוות מתעורר…</b><span id="gsS"></span></div>
+          <div class="gs-post" id="gsPost"><div class="im"></div><div><h4>פוסט מוכן ✓</h4><p>טקסט בקול של העסק, תמונות בפורמט הנכון, ורשימת בדיקה לפני פרסום.</p></div></div>
+        </div>
+        <audio id="gsAudio" loop preload="none" hidden></audio>
+      </div>
+      <div class="gs-card" id="gsCard" aria-live="polite"></div>
+    </div>
+    <div class="how3"><div><b>1</b>מתחברים עם Google ומאמתים נייד</div><div><b>2</b>רואים הדגמה חיה של הצוות בעבודה</div><div><b>3</b>בוחרים מסלול ומקבלים תוכן לעסק שלכם</div></div>
+  </section>
 
   <div id="landing">
     <h1 class="hero">פוסט מוכן לפרסום תוך דקות, <span>לכל עסק</span></h1>
@@ -523,6 +578,9 @@ const API = {
     if (STATIC) return new Blob([await CrewEngine.tts(scfg(b), text, { voice: b.voice, model: b.ttsModel })], { type: 'audio/mpeg' });
     const r = await post('api/tts', { ...b, text }); if (!r.ok) await apiJson(r); return r.blob();
   },
+  google: async credential => apiJson(await post('api/auth/google', { credential })),
+  phoneSend: async phone => apiJson(await post('api/auth/phone/send', { phone })),
+  phoneVerify: async code => apiJson(await post('api/auth/phone/verify', { code })),
   plan: async b => (STATIC ? CrewEngine.plan(b, EIO, scfg(b)) : apiJson(await post('api/plan', b))),
   saveProfile: async b => apiJson(await post('api/account/profile', b)),
   getProfile: async () => apiJson(await fetch(urlOf('api/account/profile'), { headers: authHdr() })),
@@ -567,6 +625,7 @@ async function init() {
   await loadKit(); applyChoices();
   CHOICE = store.get('planChoice') || '';
   if (INFO.accounts && TOKEN) await refreshAccount();
+  LOCKED = Boolean(INFO.accounts && INFO.requireVerify && !(ACCOUNT && ACCOUNT.verified)); GSTATE = TOKEN && ACCOUNT ? 'phone' : 'consent';
   normalizeChoice(); updateMode(); reset(); renderPlan();
   const paid = new URLSearchParams(location.search).get('paid');
   if (paid) { history.replaceState(null, '', location.pathname); }
@@ -1050,8 +1109,10 @@ function renderStepper() {
   });
 }
 function show(n) {
+  if (LOCKED) { lockUI(); return; }
   const mx = maxStep(); if (n !== 6 && n > mx) n = mx;
   STEP = n; STEPS.forEach(s => { $(s.el).hidden = s.n !== n; });
+  if (typeof lockUI === 'function' && INFO && INFO.requireVerify) { /* חזרה מהשער */ }
   $('#landing').hidden = n !== 1; $('#gate').hidden = n === 6; $('#wiz').hidden = n === 6; $('#runview').hidden = n !== 6;
   if (n === 2) renderPlan(); if (n === 4) renderStep4(); if (n === 5) renderSummary();
   refreshGate(); scrollTo({ top: 0, behavior: 'smooth' });
@@ -1153,7 +1214,7 @@ async function refreshAccount() {
   }
 }
 function updateAcctChip() {
-  const c = $('#acct'); if (!INFO.accounts || !ACCOUNT) { c.hidden = true; return; }
+  const c = $('#acct'); if (!INFO.accounts || !ACCOUNT || LOCKED) { c.hidden = true; return; }
   const a = ACCOUNT, left = remaining();
   c.hidden = false; c.textContent = a.state === 'trial' ? `ניסיון חינם · נותרו ${a.trialRuns}` : a.state === 'active' ? `${PLAN_LABEL[a.plan]}${left !== null ? ` · נותרו ${left}/${a.usage.runLimit}` : ''}` : 'ללא מנוי פעיל';
 }
@@ -1188,12 +1249,131 @@ function renderSummary() {
   $('#sumbox').innerHTML = `<b>העסק:</b> ${esc(fld('pName'))} · <b>מסלול:</b> ${esc(PLAN_LABEL[CHOICE] || '')} · <b>פורמט:</b> ${esc(f ? f.label : '')} · <b>הקראה:</b> ${esc(nr || '')} · <b>לוגו:</b> ${hasLogo() ? 'כן' : 'לא'} · <b>reference:</b> ${hasRefs() ? REFS.length : 'לא'}`;
 }
 
+
+// ---------- שער הרשמה: Google + אימות נייד ב-SMS ----------
+let LOCKED = false, GSTATE = 'consent', GS_PHONE = '', GS_TIMER = null, GS_ANIM = null, GS_PAUSE = 0;
+const GS_ERR = { invalid_credential: 'ההתחברות עם Google לא הצליחה. נסו שוב.', gmail_only: 'ההרשמה פתוחה לחשבונות Gmail בלבד.', google_not_configured: 'ההתחברות עם Google עדיין לא הוגדרה במערכת.', sms_not_configured: 'שליחת ה-SMS עדיין לא הוגדרה במערכת. פנו אלינו.', invalid_phone: 'מספר הנייד לא תקין. למשל: 050-1234567', phone_taken: 'המספר הזה כבר משויך לחשבון אחר.', wait_before_resend: 'המתינו כמה שניות לפני שליחה חוזרת.', too_many_requests: 'יותר מדי ניסיונות. נסו שוב מאוחר יותר.', code_expired: 'הקוד פג תוקף. בקשו קוד חדש.', wrong_code: 'הקוד שגוי. בדקו ונסו שוב.', too_many_attempts: 'יותר מדי ניסיונות שגויים. בקשו קוד חדש.', sms_failed: 'לא הצלחנו לשלוח SMS. בדקו את המספר ונסו שוב.', blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להתחבר מחדש.' };
+const gsMsg = (t, ok) => { const m = $('#gsMsg'); if (m) { m.textContent = t || ''; m.className = 'gs-msg' + (ok ? ' ok' : ''); } };
+function lockUI() {
+  $('#gatescreen').hidden = !LOCKED; $('#stepper').hidden = LOCKED; $('#landing').hidden = LOCKED || STEP !== 1;
+  $('#wiz').hidden = LOCKED || STEP === 6; $('#runview').hidden = LOCKED || STEP !== 6; $('#gate').hidden = LOCKED || STEP === 6; $('#mode').hidden = LOCKED;
+  if (LOCKED) { renderGate(); startGsAnim(); loadMedia(); } else { stopGsAnim(); const a = $('#gsAudio'); if (a && !a.paused) a.pause(); }
+}
+function renderGate() {
+  const box = $('#gsCard'), n = { consent: 1, google: 1, phone: 2, code: 3 }[GSTATE] || 1;
+  const steps = `<div class="gs-steps">${[1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</div>`;
+  const link = (u, t) => (u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${t}</a>` : t);
+  let h = '';
+  if (GSTATE === 'consent' || GSTATE === 'google') {
+    h = `<h2>הרשמה בשתי דקות</h2><div class="note">שלב 1 מתוך 3: התחברות עם חשבון Google</div>${steps}
+      <label class="chk"><input type="checkbox" id="gsOk" ${GSTATE === 'google' ? 'checked' : ''}> אני מאשר/ת את ${link(INFO.termsUrl, 'תנאי השימוש')} ו${link(INFO.privacyUrl, 'מדיניות הפרטיות')}, וקבלת SMS חד-פעמי לאימות המספר שלי.</label>
+      <div id="gbtn">${GSTATE === 'google' ? '' : '<span class="note">סמנו את האישור כדי להמשיך</span>'}</div><div class="gs-msg" id="gsMsg"></div>
+      <div class="gs-trust"><span>🔒 לא שולחים פרסומות בלי הסכמה</span><span>⚡ הדגמה חינם</span></div>
+`;
+  } else if (GSTATE === 'phone') {
+    h = `<h2>אימות מספר נייד</h2><div class="note">שלב 2 מתוך 3: ${ACCOUNT ? 'שלום ' + esc(ACCOUNT.name) + ', ' : ''}נשלח אליכם קוד ב-SMS</div>${steps}
+      <label for="gsPhone" style="font-size:.9rem">מספר נייד</label><input class="f" id="gsPhone" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="050-1234567" value="${esc(GS_PHONE)}">
+      <button class="primary" id="gsSend" type="button">שלחו לי קוד</button><div class="gs-msg" id="gsMsg"></div><button class="lnk" id="gsOut" type="button">החלפת חשבון Google</button>`;
+  } else {
+    h = `<h2>הקלידו את הקוד</h2><div class="note">שלב 3 מתוך 3: שלחנו קוד בן 6 ספרות אל ${esc(GS_PHONE)}</div>${steps}
+      <input class="f" id="gsCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" dir="ltr" placeholder="______" style="font-size:1.6rem;letter-spacing:.4em;text-align:center">
+      <button class="primary" id="gsVerify" type="button">אמתו והיכנסו</button><div class="gs-msg" id="gsMsg"></div>
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px"><button class="lnk" id="gsResend" type="button" disabled>שליחה חוזרת</button><button class="lnk" id="gsChange" type="button">שינוי מספר</button></div>`;
+  }
+  box.innerHTML = h;
+  if (GSTATE === 'google') mountGoogle();
+  if (GSTATE === 'code') { startResendTimer(30); $('#gsCode').focus(); }
+}
+function startResendTimer(sec) {
+  clearInterval(GS_TIMER); let left = sec; const b = () => $('#gsResend');
+  const t = () => { const r = b(); if (!r) return clearInterval(GS_TIMER); r.disabled = left > 0; r.textContent = left > 0 ? `שליחה חוזרת (${left})` : 'שליחה חוזרת'; if (left-- <= 0) clearInterval(GS_TIMER); };
+  t(); GS_TIMER = setInterval(t, 1000);
+}
+let GIS_LOADING = null;
+function loadGis() {
+  if (window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  if (GIS_LOADING) return GIS_LOADING;
+  GIS_LOADING = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = res; sc.onerror = () => { GIS_LOADING = null; rej(new Error('gis')); }; document.head.append(sc); });
+  return GIS_LOADING;
+}
+async function mountGoogle() {
+  const box = $('#gbtn'); if (!box) return;
+  if (!INFO.googleClientId) { gsMsg(GS_ERR.google_not_configured); return; }
+  try {
+    await loadGis();
+    google.accounts.id.initialize({ client_id: INFO.googleClientId, callback: onGoogle, ux_mode: 'popup', auto_select: false });
+    google.accounts.id.renderButton(box, { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', locale: 'he', width: 280 });
+  } catch { gsMsg('לא הצלחנו לטעון את ההתחברות של Google. בדקו חיבור אינטרנט ורעננו.'); }
+}
+async function onGoogle(resp) {
+  gsMsg('מתחברים…', true);
+  try {
+    const r = await API.google(resp.credential); TOKEN = r.token; store.set('crew_token', TOKEN); ACCOUNT = r.account;
+    if (ACCOUNT.verified) return enterApp();
+    GSTATE = 'phone'; renderGate();
+  } catch (e) { gsMsg(GS_ERR[e.code] || 'ההתחברות נכשלה. נסו שוב.'); }
+}
+$('#gsCard').addEventListener('change', e => { if (e.target.id === 'gsOk') { GSTATE = e.target.checked ? 'google' : 'consent'; renderGate(); } });
+$('#gsCard').addEventListener('click', async e => {
+  const id = e.target.id;
+  try {
+    if (id === 'gsSend' || id === 'gsResend') {
+      if (id === 'gsSend') GS_PHONE = $('#gsPhone').value.trim();
+      gsMsg('שולחים…', true); const r = await API.phoneSend(GS_PHONE);
+      GSTATE = 'code'; renderGate(); gsMsg(r.devCode ? `מצב בדיקה: הקוד הוא ${r.devCode}` : 'הקוד נשלח. זה יכול לקחת כמה שניות.', true);
+    } else if (id === 'gsVerify') {
+      const code = $('#gsCode').value.trim(); if (code.length < 6) return gsMsg('הקלידו את 6 הספרות.');
+      gsMsg('בודקים…', true); const r = await API.phoneVerify(code); ACCOUNT = r.account; enterApp();
+    } else if (id === 'gsChange') { GSTATE = 'phone'; renderGate();
+    } else if (id === 'gsOut') { TOKEN = ''; ACCOUNT = null; store.set('crew_token', ''); GSTATE = 'consent'; renderGate(); }
+  } catch (err) {
+    if (err.code === 'login_required') { TOKEN = ''; ACCOUNT = null; store.set('crew_token', ''); GSTATE = 'consent'; renderGate(); }
+    gsMsg(GS_ERR[err.code] || err.message);
+  }
+});
+$('#gsCard').addEventListener('keydown', e => { if (e.key === 'Enter') { const b = $('#gsSend') || $('#gsVerify'); if (b) b.click(); } });
+function enterApp() {
+  LOCKED = false; clearInterval(GS_TIMER); normalizeChoice(); updateMode(); renderPlan(); updateAcctChip(); lockUI(); show(1);
+  if (ACCOUNT && ACCOUNT.verified) refreshAccount().then(() => { renderPlan(); refreshGate(); });
+}
+// הדגמה מונפשת לפני ההתחברות
+function startGsAnim() {
+  if (GS_ANIM || !INFO.agents.length) return;
+  const orbs = $('#orbs'); orbs.replaceChildren();
+  INFO.agents.forEach(a => { const o = el('button', 'orb', `${svg(a.id)}${a.title}`); o.type = 'button'; o.dataset.id = a.id; o.style.setProperty('--c', a.color); o.onclick = () => { GS_PAUSE = Date.now() + 5000; focusOrb(a.id, true); }; orbs.append(o); });
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; let i = 0;
+  const step = () => {
+    if (Date.now() < GS_PAUSE) return;
+    const ids = INFO.agents.map(a => a.id);
+    if (i >= ids.length) { $('#gsPost').classList.add('on'); $('#gsT').textContent = 'הפוסט מוכן ✓'; $('#gsS').textContent = 'טקסט ותמונות, מוכנים לפרסום'; $('#gsBar').style.width = '100%'; if (i++ > ids.length + 3) { i = 0; $('#gsPost').classList.remove('on'); orbs.querySelectorAll('.orb').forEach(o => o.classList.remove('done', 'on')); } return; }
+    focusOrb(ids[i], false); $('#gsBar').style.width = Math.round((i + 1) / ids.length * 90) + '%'; i++;
+  };
+  step(); if (!reduce) GS_ANIM = setInterval(step, 1900); else { GS_ANIM = 1; $('#gsPost').classList.add('on'); }
+}
+function focusOrb(id, manual) {
+  const a = A(id); document.querySelectorAll('#orbs .orb').forEach(o => { const idx = INFO.agents.findIndex(x => x.id === o.dataset.id), cur = INFO.agents.findIndex(x => x.id === id); o.classList.toggle('on', o.dataset.id === id); o.classList.toggle('done', !manual && idx < cur); });
+  $('#gsT').textContent = `${HEN[id]} ${ACT[id]}…`; $('#gsS').textContent = WHAT[id] || ''; if (!manual) $('#gsPost').classList.remove('on');
+}
+function stopGsAnim() { if (GS_ANIM && GS_ANIM !== 1) clearInterval(GS_ANIM); GS_ANIM = null; }
+// וידאו והסבר בקול: קבצים אופציונליים ב-media/demo.mp4 ו-media/narration.mp3
+let MEDIA_LOADED = false;
+function loadMedia() {
+  if (MEDIA_LOADED) return; MEDIA_LOADED = true;
+  const v = $('#gsVideo'), au = $('#gsAudio'), snd = $('#gsSnd');
+  v.addEventListener('loadeddata', () => { v.hidden = false; $('#gsAnim').hidden = true; });
+  v.addEventListener('error', () => { v.hidden = true; $('#gsAnim').hidden = false; });
+  v.src = 'media/demo.mp4';
+  au.addEventListener('canplay', () => { snd.hidden = false; }, { once: true }); au.addEventListener('error', () => { snd.hidden = true; });
+  au.src = 'media/narration.mp3';
+  snd.onclick = async () => { if (au.paused) { try { await au.play(); snd.textContent = '🔇 השתיקו'; } catch { /* נחסם */ } } else { au.pause(); snd.textContent = '🔊 שמעו הסבר'; } };
+}
+
 // ---------- שיגור ----------
-const ERR_MSG = { edit_limit: 'ניצלתם את מכסת התיקונים החודשית.', blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
+const ERR_MSG = { verification_required: 'כדי להמשיך צריך לאמת את חשבון ה-Google ואת מספר הנייד.', edit_limit: 'ניצלתם את מכסת התיקונים החודשית.', blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
 function apiProblem(err) {
   if (!(err instanceof ApiErr)) return false;
   if (err.data && err.data.account) ACCOUNT = err.data.account;
-  if (err.code === 'login_required') { TOKEN = ''; ACCOUNT = null; store.set('crew_token', ''); }
+  if (err.code === 'login_required' || err.code === 'verification_required') { if (err.code === 'login_required') { TOKEN = ''; ACCOUNT = null; store.set('crew_token', ''); } if (INFO.requireVerify) { LOCKED = true; GSTATE = TOKEN ? 'phone' : 'consent'; lockUI(); return true; } }
   if (ERR_MSG[err.code]) { PLAN_MSG = ERR_MSG[err.code]; return true; }
   return false;
 }

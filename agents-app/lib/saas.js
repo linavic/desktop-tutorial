@@ -4,11 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { Store } = require('./store.js');
+const { smsConfig, smsReady, sendSms, normalizePhone } = require('./sms.js');
 const { growConfig, createCheckout, approveTransaction, parseBody, interpretWebhook } = require('./grow.js');
 
 module.exports = function createSaas({ env, Engine, streamRun, io }) {
   const store = new Store(env.DATA_DIR || path.join(__dirname, '..', 'data'), { url: env.SUPABASE_URL, key: env.SUPABASE_SERVICE_KEY });
-  const g = growConfig(env);
+  const g = growConfig(env), SMS = smsConfig(env);
+  const GOOGLE_ID = env.GOOGLE_CLIENT_ID || '', REQUIRE_VERIFY = Boolean(GOOGLE_ID) && env.REQUIRE_VERIFY !== '0';
+  const sha = x => crypto.createHash('sha256').update(String(x)).digest('hex');
   const num = (v, d) => (v !== undefined && v !== '' && !Number.isNaN(+v) ? +v : d);
   const C = {
     prices: { own: num(env.PRICE_OWN, 99), managed: num(env.PRICE_MANAGED, 149) },
@@ -35,13 +38,14 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     if (c.trialRuns > 0) return 'trial';
     return c.plan ? 'expired' : 'none';
   };
+  const isVerified = c => !REQUIRE_VERIFY || Boolean(c.verified);
   const pub = c => {
     const u = usageOf(c), managed = c.plan === 'managed';
-    return { id: c.id, name: c.name, email: c.email, plan: c.plan, state: state(c), paidUntil: c.paidUntil, trialRuns: c.trialRuns, cancelRequested: c.cancelRequested, blocked: Boolean(c.blocked),
+    return { id: c.id, name: c.name, email: c.email, plan: c.plan, state: state(c), paidUntil: c.paidUntil, trialRuns: c.trialRuns, cancelRequested: c.cancelRequested, blocked: Boolean(c.blocked), verified: isVerified(c), phoneVerified: Boolean(c.phoneVerified), picture: c.picture || '',
       usage: { runs: u.runs, radar: u.radar, runLimit: managed ? limOf(c) : null, radarLimit: managed ? C.radarLimit : null } };
   };
   const publicConfig = () => ({
-    accounts: true, termsUrl: env.TERMS_URL || '',
+    accounts: true, termsUrl: env.TERMS_URL || '', privacyUrl: env.PRIVACY_URL || '', googleClientId: GOOGLE_ID, requireVerify: REQUIRE_VERIFY, smsDev: SMS.provider === 'dev' && SMS.dev, legacySignup: !REQUIRE_VERIFY, brand: env.BRAND_NAME || '',
     plans: {
       own: { name: 'מפתח OpenAI משלך', price: C.prices.own, unlimited: true },
       managed: { name: 'המפתח של המערכת', price: C.prices.managed, limit: C.limitManaged },
@@ -51,6 +55,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
 
   function entitle(c, kind) {
     if (c.blocked) return { ok: false, reason: 'blocked' };
+    if (!isVerified(c)) return { ok: false, reason: 'verification_required' };
     const s = state(c);
     if (kind === 'edit') {
       const u = usageOf(c);
@@ -94,6 +99,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
 
     // ----- חשבון -----
     if (p === '/api/account/register' && req.method === 'POST') {
+      if (REQUIRE_VERIFY) return json(res, 403, { error: 'use_google_signup' }), true;
       if (!rate('reg:' + ipOf(req), 6, 3600e3)) return json(res, 429, { error: 'too_many_requests' }), true;
       const b = await readJson(req, 20000) || {};
       const name = String(b.name || '').trim().slice(0, 80), email = String(b.email || '').trim().slice(0, 120), phone = String(b.phone || '').replace(/[^\d+]/g, '').slice(0, 16);
@@ -107,6 +113,48 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
       if (!rate('login:' + ipOf(req), 20, 600e3)) return json(res, 429, { error: 'too_many_requests' }), true;
       const b = await readJson(req, 5000) || {}, c = store.byToken(String(b.token || '').trim());
       return c ? json(res, 200, { token: String(b.token).trim(), account: pub(c) }) : json(res, 401, { error: 'invalid_token' }), true;
+    }
+    // ----- הרשמה עם Google + אימות נייד ב-SMS -----
+    if (p === '/api/auth/google' && req.method === 'POST') {
+      if (!GOOGLE_ID) return json(res, 501, { error: 'google_not_configured' }), true;
+      if (!rate('g:' + ipOf(req), 30, 3600e3)) return json(res, 429, { error: 'too_many_requests' }), true;
+      const b = await readJson(req, 8000) || {}, cred = String(b.credential || '');
+      if (cred.length < 100 || cred.length > 4000) return json(res, 400, { error: 'invalid_credential' }), true;
+      let info; try { const r = await fetch((env.GOOGLE_TOKENINFO_URL || 'https://oauth2.googleapis.com/tokeninfo') + '?id_token=' + encodeURIComponent(cred)); info = await r.json(); if (!r.ok) throw new Error('bad'); } catch { return json(res, 401, { error: 'invalid_credential' }), true; }
+      const email = String(info.email || '').toLowerCase();
+      if (info.aud !== GOOGLE_ID || String(info.email_verified) !== 'true' || !email || Number(info.exp) * 1000 < Date.now()) return json(res, 401, { error: 'invalid_credential' }), true;
+      if (env.GMAIL_ONLY === '1' && !/@(gmail|googlemail)\.com$/.test(email)) return json(res, 403, { error: 'gmail_only' }), true;
+      let c = store.byEmail(email), token;
+      if (c) { token = store.addSession(c); c.googleSub = info.sub; if (info.picture) c.picture = String(info.picture).slice(0, 300); store.save(); }
+      else { const r = store.create({ name: String(info.name || email.split('@')[0]).slice(0, 80), email, phone: '', trialRuns: C.trialRuns }); c = r.customer; token = r.token; c.googleSub = info.sub; c.picture = String(info.picture || '').slice(0, 300); c.verified = false; c.phoneVerified = false; store.event('register', { id: c.id, email, via: 'google' }); store.save(); }
+      return json(res, 200, { token, account: pub(c), needPhone: !c.phoneVerified }), true;
+    }
+    if (p === '/api/auth/phone/send' && req.method === 'POST') {
+      const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
+      if (c.blocked) return json(res, 403, { error: 'blocked' }), true;
+      if (!smsReady(SMS)) return json(res, 501, { error: 'sms_not_configured' }), true;
+      const b = await readJson(req, 3000) || {}, phone = normalizePhone(b.phone);
+      if (!phone) return json(res, 400, { error: 'invalid_phone' }), true;
+      if (store.all().some(x => x.id !== c.id && x.phoneVerified && x.phone === phone)) return json(res, 409, { error: 'phone_taken' }), true;
+      const o = c.otp || {}, now = Date.now();
+      if (o.sentAt && now - o.sentAt < 30e3) return json(res, 429, { error: 'wait_before_resend', wait: Math.ceil((30e3 - (now - o.sentAt)) / 1000) }), true;
+      if (!rate('sms-a:' + c.id, 5, 24 * 3600e3) || !rate('sms-p:' + phone, 3, 3600e3) || !rate('sms-i:' + ipOf(req), 10, 3600e3)) return json(res, 429, { error: 'too_many_requests' }), true;
+      const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0'), salt = crypto.randomBytes(8).toString('hex');
+      c.otp = { h: sha(salt + code), salt, exp: now + 10 * 60e3, tries: 0, sentAt: now, phone };
+      try { await sendSms(SMS, phone, `קוד האימות שלך ל-${env.BRAND_NAME || 'Agent Crew'}: ${code}. תקף ל-10 דקות. אם לא ביקשת, התעלם מההודעה.`); }
+      catch (e) { c.otp = null; store.event('sms_error', { id: c.id, message: String(e.message).slice(0, 200) }); store.save(); return json(res, 502, { error: 'sms_failed' }), true; }
+      store.save(); return json(res, 200, { sent: true, phone: phone.slice(0, 6) + '****' + phone.slice(-2), ...(SMS.provider === 'dev' && SMS.dev ? { devCode: code } : {}) }), true;
+    }
+    if (p === '/api/auth/phone/verify' && req.method === 'POST') {
+      const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
+      const b = await readJson(req, 2000) || {}, code = String(b.code || '').replace(/\D/g, ''), o = c.otp;
+      if (!o || Date.now() > o.exp) return json(res, 400, { error: 'code_expired' }), true;
+      if (o.tries >= 5) return json(res, 429, { error: 'too_many_attempts' }), true;
+      o.tries += 1; store.save();
+      if (!eq(sha(o.salt + code), o.h)) return json(res, 400, { error: 'wrong_code' }), true;
+      if (store.all().some(x => x.id !== c.id && x.phoneVerified && x.phone === o.phone)) return json(res, 409, { error: 'phone_taken' }), true;
+      c.phone = o.phone; c.phoneVerified = true; c.verified = true; c.otp = null; store.event('verified', { id: c.id, email: c.email }); store.save();
+      return json(res, 200, { account: pub(c) }), true;
     }
     if (p === '/api/account/profile') {
       const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
@@ -171,7 +219,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         const mrr = act.reduce((s, c) => s + (C.prices[c.plan] || 0), 0);
         return json(res, 200, { customers: all.length, active: act.length, own: act.filter(c => c.plan === 'own').length, managed: act.filter(c => c.plan === 'managed').length, trial: all.filter(c => state(c) === 'trial').length, mrrIls: mrr, costUsd: +costUsd.toFixed(2), costIls: +(costUsd * C.usdIls).toFixed(2), month: m, note: 'ההכנסה כוללת מע"מ ועמלות סליקה. העלות היא הערכה לפי מחירון שמוגדר ב-PRICES_JSON.' }), true;
       }
-      const row = c => { const tot = Object.values(c.usage).reduce((t, u) => ({ runs: t.runs + (u.runs || 0), cost: t.cost + (u.costUsd || 0) }), { runs: 0, cost: 0 }); return { ...pub(c), phone: c.phone, createdAt: c.createdAt, lastSeen: c.lastSeen || 0, tags: c.tags || [], note: (c.note || '').slice(0, 80), customLimit: c.customLimit || null, totalRuns: tot.runs, costUsdMonth: +(((c.usage[month()] || {}).costUsd) || 0).toFixed(3), costUsdTotal: +tot.cost.toFixed(3) }; };
+      const row = c => { const tot = Object.values(c.usage).reduce((t, u) => ({ runs: t.runs + (u.runs || 0), cost: t.cost + (u.costUsd || 0) }), { runs: 0, cost: 0 }); return { ...pub(c), via: c.googleSub ? 'google' : 'אחר', phone: c.phone, createdAt: c.createdAt, lastSeen: c.lastSeen || 0, tags: c.tags || [], note: (c.note || '').slice(0, 80), customLimit: c.customLimit || null, totalRuns: tot.runs, costUsdMonth: +(((c.usage[month()] || {}).costUsd) || 0).toFixed(3), costUsdTotal: +tot.cost.toFixed(3) }; };
       if (p === '/api/admin/customers') return json(res, 200, { customers: store.all().sort((a, b) => b.createdAt - a.createdAt).map(row), prices: C.prices }), true;
       if (p === '/api/admin/customer' && req.method === 'GET') {
         const c = store.get(url.searchParams.get('id')); if (!c) return json(res, 404, { error: 'not_found' }), true;
@@ -182,7 +230,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         if (name.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json(res, 400, { error: 'invalid_details' }), true;
         if (store.byEmail(email)) return json(res, 409, { error: 'email_exists' }), true;
         const { customer, token } = store.create({ name, email, phone: String(b.phone || '').replace(/[^\d+]/g, '').slice(0, 16), trialRuns: C.trialRuns });
-        store.event('admin', { id: customer.id, action: 'create' }); return json(res, 200, { customer: row(customer), token }), true;
+        customer.verified = true; customer.phoneVerified = Boolean(customer.phone); store.event('admin', { id: customer.id, action: 'create' }); return json(res, 200, { customer: row(customer), token }), true;
       }
       if (p === '/api/admin/export') {
         const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"', d = t => (t ? new Date(t).toISOString().slice(0, 10) : '');
@@ -195,6 +243,8 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         const checks = [
           { ok: Boolean(C.serverKey), label: 'מפתח OpenAI של המערכת', env: 'OPENAI_API_KEY', help: 'נדרש למסלול 149 ולניסיון החינמי. אין API חינמי של OpenAI: פותחים חשבון ב-platform.openai.com, מטעינים יתרה קטנה ויוצרים מפתח. בלי זה עובדת רק ההדגמה.' },
           { ok: has('SUPABASE_URL') && has('SUPABASE_SERVICE_KEY'), label: 'אחסון קבוע ללקוחות (Supabase)', env: 'SUPABASE_URL, SUPABASE_SERVICE_KEY', help: 'בלי זה הלקוחות נמחקים בכל הפעלה מחדש של השרת, אלא אם יש דיסק קבוע.' },
+          { ok: Boolean(GOOGLE_ID), label: 'הרשמה עם Google (Client ID)', env: 'GOOGLE_CLIENT_ID', help: 'ב-Google Cloud Console: APIs & Services, Credentials, OAuth client ID מסוג Web. ב-Authorized JavaScript origins מוסיפים את הכתובת של האתר (למשל https://crew-saas.onrender.com ו-https://as-biz.com). בלי זה אין שער הרשמה והדגמה פתוחה.' },
+          { ok: smsReady(SMS) && SMS.provider !== 'dev', label: 'שליחת SMS לאימות נייד', env: 'SMS_PROVIDER + פרטי הספק', help: 'twilio (SMS_TWILIO_SID, SMS_TWILIO_TOKEN, SMS_TWILIO_FROM או SMS_TWILIO_SERVICE) או webhook (SMS_WEBHOOK_URL) לספק ישראלי. כל SMS עולה כסף. בלי זה הלקוחות לא יוכלו להשלים אימות.' },
           { ok: Boolean(C.publicUrl), label: 'כתובת ציבורית של השרת', env: 'PUBLIC_URL', help: 'נכנסת לקישורי החזרה מהתשלום ול-webhook.' },
           { ok: Boolean(g.userId && g.apiKey), label: 'חשבון GROW (userId ו-apiKey)', env: 'GROW_USER_ID, GROW_API_KEY', help: 'מתקבלים מ-GROW אחרי שפותחים חשבון סולק.' },
           { ok: Boolean(g.pages.own), label: 'דף תשלום חוזר ב-GROW: 99 ₪ (מפתח עצמי)', env: 'GROW_PAGECODE_OWN', help: 'יוצרים ב-GROW דף תשלום עם הוראת קבע חודשית ומעתיקים את ה-pageCode.' },
@@ -214,6 +264,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         else if (b.action === 'extend') { c.paidUntil = Math.max(Date.now(), c.paidUntil || 0) + num(b.days, 7) * 864e5; }
         else if (b.action === 'cancel') { c.paidUntil = Date.now() - C.graceDays * 864e5 - 1; }
         else if (b.action === 'trial') { c.trialRuns = num(b.value, 1); }
+        else if (b.action === 'verify') { c.verified = Boolean(b.value); }
         else if (b.action === 'block') { c.blocked = Boolean(b.value); }
         else if (b.action === 'limit') { const v = num(b.value, 0); c.customLimit = v > 0 ? Math.min(v, 100000) : null; }
         else if (b.action === 'resetUsage') { delete c.usage[month()]; }
@@ -236,7 +287,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     // ----- ריצות (בשרת, לפי הרשאות) -----
     if (p === '/api/run' && req.method === 'POST') {
       const brief = await readJson(req); if (!brief) return json(res, 413, { error: 'request too large' }), true;
-      if (brief.demo === true) { await streamRun(res, { ...brief, apiKey: '' }, { live: false, key: '', model: C.model, base: C.base }); return true; }
+      if (brief.demo === true) { if (REQUIRE_VERIFY) { const dc = auth(req); if (!dc || !isVerified(dc)) return json(res, 403, { error: 'verification_required' }), true; } await streamRun(res, { ...brief, apiKey: '' }, { live: false, key: '', model: C.model, base: C.base }); return true; }
       const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
       const ent = entitle(c, 'run'); if (!ent.ok) return json(res, 402, { error: ent.reason, account: pub(c) }), true;
       if (active.has(c.id)) return json(res, 429, { error: 'run_in_progress' }), true;
@@ -260,7 +311,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     }
     if (p === '/api/trends' && req.method === 'POST') {
       const brief = await readJson(req, 200000) || {};
-      if (brief.demo === true) return json(res, 200, await Engine.trends(brief, io, { live: false })), true;
+      if (brief.demo === true) { if (REQUIRE_VERIFY) { const dc = auth(req); if (!dc || !isVerified(dc)) return json(res, 403, { error: 'verification_required' }), true; } return json(res, 200, await Engine.trends(brief, io, { live: false })), true; }
       const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
       const ent = entitle(c, 'radar'); if (!ent.ok) return json(res, 402, { error: ent.reason }), true;
       const key = ent.mode === 'own' ? String(brief.apiKey || '').trim() : C.serverKey; if (!key) return json(res, 400, { error: 'key_required' }), true;
@@ -271,7 +322,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     }
     if (p === '/api/plan' && req.method === 'POST') {
       const brief = await readJson(req, 200000) || {};
-      if (brief.demo === true) return json(res, 200, await Engine.plan(brief, io, { live: false })), true;
+      if (brief.demo === true) { if (REQUIRE_VERIFY) { const dc = auth(req); if (!dc || !isVerified(dc)) return json(res, 403, { error: 'verification_required' }), true; } return json(res, 200, await Engine.plan(brief, io, { live: false })), true; }
       const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
       const ent = entitle(c, 'radar'); if (!ent.ok) return json(res, 402, { error: ent.reason }), true;
       const key = ent.mode === 'own' ? String(brief.apiKey || '').trim() : C.serverKey; if (!key) return json(res, 400, { error: 'key_required' }), true;
@@ -283,7 +334,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     }
     if ((p === '/api/revise' || p === '/api/reimage') && req.method === 'POST') {
       const brief = await readJson(req, 200000) || {}, fn = p === '/api/revise' ? 'revise' : 'reimage';
-      if (brief.demo === true) return json(res, 200, await Engine[fn](brief, io, { live: false })), true;
+      if (brief.demo === true) { if (REQUIRE_VERIFY) { const dc = auth(req); if (!dc || !isVerified(dc)) return json(res, 403, { error: 'verification_required' }), true; } return json(res, 200, await Engine[fn](brief, io, { live: false })), true; }
       const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
       const ent = entitle(c, 'edit'); if (!ent.ok) return json(res, 402, { error: ent.reason }), true;
       const key = ent.mode === 'own' ? String(brief.apiKey || '').trim() : C.serverKey; if (!key) return json(res, 400, { error: 'key_required' }), true;

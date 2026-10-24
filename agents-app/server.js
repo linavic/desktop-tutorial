@@ -121,17 +121,24 @@ async function handleAuth(req, res, url) {
 
 
 // ---------- שרת ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.mp4': 'video/mp4', '.webm': 'video/webm', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 
-function serveFrom(root, rel, res) {
+function serveFrom(root, rel, res, req) {
   const base = path.resolve(root);
   let dec; try { dec = decodeURIComponent(rel); } catch { res.writeHead(400); return res.end(); }
   const full = path.resolve(base, '.' + path.sep + path.normalize(dec).replace(/^([/\\]|\.\.[/\\]?)+/, ''));
   if (!full.startsWith(base + path.sep)) { res.writeHead(403); return res.end(); }
-  fs.readFile(full, (err, data) => {
-    if (err) { res.writeHead(404); return res.end('Not found'); }
-    res.writeHead(200, { 'content-type': MIME[path.extname(full)] || 'application/octet-stream' });
-    res.end(data);
+  fs.stat(full, (err, st) => {
+    if (err || !st.isFile()) { res.writeHead(404); return res.end('Not found'); }
+    const type = MIME[path.extname(full)] || 'application/octet-stream', m = req && /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m && (m[1] || m[2])) { // Range: נדרש לניגון וידאו ושמע בדפדפנים
+      let start = m[1] ? +m[1] : Math.max(0, st.size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], st.size - 1) : st.size - 1;
+      if (start > end || start >= st.size) { res.writeHead(416, { 'content-range': `bytes */${st.size}` }); return res.end(); }
+      res.writeHead(206, { 'content-type': type, 'accept-ranges': 'bytes', 'content-range': `bytes ${start}-${end}/${st.size}`, 'content-length': end - start + 1 });
+      return fs.createReadStream(full, { start, end }).pipe(res);
+    }
+    res.writeHead(200, { 'content-type': type, 'accept-ranges': 'bytes', 'content-length': st.size });
+    fs.createReadStream(full).pipe(res);
   });
 }
 
@@ -179,7 +186,7 @@ const server = http.createServer(async (req, res) => {
     try { const buf = Buffer.from(await Engine.tts(cfg, brief.text || '', { voice: brief.voice, model: brief.ttsModel })); res.writeHead(200, { 'content-type': 'audio/mpeg' }); return res.end(buf); }
     catch (err) { return sendJson(res, 502, { error: String(err.message || err) }); }
   }
-  if (p.startsWith('/runs/') && /\.(png|svg)$/.test(p)) return serveFrom(path.join(__dirname, 'runs'), p.slice(6), res);
-  return serveFrom(path.join(__dirname, 'public'), p === '/' ? 'index.html' : p, res);
+  if (p.startsWith('/runs/') && /\.(png|svg)$/.test(p)) return serveFrom(path.join(__dirname, 'runs'), p.slice(6), res, req);
+  return serveFrom(path.join(__dirname, 'public'), p === '/' ? 'index.html' : p, res, req);
 });
 (saas ? saas.ready : Promise.resolve()).then(() => server.listen(PORT, (PASSWORD || ACCOUNTS) ? '0.0.0.0' : '127.0.0.1', () => console.log(`Agent crew: http://localhost:${PORT}  [${ACCOUNTS ? 'ACCOUNTS mode' : PASSWORD ? 'password ON' : 'localhost only, no password'}]  (${LIVE ? `LIVE OpenAI ${MODEL}` : 'DEMO mode'})`)));

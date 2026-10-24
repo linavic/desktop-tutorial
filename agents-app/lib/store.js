@@ -40,7 +40,9 @@ class Store {
   all() { return Object.values(this.db.customers); }
   get(id) { return this.db.customers[id] || null; }
   byEmail(e) { e = String(e || '').toLowerCase(); return this.all().find(c => c.email === e) || null; }
-  byToken(t) { if (!t) return null; const h = this.hash(t); return this.all().find(c => c.tokenHash === h) || null; }
+  byToken(t) { if (!t) return null; const h = this.hash(t); return this.all().find(c => c.tokenHash === h || (c.sessions || []).includes(h)) || null; }
+  // מנפיק טוקן חדש למכשיר נוסף בלי לבטל את הקיימים (עד 8 מכשירים)
+  addSession(c) { const t = 'crew_' + crypto.randomBytes(24).toString('hex'); c.sessions = [...(c.sessions || []), this.hash(t)].slice(-8); this.save(); return t; }
   event(type, data) { this.db.events.push({ t: Date.now(), type, data }); if (this.db.events.length > 500) this.db.events.shift(); this.save(); }
 }
 module.exports = { Store };
