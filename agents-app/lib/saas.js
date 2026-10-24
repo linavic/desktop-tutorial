@@ -244,7 +244,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
           { ok: Boolean(C.serverKey), label: 'מפתח OpenAI של המערכת', env: 'OPENAI_API_KEY', help: 'נדרש למסלול 149 ולניסיון החינמי. אין API חינמי של OpenAI: פותחים חשבון ב-platform.openai.com, מטעינים יתרה קטנה ויוצרים מפתח. בלי זה עובדת רק ההדגמה.' },
           { ok: has('SUPABASE_URL') && has('SUPABASE_SERVICE_KEY'), label: 'אחסון קבוע ללקוחות (Supabase)', env: 'SUPABASE_URL, SUPABASE_SERVICE_KEY', help: 'בלי זה הלקוחות נמחקים בכל הפעלה מחדש של השרת, אלא אם יש דיסק קבוע.' },
           { ok: Boolean(GOOGLE_ID), label: 'הרשמה עם Google (Client ID)', env: 'GOOGLE_CLIENT_ID', help: 'ב-Google Cloud Console: APIs & Services, Credentials, OAuth client ID מסוג Web. ב-Authorized JavaScript origins מוסיפים את הכתובת של האתר (למשל https://crew-saas.onrender.com ו-https://as-biz.com). בלי זה אין שער הרשמה והדגמה פתוחה.' },
-          { ok: smsReady(SMS) && SMS.provider !== 'dev', label: 'שליחת SMS לאימות נייד', env: 'SMS_PROVIDER + פרטי הספק', help: 'twilio (SMS_TWILIO_SID, SMS_TWILIO_TOKEN, SMS_TWILIO_FROM או SMS_TWILIO_SERVICE) או webhook (SMS_WEBHOOK_URL) לספק ישראלי. כל SMS עולה כסף. בלי זה הלקוחות לא יוכלו להשלים אימות.' },
+          { ok: smsReady(SMS) && SMS.provider !== 'dev', label: 'שליחת SMS לאימות נייד', env: 'SMS_PROVIDER + פרטי הספק', help: 'sms4free (SMS4FREE_USER, SMS4FREE_PASS, SMS4FREE_KEY), twilio (SMS_TWILIO_SID, SMS_TWILIO_TOKEN, SMS_TWILIO_FROM או SMS_TWILIO_SERVICE) או webhook (SMS_WEBHOOK_URL). לבדיקה שלחי הודעת ניסיון למעלה. כל SMS עולה כסף. בלי זה הלקוחות לא יוכלו להשלים אימות.' },
           { ok: Boolean(C.publicUrl), label: 'כתובת ציבורית של השרת', env: 'PUBLIC_URL', help: 'נכנסת לקישורי החזרה מהתשלום ול-webhook.' },
           { ok: Boolean(g.userId && g.apiKey), label: 'חשבון GROW (userId ו-apiKey)', env: 'GROW_USER_ID, GROW_API_KEY', help: 'מתקבלים מ-GROW אחרי שפותחים חשבון סולק.' },
           { ok: Boolean(g.pages.own), label: 'דף תשלום חוזר ב-GROW: 99 ₪ (מפתח עצמי)', env: 'GROW_PAGECODE_OWN', help: 'יוצרים ב-GROW דף תשלום עם הוראת קבע חודשית ומעתיקים את ה-pageCode.' },
@@ -253,6 +253,13 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
           { ok: has('TERMS_URL'), label: 'קישור לתקנון ותנאי שימוש', env: 'TERMS_URL', help: 'מוצג ללקוח לפני תשלום. מומלץ מאוד לפני מכירה.' }
         ];
         return json(res, 200, { checks, webhookUrl: `${pu}/api/billing/webhook?s=${C.webhookSecret || '<GROW_WEBHOOK_SECRET>'}`, successUrl: `${pu}/?paid=1`, cancelUrl: `${pu}/?paid=0`, sandbox: env.GROW_SANDBOX === '1' }), true;
+      }
+      if (p === '/api/admin/test-sms' && req.method === 'POST') {
+        const b = await readJson(req, 2000) || {}, phone = normalizePhone(b.phone);
+        if (!smsReady(SMS)) return json(res, 200, { ok: false, error: 'ספק ה-SMS לא הוגדר (SMS_PROVIDER ופרטי הספק).' }), true;
+        if (!phone) return json(res, 200, { ok: false, error: 'מספר לא תקין.' }), true;
+        try { await sendSms(SMS, phone, `בדיקת שליחה מ-${env.BRAND_NAME || 'Agent Crew'}. אם קיבלת את ההודעה הזו, ה-SMS עובד.`); store.event('sms_test', { phone: phone.slice(0, 6) + '****' }); return json(res, 200, { ok: true }), true; }
+        catch (e) { store.event('sms_error', { message: String(e.message).slice(0, 300) }); return json(res, 200, { ok: false, error: String(e.message).slice(0, 300) }), true; }
       }
       if (p === '/api/admin/check-openai' && !C.serverKey) return json(res, 200, { results: [{ name: 'מפתח OpenAI של המערכת', ok: false, detail: 'לא הוגדר OPENAI_API_KEY בשרת (ב-Render: Environment).' }] }), true;
       if (p === '/api/admin/check-openai') return json(res, 200, { results: await Engine.checkConn({ live: Boolean(C.serverKey), key: C.serverKey, model: C.model, base: C.base }) }), true;

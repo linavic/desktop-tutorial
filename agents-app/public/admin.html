@@ -36,6 +36,7 @@ h3{margin:14px 0 6px;font-size:.95rem;color:var(--gold)}
 <div class="cards" id="sum"></div>
 <details class="card" id="setup"><summary style="cursor:pointer;font-weight:700">מוכנות להפעלה: מה מוגדר ומה חסר <span id="setupSum" class="muted"></span></summary>
   <div id="setupBody" class="muted" style="margin-top:10px">טוען…</div>
+  <div class="acts"><input id="tsPhone" placeholder="נייד לבדיקת SMS (050...)" dir="ltr" style="width:190px"><button id="tsGo">שלחו SMS בדיקה</button></div><div id="tsOut" class="muted"></div>
   <div class="acts"><button id="chkOA">בדוק את מפתח OpenAI של המערכת (חינם)</button></div><div id="oaOut" class="muted"></div>
   <div class="muted" style="margin-top:8px;line-height:1.7"><b>הרצת דוגמה בלי עלות:</b> אין API חינמי של OpenAI. הדגמה (תוכן לדוגמה) חינמית ופתוחה לכולם בעמוד הראשי. להרצה אמיתית צריך מפתח עם יתרה קטנה, וכל ריצה עולה כ-1 עד 2 ₪. כדי לא לשלם בעצמך על ניסיונות של לקוחות, הגבילי את "ריצות הניסיון" (TRIAL_RUNS).</div>
 </details>
@@ -134,6 +135,7 @@ async function loadSetup() {
   } catch (e) { $('#setupBody').textContent = e.message; }
 }
 $('#chkOA').onclick = async () => { $('#oaOut').textContent = 'בודק…'; try { const r = await call('/api/admin/check-openai'); $('#oaOut').innerHTML = r.results.map(x => `<div><span class="${x.ok ? 's-active' : x.ok === false ? 's-expired' : ''}">${x.ok ? '✓' : x.ok === false ? '✗' : '•'}</span> ${esc(x.name)}: ${esc(x.detail)}</div>`).join(''); } catch (e) { $('#oaOut').textContent = e.message; } };
+$('#tsGo').onclick = async () => { $('#tsOut').textContent = 'שולח…'; try { const r = await call('/api/admin/test-sms', { phone: $('#tsPhone').value }); $('#tsOut').innerHTML = r.ok ? '<span class="s-active">✓ נשלח. בדקי שההודעה הגיעה לנייד.</span>' : '<span class="s-expired">✗ ' + esc(r.error) + '</span>'; } catch (e) { $('#tsOut').textContent = e.message; } };
 $('#setup').addEventListener('toggle', () => { if ($('#setup').open) loadSetup(); });
 if (T) { load(); loadSetup(); }
 </script></body></html>
