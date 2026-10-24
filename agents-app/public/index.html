@@ -353,7 +353,7 @@ details.how-it-worked>summary{cursor:pointer;font-weight:700}
       <h2 class="sh">5. מה המשימה?</h2>
       <div class="how"><b>מה עושים כאן:</b> כתבו מה הצוות צריך להכין (לפחות כמה מילים), או בחרו רעיון מוכן. אחרי זה לוחצים "שגר משימה".</div>
       <textarea id="task" class="taskbox" placeholder="למשל: פוסט שמציג את השירות החדש שלנו"></textarea>
-      <div class="chips" id="chips"><button class="chip radar" id="radar" type="button"><i></i><span>סרוק טרנדים עכשיו</span></button></div>
+      <div class="chips" id="chips"><button class="chip radar" id="radar" type="button"><i></i><span>סרוק טרנדים עכשיו</span></button><button class="chip radar" id="planweek" type="button"><i></i><span>📅 תכננו שבוע תוכן</span></button></div>
       <div class="ideas" id="ideas"></div>
       <div class="sumbox" id="sumbox"></div>
     </article>
@@ -523,6 +523,10 @@ const API = {
     if (STATIC) return new Blob([await CrewEngine.tts(scfg(b), text, { voice: b.voice, model: b.ttsModel })], { type: 'audio/mpeg' });
     const r = await post('api/tts', { ...b, text }); if (!r.ok) await apiJson(r); return r.blob();
   },
+  plan: async b => (STATIC ? CrewEngine.plan(b, EIO, scfg(b)) : apiJson(await post('api/plan', b))),
+  saveProfile: async b => apiJson(await post('api/account/profile', b)),
+  getProfile: async () => apiJson(await fetch(urlOf('api/account/profile'), { headers: authHdr() })),
+  saveApproved: async b => apiJson(await post('api/account/approved', b)),
   revise: async b => (STATIC ? CrewEngine.revise(b, EIO, scfg(b)) : apiJson(await post('api/revise', b))),
   reimage: async b => (STATIC ? CrewEngine.reimage(b, EIO, scfg(b)) : apiJson(await post('api/reimage', b))),
   register: async b => apiJson(await post('api/account/register', b)),
@@ -774,7 +778,7 @@ async function doReimage() {
 $('#revgo').onclick = () => doRevise(); $('#revimggo').onclick = doReimage;
 $('#revtext').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doRevise(); } });
 $('#undoBtn').onclick = () => { if (!PREV.length) return; ed().content = PREV.pop(); APPROVED = false; renderDeliver(); saveHist(); syncRev(); revmsg('חזרתם לגרסה הקודמת.'); };
-$('#apprBtn').onclick = () => { APPROVED = !APPROVED; saveHist(); syncRev(); revmsg(APPROVED ? 'הפוסט אושר ונשמר בהיסטוריה. בדקו את הנקודות ברשימת ההפצה לפני פרסום.' : ''); };
+$('#apprBtn').onclick = () => { APPROVED = !APPROVED; saveHist(); if (APPROVED && INFO.accounts && TOKEN && ed()) API.saveApproved({ task: $('#task').value.trim(), text: ed().content.replace(/!\[[^\]]*\]\([^)]*\)\s*/g, '').slice(0, 1400) }).catch(() => {}); syncRev(); revmsg(APPROVED ? (INFO.accounts && TOKEN ? 'הפוסט אושר, ונשמר כדוגמה: הצוות ילמד ממנו לפוסטים הבאים. בדקו את רשימת ההפצה לפני פרסום.' : 'הפוסט אושר ונשמר בהיסטוריה. בדקו את הנקודות ברשימת ההפצה לפני פרסום.') : ''); };
 
 // ---------- תוצרים ----------
 const ed = () => FILES.find(f => f.agent === 'editor');
@@ -834,7 +838,10 @@ function applyBrand() {
   $('#brand').textContent = n; document.title = `צוות הסוכנים · ${n}`;
   const has = $('#pName').value.trim();
 }
-function saveProfile() { store.set('profile', JSON.stringify(getProfile())); store.set('ctxManual', ctxManual ? '1' : ''); store.set('ctx', ctxManual ? $('#ctx').value : ''); }
+let PSAVE = null;
+function saveProfile() {
+  if (INFO && INFO.accounts && TOKEN && ACCOUNT) { clearTimeout(PSAVE); PSAVE = setTimeout(() => API.saveProfile({ profile: getProfile(), ctxManual, ctx: ctxManual ? $('#ctx').value : '' }).catch(() => {}), 1500); }
+  store.set('profile', JSON.stringify(getProfile())); store.set('ctxManual', ctxManual ? '1' : ''); store.set('ctx', ctxManual ? $('#ctx').value : ''); }
 function syncCtx() { if (!ctxManual) $('#ctx').value = buildContext(getProfile()); applyBrand(); saveProfile(); }
 function fillProfile(p) { Object.entries(PF).forEach(([k, id]) => $('#' + id).value = p[k] || ''); ctxManual = false; syncCtx(); if (typeof refreshGate === 'function' && typeof STEP !== 'undefined') refreshGate(); }
 function loadProfile() {
@@ -964,13 +971,29 @@ $('#chk').onclick = async () => {
 };
 
 // ---------- רדאר טרנדים ----------
+const DONE_PLAN = new Set();
+$('#planweek').onclick = async () => {
+  const btn = $('#planweek'); if (btn.classList.contains('scan')) return; btn.classList.add('scan'); btn.querySelector('span').textContent = 'מתכננים…';
+  const box = $('#ideas'); box.replaceChildren(); DONE_PLAN.clear();
+  try {
+    const d = await API.plan(body({ count: 5 }));
+    box.append(el('div', 'cap', `תוכנית שבוע (${d.items.length} פוסטים)${d.demo ? ' · דוגמה' : ''}. לחצו "הפיקו" על כל פוסט, אחד אחרי השני.`));
+    d.items.forEach((x, i) => {
+      const c = el('div', 'idea', `<b>${esc(x.day)} · ${esc(x.goal)}</b><p>${esc(x.format)}: ${esc(x.title)}</p>`); c.style.animationDelay = i * 80 + 'ms';
+      const b = el('button', null, DONE_PLAN.has(x.task) ? 'הופק ✓' : 'הפיקו פוסט זה'); b.type = 'button';
+      b.onclick = () => { $('#task').value = x.task; DONE_PLAN.add(x.task); b.textContent = 'הופק ✓'; refreshGate(); startRun(); };
+      c.append(b); box.append(c);
+    });
+  } catch (e) { box.append(el('div', 'banner err', apiProblem(e) ? PLAN_MSG : friendlyErr(e.message))); }
+  btn.classList.remove('scan'); btn.querySelector('span').textContent = '📅 תכננו שבוע תוכן';
+};
 $('#radar').onclick = async () => {
   const btn = $('#radar'); if (btn.classList.contains('scan')) return; btn.classList.add('scan'); btn.querySelector('span').textContent = 'סורק את הרשת…';
   const box = $('#ideas'); box.replaceChildren();
   try {
     const d = await API.trends(body({}));
-    d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; $('#form').requestSubmit(); }; c.append(b); box.append(c); });
-  } catch (e) { box.append(el('div', 'banner err', 'שגיאה: ' + esc(e.message))); }
+    d.ideas.forEach((x, i) => { const c = el('div', 'idea', `<b>${esc(x.title)}</b><p>${esc(x.why)}${d.demo ? ' (הדגמה)' : ''}</p>`); c.style.animationDelay = i * 90 + 'ms'; const b = el('button', null, 'שגר לצוות'); b.type = 'button'; b.onclick = () => { $('#task').value = x.task; refreshGate(); startRun(); }; c.append(b); box.append(c); });
+  } catch (e) { box.append(el('div', 'banner err', apiProblem(e) ? PLAN_MSG : friendlyErr(e.message))); }
   btn.classList.remove('scan'); btn.querySelector('span').textContent = 'סרוק טרנדים עכשיו';
 };
 
@@ -1122,6 +1145,12 @@ document.addEventListener('change', e => { if (e.target.id === 'terms') { const 
 async function refreshAccount() {
   if (!INFO.accounts || !TOKEN) { ACCOUNT = null; return; }
   try { ACCOUNT = (await API.me()).account; } catch (e) { if (e.code === 'login_required') { TOKEN = ''; store.set('crew_token', ''); } ACCOUNT = null; }
+  if (ACCOUNT && !fld('pName')) {
+    try {
+      const d = await API.getProfile(), f = d.profile && d.profile.fields;
+      if (f && f.name) { Object.entries(PF).forEach(([k, id]) => { $('#' + id).value = f[k] || ''; }); ctxManual = Boolean(d.profile.ctxManual); if (ctxManual) $('#ctx').value = d.profile.ctx || ''; else syncCtx(); applyBrand(); refreshGate(); }
+    } catch { /* אין פרופיל שמור */ }
+  }
 }
 function updateAcctChip() {
   const c = $('#acct'); if (!INFO.accounts || !ACCOUNT) { c.hidden = true; return; }

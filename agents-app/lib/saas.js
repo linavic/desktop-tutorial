@@ -73,6 +73,8 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
     c.history.unshift({ t: Date.now(), task: String(task || '').slice(0, 120), mode, costUsd: +cost.toFixed(4), ok }); c.history.length = Math.min(c.history.length, 30); store.save();
   }
 
+  // זיכרון: דוגמאות לפוסטים שאושרו בעבר, מצורפות להקשר כדי שהצוות ילמד את הטעם של הלקוח
+  const memCtx = c => (c && c.approved && c.approved.length ? '\n\nדוגמאות לפוסטים שהלקוח אישר בעבר (למדי את הסגנון, האורך והמבנה, ואל תעתיקי תוכן):\n' + c.approved.slice(0, 3).map((x, i) => `--- דוגמה ${i + 1}: ${x.task}\n${x.text}`).join('\n') : '');
   const json = (res, code, obj) => { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); };
   async function readRaw(req, limit = 6_000_000) { let b = ''; for await (const x of req) { b += x; if (b.length > limit) return null; } return b; }
   async function readJson(req, limit) { const raw = await readRaw(req, limit); if (raw === null) return null; try { return JSON.parse(raw || '{}'); } catch { return {}; } }
@@ -105,6 +107,21 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
       if (!rate('login:' + ipOf(req), 20, 600e3)) return json(res, 429, { error: 'too_many_requests' }), true;
       const b = await readJson(req, 5000) || {}, c = store.byToken(String(b.token || '').trim());
       return c ? json(res, 200, { token: String(b.token).trim(), account: pub(c) }) : json(res, 401, { error: 'invalid_token' }), true;
+    }
+    if (p === '/api/account/profile') {
+      const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
+      if (req.method === 'POST') {
+        const b = await readJson(req, 30000) || {}, pr = b.profile && typeof b.profile === 'object' ? b.profile : {}, clean = {};
+        for (const k of ['name', 'type', 'about', 'audience', 'tone', 'language', 'rules']) clean[k] = String(pr[k] || '').slice(0, 1500);
+        c.profile = { fields: clean, ctxManual: Boolean(b.ctxManual), ctx: b.ctxManual ? String(b.ctx || '').slice(0, 8000) : '' }; store.save();
+      }
+      return json(res, 200, { profile: c.profile || null, approved: (c.approved || []).length }), true;
+    }
+    if (p === '/api/account/approved' && req.method === 'POST') {
+      const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
+      const b = await readJson(req, 30000) || {}, text = String(b.text || '').slice(0, 1400); if (text.length < 40) return json(res, 400, { error: 'invalid' }), true;
+      c.approved = (c.approved || []).filter(x => x.task !== String(b.task || '').slice(0, 160)); c.approved.unshift({ t: Date.now(), task: String(b.task || '').slice(0, 160), text }); c.approved.length = Math.min(c.approved.length, 5); store.save();
+      return json(res, 200, { approved: c.approved.length }), true;
     }
     if (p === '/api/account/me') { const c = auth(req); return c ? json(res, 200, { account: pub(c) }) : json(res, 401, { error: 'login_required' }), true; }
 
@@ -231,6 +248,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         if (!C.serverKey) return json(res, 503, { error: 'server_key_missing' }), true;
         cfg = { live: true, key: C.serverKey, model: C.model, base: C.base };
       }
+      brief.context = String(brief.context || '') + memCtx(c);
       cfg.usage = { in: 0, out: 0, searches: 0, images: 0 }; cfg.maxToolCalls = ent.mode === 'own' ? 3 : 2;
       bump(c, ent.mode, 'run', +1); active.add(c.id);
       await streamRun(res, { ...brief, apiKey: '', model: '' }, cfg, { after: ({ finished, emit }) => {
@@ -251,6 +269,18 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
       try { const out = await Engine.trends(brief, io, cfg); if (ent.mode !== 'own') { const u = usageOf(c); u.costUsd += costOf(cfg.usage); store.save(); } return json(res, 200, out), true; }
       catch (e) { bump(c, ent.mode, 'radar', -1); return json(res, 502, { error: String(e.message || e) }), true; }
     }
+    if (p === '/api/plan' && req.method === 'POST') {
+      const brief = await readJson(req, 200000) || {};
+      if (brief.demo === true) return json(res, 200, await Engine.plan(brief, io, { live: false })), true;
+      const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
+      const ent = entitle(c, 'radar'); if (!ent.ok) return json(res, 402, { error: ent.reason }), true;
+      const key = ent.mode === 'own' ? String(brief.apiKey || '').trim() : C.serverKey; if (!key) return json(res, 400, { error: 'key_required' }), true;
+      const cfg = { live: true, key, model: C.model, base: C.base, usage: { in: 0, out: 0, searches: 0, images: 0 } };
+      brief.context = String(brief.context || '') + memCtx(c);
+      bump(c, ent.mode, 'radar', +1);
+      try { const out = await Engine.plan(brief, io, cfg); if (ent.mode !== 'own') { const u = usageOf(c); u.costUsd += costOf(cfg.usage); store.save(); } return json(res, 200, out), true; }
+      catch (e) { bump(c, ent.mode, 'radar', -1); return json(res, 502, { error: String(e.message || e) }), true; }
+    }
     if ((p === '/api/revise' || p === '/api/reimage') && req.method === 'POST') {
       const brief = await readJson(req, 200000) || {}, fn = p === '/api/revise' ? 'revise' : 'reimage';
       if (brief.demo === true) return json(res, 200, await Engine[fn](brief, io, { live: false })), true;
@@ -258,7 +288,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
       const ent = entitle(c, 'edit'); if (!ent.ok) return json(res, 402, { error: ent.reason }), true;
       const key = ent.mode === 'own' ? String(brief.apiKey || '').trim() : C.serverKey; if (!key) return json(res, 400, { error: 'key_required' }), true;
       const cfg = { live: true, key, model: C.model, base: C.base, usage: { in: 0, out: 0, searches: 0, images: 0 } };
-      const u = usageOf(c); u.edits += 1; store.save();
+      brief.context = String(brief.context || '') + memCtx(c); const u = usageOf(c); u.edits += 1; store.save();
       try { const out = await Engine[fn](brief, io, cfg); if (ent.mode !== 'own') { u.costUsd += costOf(cfg.usage); u.images += cfg.usage.images || 0; u.tin += cfg.usage.in || 0; u.tout += cfg.usage.out || 0; store.save(); } return json(res, 200, out), true; }
       catch (e) { u.edits = Math.max(0, u.edits - 1); store.save(); return json(res, 502, { error: String(e.message || e) }), true; }
     }

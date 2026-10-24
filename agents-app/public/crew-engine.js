@@ -335,6 +335,24 @@
     return { url, prompt: newPrompt, n, ratio: fid };
   }
 
+  // תכנון שבוע תוכן: סדרה של פוסטים מגוונת, בקריאה אחת. כל פוסט מופק אחר כך בנפרד.
+  async function plan(brief, io, cfg) {
+    const n = Math.max(3, Math.min(7, Number(brief.count) || 5));
+    const biz = String(brief.businessName || '').trim().slice(0, 60) || io.brand || 'העסק';
+    if (!cfg.live) {
+      await sleep(900);
+      const D = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי (בוקר)', 'שני'];
+      const T = [['אמון', 'פוסט היכרות', 'מי אנחנו ומה חשוב לנו'], ['מודעות', 'קרוסלה: 3 דברים שכדאי לדעת', 'שלוש נקודות שהלקוחות שלנו שואלים עליהן'], ['מעורבות', 'שאלה לקהל', 'שאלה פתוחה שמזמינה תגובות'], ['אמון', 'מאחורי הקלעים', 'איך נראה יום עבודה אצלנו'], ['הנעה לפנייה', 'הצעה אחת וקריאה לפעולה', 'הזמנה לפנות אלינו בלי התחייבות'], ['אמון', 'שאלות ותשובות', 'התשובות לשאלות הנפוצות'], ['מעורבות', 'סקר קצר', 'סקר בין שתי אפשרויות']];
+      return { demo: true, items: T.slice(0, n).map((t, i) => ({ day: D[i], goal: t[0], format: t[1], title: t[2], task: `${t[1]} עבור ${biz}: ${t[2]}` })) };
+    }
+    const ctx = String(brief.context || '').trim().slice(0, 6000) || io.defaultCtx || NO_CTX;
+    const system = `את מנהלת תוכן ותיקה בסוכנות. בני תוכנית של ${n} פוסטים לשבוע אחד לעסק לפי ההקשר. כללים: (1) סדרה אחת עם קו מחבר, לא פוסטים אקראיים. (2) מגוון מטרות: מודעות, אמון, מעורבות והנעה לפנייה אחת ברורה, כשעיקר הפוסטים אינם מכירתיים. (3) מגוון פורמטים (פוסט, קרוסלה, שאלה לקהל, סטורי). (4) לפי כללי העסק בהקשר (ימי פרסום ואיסורים; ברירת מחדל ראשון עד חמישי). (5) אל תמציאי נתונים, מבצעים או מחירים. (6) כל משימה (task) היא הוראה מלאה בעברית שאפשר להזין לצוות. החזירי JSON בלבד, ללא טקסט נוסף: [{"day":"ראשון","goal":"אמון","format":"פוסט","title":"כותרת קצרה","task":"הוראה מלאה לצוות"}]`;
+    const text = await streamLLM(cfg, system, `הקשר העסק:\n${ctx}\n\nתאריך היום: ${new Date().toISOString().slice(0, 10)}`, () => {}, 1800);
+    const items = jsonFrom(text, '[', ']');
+    if (!Array.isArray(items) || !items.length) throw new Error('לא התקבלה תוכנית תקינה');
+    return { demo: false, items: items.slice(0, n).map(x => ({ day: String(x.day || '').slice(0, 20), goal: String(x.goal || '').slice(0, 30), format: String(x.format || '').slice(0, 40), title: String(x.title || '').slice(0, 120), task: String(x.task || x.title || '').slice(0, 400) })) };
+  }
+
   // רדאר טרנדים (פרואקטיבי)
   async function trends(brief, io, cfg) {
     const ctx = String(brief.context || '').trim().slice(0, 6000) || io.defaultCtx || NO_CTX;
@@ -352,5 +370,5 @@
     return { demo: false, ideas: ideas.slice(0, 5), sources: r.sources.slice(0, 8) };
   }
 
-  return { DEFAULT_MODEL, IMAGE_MODEL, TTS_MODEL, FORMATS, PIPE, buildAgents, meta, runCrew, checkConn, trends, tts, revise, reimage };
+  return { DEFAULT_MODEL, IMAGE_MODEL, TTS_MODEL, FORMATS, PIPE, buildAgents, meta, runCrew, checkConn, trends, tts, revise, reimage, plan };
 });

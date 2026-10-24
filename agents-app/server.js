@@ -163,9 +163,9 @@ const server = http.createServer(async (req, res) => {
     try { return sendJson(res, 200, await Engine.trends(brief, io, resolveCfg(brief))); }
     catch (err) { return sendJson(res, 502, { error: String(err.message || err) }); }
   }
-  if ((p === '/api/revise' || p === '/api/reimage') && req.method === 'POST') {
+  if ((p === '/api/revise' || p === '/api/reimage' || p === '/api/plan') && req.method === 'POST') {
     const brief = await readJson(req, 200_000) || {};
-    try { return sendJson(res, 200, await Engine[p === '/api/revise' ? 'revise' : 'reimage'](brief, io, resolveCfg(brief))); }
+    try { return sendJson(res, 200, await Engine[p === '/api/revise' ? 'revise' : p === '/api/plan' ? 'plan' : 'reimage'](brief, io, resolveCfg(brief))); }
     catch (err) { return sendJson(res, 502, { error: String(err.message || err) }); }
   }
   if (p === '/api/check' && req.method === 'POST') {
