@@ -35,7 +35,10 @@
   ];
 
   // data = { id: { description, tools, body, steps } } מקבצי agents/*.md
-  const buildAgents = data => PIPE.map(p => ({ ...p, ...(data[p.id] || { description: '', tools: [], body: '', steps: [] }) }));
+  const buildAgents = data => PIPE.map(p => ({ ...p, ...(data[p.id] || { description: '', tools: [], body: '', steps: [] }), regulated: data._regulated || '' }));
+  // תחומים מוסדרים: מוסיפים כללי ציות מחמירים לסוכנים שכותבים, מעצבים ומפיצים
+  const REGULATED_RE = /רפוא|קליניק|אסתט|בריאות|רופא|שיניים|תרופ|משפט|עורך דין|עו"ד|רואה חשבון|פיננס|השקע|ביטוח|משכנתא|תזונ|פסיכולוג|מטופל/;
+  const REG_AGENTS = ['orchestrator', 'researcher', 'writer', 'yael', 'yuval', 'editor', 'publisher'];
   const meta = agents => agents.map(a => ({ id: a.id, title: a.title, color: a.color, label: a.label, search: Boolean(a.search), out: a.out('<slug>'), inputs: a.inputs, description: a.description, tools: a.tools, steps: a.steps }));
 
   // מדידת שימוש בפועל: cfg.usage = { in, out, searches, images } מצטבר לאורך הריצה
@@ -169,7 +172,8 @@
     const env = `\n\n---\nהקשר הפרויקט (תחליף ל-CLAUDE.md):\n${ctx}\n\nמגבלות הסביבה: ${tools}הקבצים מהשלבים הקודמים מוצגים בהודעה. אל תמציא מקורות או עובדות; מה שחסר מסמנים "[צריך מקור]" או "צריך אימות". כתוב בעברית אלא אם התבקש אחרת. ה-slug הוא ${slug}. ${extra || 'החזר רק את תוכן קובץ הפלט שלך ב-Markdown, בלי הקדמה ובלי תיאור של פעולות על קבצים.'}${agent.id === 'yuval' && fmt ? `\n\nפורמט היעד של התמונות: ${fmt.id} (${fmt.label}). חשבו על קומפוזיציה מתאימה לפורמט, עם הנושא המרכזי במרכז.` : ''}${agent.id === 'yuval' && style ? `\n\nסגנון מה-reference (חובה להתאים אליו):\n${style}` : ''}`;
     const need = agent.inputs.map(id => byAgent[id]).filter(Boolean).map(k => `### ${k.path}\n${k.content}`).join('\n\n');
     const user = agent.id === 'orchestrator' ? `בקשת תוכן: ${task}` : `בקשת התוכן המקורית: ${task}\n\nהקבצים מהשלבים הקודמים:\n\n${need}`;
-    return { system: agent.body + env, user };
+    const skills = (agent.skills ? '\n\n---\n' + agent.skills : '') + (agent.regulated && REG_AGENTS.includes(agent.id) && REGULATED_RE.test(ctx) ? '\n\n---\n' + agent.regulated : '');
+    return { system: agent.body + skills + env, user };
   }
 
   // ---------- ריצת הצוות ----------

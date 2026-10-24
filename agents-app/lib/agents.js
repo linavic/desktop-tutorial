@@ -18,7 +18,9 @@ function parseAgent(file) {
 
 function loadAgentsData(dir) {
   const out = {};
-  for (const id of IDS) out[id] = parseAgent(path.join(dir, id + '.md'));
+  const skillsDir = path.join(dir, '..', 'skills'), rd = f => { try { return fs.readFileSync(path.join(skillsDir, f), 'utf8').replace(/\r\n/g, '\n').trim(); } catch { return ''; } };
+  for (const id of IDS) { out[id] = parseAgent(path.join(dir, id + '.md')); out[id].skills = rd(id + '.md'); }
+  out._regulated = rd('_regulated.md');
   return out;
 }
 
