@@ -241,6 +241,12 @@ pre.stream{direction:rtl;text-align:start;unicode-bidi:plaintext;font-family:"Se
 details.how-it-worked{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:#0d1017}
 details.how-it-worked>summary{cursor:pointer;font-weight:700}
 .node .nm{font-size:.9rem}.node .st{font-size:.8rem}
+
+.revbar{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:#0d1017}
+.revbar .cap{margin:0 0 6px;color:var(--ink);font-weight:700;font-size:.95rem}
+.revrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}.revrow input,.revrow select{flex:1;min-width:150px}.revrow select{flex:none;min-width:110px}
+.apprbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.badge-ok{color:var(--ok);font-weight:700}
 @media(max-width:700px){.how3{grid-template-columns:1fr}.live{padding:12px}.lt{font-size:1.05rem}.gate{bottom:6px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
@@ -366,7 +372,12 @@ details.how-it-worked>summary{cursor:pointer;font-weight:700}
     <div class="pipe" id="pipe" aria-label="צוות הסוכנים"></div>
     <div class="banner" id="banner"></div>
     <section class="panel deliver" id="deliver" hidden>
-      <div class="rhero" id="rhero"><h2>✓ הפוסט שלך מוכן</h2><ol><li>קראו את הטקסט והתמונות למטה.</li><li>העתיקו או הורידו (כפתורים מתחת ללשוניות).</li><li>בדקו הכול לפני שמפרסמים.</li></ol></div><div class="cap" style="margin:0 0 8px">התוצרים</div>
+      <div class="rhero" id="rhero"><h2>✓ הפוסט שלך מוכן</h2><ol><li>קראו את הטקסט והתמונות למטה.</li><li>העתיקו או הורידו (כפתורים מתחת ללשוניות).</li><li>בדקו הכול לפני שמפרסמים.</li></ol></div><div class="revbar" id="revbar"><div class="cap">לא בדיוק מה שרציתם? תקנו בלחיצה</div>
+        <div class="chips" id="revchips"></div>
+        <div class="revrow"><input class="f" id="revtext" placeholder="או כתבו מה לשנות, למשל: תזכירו שיש חניה"><button class="btn" id="revgo" type="button">תקן את הטקסט</button></div>
+        <div class="revrow"><select class="f" id="revimgn" aria-label="איזו תמונה"></select><input class="f" id="revimgtext" placeholder="מה לשנות בתמונה? למשל: יותר חם, בלי אנשים"><button class="btn" id="revimggo" type="button">החלף תמונה</button></div>
+        <div class="apprbar"><button class="primary" id="apprBtn" type="button">✓ אשרו את הפוסט</button><button class="btn" id="undoBtn" type="button" hidden>חזרה לגרסה קודמת</button><span class="note" id="revmsg" aria-live="polite"></span></div></div>
+      <div class="cap" style="margin:0 0 8px">התוצרים</div>
       <div class="tabs" id="tabs"></div>
       <div class="acts"><button class="btn" id="copy">העתקה</button><button class="btn" id="dlHtml">הורדת הפוסט (HTML)</button><button class="btn" id="dl">הורדת כל הקבצים</button></div>
       <div id="article" class="article" hidden></div>
@@ -512,6 +523,8 @@ const API = {
     if (STATIC) return new Blob([await CrewEngine.tts(scfg(b), text, { voice: b.voice, model: b.ttsModel })], { type: 'audio/mpeg' });
     const r = await post('api/tts', { ...b, text }); if (!r.ok) await apiJson(r); return r.blob();
   },
+  revise: async b => (STATIC ? CrewEngine.revise(b, EIO, scfg(b)) : apiJson(await post('api/revise', b))),
+  reimage: async b => (STATIC ? CrewEngine.reimage(b, EIO, scfg(b)) : apiJson(await post('api/reimage', b))),
   register: async b => apiJson(await post('api/account/register', b)),
   login: async token => apiJson(await post('api/account/login', { token })),
   me: async () => apiJson(await fetch(urlOf('api/account/me'), { headers: authHdr() })),
@@ -577,7 +590,7 @@ function reset() {
   });
   const first = el('li', null, 'הפעילות תופיע כאן.'); first.style.color = 'var(--muted)'; $('#log').replaceChildren(first);
   $('#deliver').hidden = true; $('#banner').className = 'banner'; $('#next2').classList.remove('on'); $('#sstrip').className = 'sstrip idle'; $('#schips').replaceChildren(); $('#shd').textContent = 'חיפוש חי ברשת';
-  setLive(null, 'הצוות מתחיל…', 'בדרך כלל לוקח 1 עד 3 דקות. אפשר להישאר בדף ולצפות.', ''); $('#hiw').open = true; $('#rhero').hidden = true;
+  setLive(null, 'הצוות מתחיל…', 'בדרך כלל לוקח 1 עד 3 דקות. אפשר להישאר בדף ולצפות.', ''); $('#hiw').open = true; $('#rhero').hidden = true; PREV = []; APPROVED = false; revmsg('');
   setStats(); setFocus(INFO.agents[0].id);
 }
 function setStats() {
@@ -722,10 +735,51 @@ function handle(ev) {
   }
 }
 
+// ---------- תיקונים ואישור ----------
+const REVS = ['קצרו את הפוסט', 'טון חם יותר', 'טון מקצועי יותר', 'פשוט יותר, בלי מילים גבוהות', 'חזקו את הקריאה לפעולה', 'הוסיפו שאלה בסוף'];
+let PREV = [], APPROVED = false, REVBUSY = false;
+const revmsg = t => { const m = $('#revmsg'); if (m) m.textContent = t || ''; };
+function renderRev() {
+  const box = $('#revchips'); if (!box || box.childElementCount) return;
+  REVS.forEach(t => { const c = el('button', 'chip'); c.type = 'button'; c.textContent = t; c.onclick = () => doRevise(t); box.append(c); });
+}
+function syncRev() {
+  const ims = IMGS.yuval || [], sel = $('#revimgn'), cur = sel.value;
+  sel.replaceChildren(...ims.map(i => { const o = el('option'); o.value = i.n; o.textContent = 'תמונה ' + i.n; return o; })); if (cur) sel.value = cur;
+  const has = ims.length > 0; sel.hidden = !has; $('#revimgtext').hidden = !has; $('#revimggo').hidden = !has;
+  $('#undoBtn').hidden = !PREV.length;
+  const ab = $('#apprBtn'); ab.textContent = APPROVED ? '✓ מאושר (לחצו לביטול)' : '✓ אשרו את הפוסט'; ab.className = APPROVED ? 'btn badge-ok' : 'primary';
+}
+async function doRevise(instr) {
+  const text = (instr || $('#revtext').value).trim(); if (REVBUSY || !ed() || text.length < 3) { if (text.length < 3) revmsg('כתבו מה לשנות.'); return; }
+  REVBUSY = true; revmsg('מתקן…'); document.querySelectorAll('#revbar button').forEach(b => b.disabled = true);
+  try {
+    const r = await API.revise(body({ article: ed().content, instruction: text }));
+    PREV.push(ed().content); ed().content = r.article; APPROVED = false; $('#revtext').value = ''; TAB = 'article'; renderDeliver(); saveHist();
+    revmsg(r.demo ? 'בהדגמה התיקון נראה כהערה בלבד. בריצה אמיתית הטקסט נכתב מחדש.' : 'עודכן. אפשר לאשר או לתקן שוב.');
+  } catch (err) { revmsg(apiProblem(err) ? PLAN_MSG : friendlyErr(err.message)); }
+  REVBUSY = false; document.querySelectorAll('#revbar button').forEach(b => b.disabled = false); syncRev();
+}
+async function doReimage() {
+  const n = Number($('#revimgn').value), im = (IMGS.yuval || []).find(i => i.n === n); if (REVBUSY || !im) return;
+  REVBUSY = true; revmsg('מחליף תמונה…'); document.querySelectorAll('#revbar button').forEach(b => b.disabled = true);
+  try {
+    const r = await API.reimage(body({ prompt: im.prompt, instruction: $('#revimgtext').value.trim(), n, format: im.ratio }));
+    const ev = { ...im, url: r.url, prompt: r.prompt, shown: null }; IMGS.yuval[IMGS.yuval.indexOf(im)] = ev;
+    try { ev.shown = await compose(r.url, r.ratio); } catch { /* ללא לוגו */ }
+    APPROVED = false; $('#revimgtext').value = ''; renderDeliver(); revmsg('התמונה הוחלפה.');
+  } catch (err) { revmsg(apiProblem(err) ? PLAN_MSG : friendlyErr(err.message)); }
+  REVBUSY = false; document.querySelectorAll('#revbar button').forEach(b => b.disabled = false); syncRev();
+}
+$('#revgo').onclick = () => doRevise(); $('#revimggo').onclick = doReimage;
+$('#revtext').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doRevise(); } });
+$('#undoBtn').onclick = () => { if (!PREV.length) return; ed().content = PREV.pop(); APPROVED = false; renderDeliver(); saveHist(); syncRev(); revmsg('חזרתם לגרסה הקודמת.'); };
+$('#apprBtn').onclick = () => { APPROVED = !APPROVED; saveHist(); syncRev(); revmsg(APPROVED ? 'הפוסט אושר ונשמר בהיסטוריה. בדקו את הנקודות ברשימת ההפצה לפני פרסום.' : ''); };
+
 // ---------- תוצרים ----------
 const ed = () => FILES.find(f => f.agent === 'editor');
 function renderDeliver() {
-  $('#deliver').hidden = !FILES.length;
+  $('#deliver').hidden = !FILES.length; renderRev(); syncRev(); $('#revbar').hidden = !ed();
   const tabs = $('#tabs'); tabs.replaceChildren();
   const add = (k, t, cls) => { const b = el('button', 'tab ' + (cls || '') + (TAB === k ? ' on' : ''), t); b.onclick = () => { TAB = k; renderDeliver(); }; tabs.append(b); };
   if (ed()) add('article', '★ הפוסט המוכן', 'star');
@@ -751,7 +805,7 @@ $('#dlHtml').onclick = async () => {
 
 // ---------- היסטוריה ----------
 const hist = () => { try { return JSON.parse(store.get('hist') || '[]'); } catch { return []; } };
-function saveHist() { const h = hist(); h.unshift({ t: Date.now(), task: $('#task').value, md: ed() ? ed().content : '' }); store.set('hist', JSON.stringify(h.slice(0, 15))); }
+function saveHist() { const h = hist().filter(x => x.t !== runStart); h.unshift({ t: runStart, task: $('#task').value, md: ed() ? ed().content : '', approved: APPROVED }); store.set('hist', JSON.stringify(h.slice(0, 15))); }
 $('#histBtn').onclick = () => {
   const ul = $('#histlist'); ul.replaceChildren(); const h = hist();
   if (!h.length) ul.append(el('li', null, 'אין משימות קודמות.'));
@@ -1106,7 +1160,7 @@ function renderSummary() {
 }
 
 // ---------- שיגור ----------
-const ERR_MSG = { blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
+const ERR_MSG = { edit_limit: 'ניצלתם את מכסת התיקונים החודשית.', blocked: 'החשבון הושעה. פנו אלינו.', login_required: 'צריך להיכנס לחשבון מחדש.', subscription_required: 'כדי להריץ צריך מנוי פעיל או ריצת ניסיון.', subscription_expired: 'המנוי פג. חדשו אותו בתשלום.', limit_reached: 'ניצלתם את מכסת התכנים החודשית.', run_in_progress: 'כבר רצה אצלכם משימה. המתינו שתסתיים.', key_required: 'חסר מפתח OpenAI.', radar_limit: 'ניצלתם את מכסת סריקות הטרנדים החודשית.', radar_needs_subscription: 'סריקת טרנדים זמינה למנויים.', server_key_missing: 'המפתח של המערכת לא הוגדר בשרת. פנו אלינו.' };
 function apiProblem(err) {
   if (!(err instanceof ApiErr)) return false;
   if (err.data && err.data.account) ACCOUNT = err.data.account;

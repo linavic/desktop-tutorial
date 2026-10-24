@@ -12,7 +12,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   const num = (v, d) => (v !== undefined && v !== '' && !Number.isNaN(+v) ? +v : d);
   const C = {
     prices: { own: num(env.PRICE_OWN, 99), managed: num(env.PRICE_MANAGED, 149) },
-    limitManaged: num(env.LIMIT_MANAGED, 30), radarLimit: num(env.RADAR_LIMIT, 10), trialRuns: num(env.TRIAL_RUNS, 1),
+    limitManaged: num(env.LIMIT_MANAGED, 30), editLimit: num(env.EDIT_LIMIT, 150), trialEdits: num(env.TRIAL_EDITS, 6), radarLimit: num(env.RADAR_LIMIT, 10), trialRuns: num(env.TRIAL_RUNS, 1),
     periodDays: 31, graceDays: num(env.GRACE_DAYS, 3),
     serverKey: env.OPENAI_API_KEY || '', model: env.OPENAI_MODEL || Engine.DEFAULT_MODEL, base: env.OPENAI_BASE_URL || 'https://api.openai.com',
     adminToken: env.ADMIN_TOKEN || '', webhookSecret: env.GROW_WEBHOOK_SECRET || '', allowedOrigin: env.ALLOWED_ORIGIN || '', publicUrl: (env.PUBLIC_URL || '').replace(/\/$/, ''),
@@ -22,7 +22,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   };
   const active = new Set(), hits = new Map();
   const month = () => new Date().toISOString().slice(0, 7);
-  const usageOf = c => (c.usage[month()] ||= { runs: 0, radar: 0, costUsd: 0, searches: 0, images: 0, tin: 0, tout: 0 });
+  const usageOf = c => (c.usage[month()] ||= { runs: 0, radar: 0, edits: 0, costUsd: 0, searches: 0, images: 0, tin: 0, tout: 0 });
   const costOf = u => (u.in || 0) * C.usd.in + (u.out || 0) * C.usd.out + (u.searches || 0) * C.usd.search + (u.images || 0) * C.usd.image;
   const rate = (ip, max, ms) => { const now = Date.now(), a = (hits.get(ip) || []).filter(t => now - t < ms); if (a.length >= max) { hits.set(ip, a); return false; } a.push(now); hits.set(ip, a); return true; };
   const ipOf = req => String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
@@ -52,6 +52,12 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
   function entitle(c, kind) {
     if (c.blocked) return { ok: false, reason: 'blocked' };
     const s = state(c);
+    if (kind === 'edit') {
+      const u = usageOf(c);
+      if (s === 'active') return c.plan === 'own' ? { ok: true, mode: 'own' } : u.edits >= C.editLimit ? { ok: false, reason: 'edit_limit' } : { ok: true, mode: 'managed' };
+      if (s === 'trial') return u.edits >= C.trialEdits ? { ok: false, reason: 'edit_limit' } : { ok: true, mode: 'trial' };
+      return { ok: false, reason: s === 'expired' ? 'subscription_expired' : 'subscription_required' };
+    }
     if (s === 'active') {
       if (c.plan === 'own') return { ok: true, mode: 'own' };
       const u = usageOf(c), used = kind === 'run' ? u.runs : u.radar, lim = kind === 'run' ? limOf(c) : C.radarLimit;
@@ -244,6 +250,17 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
       bump(c, ent.mode, 'radar', +1);
       try { const out = await Engine.trends(brief, io, cfg); if (ent.mode !== 'own') { const u = usageOf(c); u.costUsd += costOf(cfg.usage); store.save(); } return json(res, 200, out), true; }
       catch (e) { bump(c, ent.mode, 'radar', -1); return json(res, 502, { error: String(e.message || e) }), true; }
+    }
+    if ((p === '/api/revise' || p === '/api/reimage') && req.method === 'POST') {
+      const brief = await readJson(req, 200000) || {}, fn = p === '/api/revise' ? 'revise' : 'reimage';
+      if (brief.demo === true) return json(res, 200, await Engine[fn](brief, io, { live: false })), true;
+      const c = auth(req); if (!c) return json(res, 401, { error: 'login_required' }), true;
+      const ent = entitle(c, 'edit'); if (!ent.ok) return json(res, 402, { error: ent.reason }), true;
+      const key = ent.mode === 'own' ? String(brief.apiKey || '').trim() : C.serverKey; if (!key) return json(res, 400, { error: 'key_required' }), true;
+      const cfg = { live: true, key, model: C.model, base: C.base, usage: { in: 0, out: 0, searches: 0, images: 0 } };
+      const u = usageOf(c); u.edits += 1; store.save();
+      try { const out = await Engine[fn](brief, io, cfg); if (ent.mode !== 'own') { u.costUsd += costOf(cfg.usage); u.images += cfg.usage.images || 0; u.tin += cfg.usage.in || 0; u.tout += cfg.usage.out || 0; store.save(); } return json(res, 200, out), true; }
+      catch (e) { u.edits = Math.max(0, u.edits - 1); store.save(); return json(res, 502, { error: String(e.message || e) }), true; }
     }
     if (p === '/api/tts' && req.method === 'POST') {
       const brief = await readJson(req, 50000) || {}, c = auth(req);

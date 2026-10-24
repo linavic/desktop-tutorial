@@ -298,6 +298,43 @@
     return out;
   }
 
+  // תיקון פוסט קיים לפי הוראה של בעל העסק (עורך ראשי בלבד, קריאה אחת, בלי להריץ את כל הצוות)
+  async function revise(brief, io, cfg) {
+    const instruction = String(brief.instruction || '').trim().slice(0, 400), article = String(brief.article || '').slice(0, 12000);
+    if (instruction.length < 3 || article.length < 20) throw new Error('חסרה הוראה או טקסט לתיקון');
+    const body = article.replace(/\n-{3,}\n## הערות עורך[\s\S]*$/, '').trim();
+    if (!cfg.live) {
+      await sleep(900);
+      const nl = body.indexOf('\n');
+      return { demo: true, article: body.slice(0, nl) + `\n\n> גרסה מתוקנת לדוגמה לפי ההוראה: ${instruction}\n` + body.slice(nl) };
+    }
+    const ctx = String(brief.context || '').trim().slice(0, 6000) || io.defaultCtx || NO_CTX, ed = (io.agents || []).find(a => a.id === 'editor') || { body: '' };
+    const system = `${ed.body}${ed.skills ? '\n\n---\n' + ed.skills : ''}\n\n---\nהקשר הפרויקט:\n${ctx}\n\nמשימת תיקון: את מקבלת פוסט מוכן והוראת תיקון מבעל העסק. החזירי את הפוסט המלא המתוקן בלבד, ב-Markdown, בעברית. כללים: בצעי רק מה שהתבקש. שמרי את כל שורות התמונה (![...](...)) במקומן בדיוק, ללא שינוי. אל תוסיפי עובדות, מספרים, מחירים או הבטחות חדשות. שמרי על כללי העסק, ועל קול העסק. בלי הסברים ובלי הערות עורך.`;
+    const text = await streamLLM(cfg, system, `הוראת התיקון: ${instruction}\n\nהפוסט הנוכחי:\n${body}`, () => {}, 2200);
+    if (!text) throw new Error('לא התקבל טקסט מתוקן');
+    return { demo: false, article: text };
+  }
+
+  // החלפת תמונה אחת לפי הוראה (למשל "יותר חם", "בלי אנשים")
+  async function reimage(brief, io, cfg) {
+    const instruction = String(brief.instruction || '').trim().slice(0, 300), prompt = String(brief.prompt || '').trim().slice(0, 1200);
+    const fid = FORMATS[brief.format] ? brief.format : '1:1', fmt = FORMATS[fid], n = Math.max(1, Math.min(MAX_IMAGES, Number(brief.n) || 1));
+    if (!prompt) throw new Error('חסר תיאור לתמונה');
+    const rid = 'rev' + Date.now().toString(36), rel = `yuval/outputs/${rid}-${n}.${cfg.live ? 'png' : 'svg'}`;
+    const newPrompt = instruction ? `${prompt}\n\nRevision requested by the business owner: ${instruction}` : `${prompt}\n\nCreate a fresh alternative composition.`;
+    let url;
+    if (!cfg.live) {
+      await sleep(700);
+      const [gw, gh] = fmt.gen.split('x').map(x => Math.round(x / 2.4)), hue = 60 + Math.floor(Math.random() * 240), biz = String(brief.businessName || '').trim().slice(0, 40) || io.brand || '';
+      url = await io.putImage(rel, { svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${gw}" height="${gh}" viewBox="0 0 ${gw} ${gh}"><rect width="${gw}" height="${gh}" fill="hsl(${hue},40%,80%)"/><text x="${gw / 2}" y="${gh / 2}" text-anchor="middle" font-family="sans-serif" font-size="${gw / 22}" fill="#fff">${biz.replace(/[<&>"]/g, '')}</text><text x="${gw / 2}" y="${gh / 2 + 26}" text-anchor="middle" font-family="sans-serif" font-size="${gw / 44}" fill="#ffffffcc">דוגמה · חלופה</text></svg>` }, 'image/svg+xml', rid);
+    } else {
+      const full = `${newPrompt}\n\nCompose for a ${fid} frame; keep the key subject centered with safe margins because the image will be cropped to exactly ${fid}.\n\nStrict: no text, no letters, no logo, no watermark, no signage.`;
+      const g = await genImage(cfg, full, fmt.gen);
+      url = await io.putImage(rel, { b64: g.b64 }, 'image/png', rid);
+    }
+    return { url, prompt: newPrompt, n, ratio: fid };
+  }
+
   // רדאר טרנדים (פרואקטיבי)
   async function trends(brief, io, cfg) {
     const ctx = String(brief.context || '').trim().slice(0, 6000) || io.defaultCtx || NO_CTX;
@@ -315,5 +352,5 @@
     return { demo: false, ideas: ideas.slice(0, 5), sources: r.sources.slice(0, 8) };
   }
 
-  return { DEFAULT_MODEL, IMAGE_MODEL, TTS_MODEL, FORMATS, PIPE, buildAgents, meta, runCrew, checkConn, trends, tts };
+  return { DEFAULT_MODEL, IMAGE_MODEL, TTS_MODEL, FORMATS, PIPE, buildAgents, meta, runCrew, checkConn, trends, tts, revise, reimage };
 });
