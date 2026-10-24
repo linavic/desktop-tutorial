@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { Store } = require('./store.js');
-const { smsConfig, smsReady, sendSms, normalizePhone } = require('./sms.js');
+const { smsConfig, smsReady, sendSms, sendOtp, normalizePhone } = require('./sms.js');
 const { growConfig, createCheckout, approveTransaction, parseBody, interpretWebhook } = require('./grow.js');
 
 module.exports = function createSaas({ env, Engine, streamRun, io }) {
@@ -139,10 +139,12 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
       const o = c.otp || {}, now = Date.now();
       if (o.sentAt && now - o.sentAt < 30e3) return json(res, 429, { error: 'wait_before_resend', wait: Math.ceil((30e3 - (now - o.sentAt)) / 1000) }), true;
       if (!rate('sms-a:' + c.id, 5, 24 * 3600e3) || !rate('sms-p:' + phone, 3, 3600e3) || !rate('sms-i:' + ipOf(req), 10, 3600e3)) return json(res, 429, { error: 'too_many_requests' }), true;
-      const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0'), salt = crypto.randomBytes(8).toString('hex');
-      c.otp = { h: sha(salt + code), salt, exp: now + 10 * 60e3, tries: 0, sentAt: now, phone };
-      try { await sendSms(SMS, phone, `קוד האימות שלך ל-${env.BRAND_NAME || 'Agent Crew'}: ${code}. תקף ל-10 דקות. אם לא ביקשת, התעלם מההודעה.`); }
-      catch (e) { c.otp = null; store.event('sms_error', { id: c.id, message: String(e.message).slice(0, 200) }); store.save(); return json(res, 502, { error: 'sms_failed' }), true; }
+      const ownCode = String(crypto.randomInt(0, 1000000)).padStart(6, '0'), salt = crypto.randomBytes(8).toString('hex');
+      c.otp = { sentAt: now }; // מבטל קוד קודם וחוסם שליחה כפולה בזמן שהספק עונה
+      let code;
+      try { code = await sendOtp(SMS, phone, `קוד האימות שלך ל-${env.BRAND_NAME || 'Agent Crew'}: [code]. תקף ל-10 דקות. אם לא ביקשת, התעלם מההודעה.`, ownCode); }
+      catch (e) { c.otp = null; store.event('sms_error', { id: c.id, message: String(e.message).slice(0, 300) }); store.save(); return json(res, 502, { error: 'sms_failed' }), true; }
+      c.otp = { h: sha(salt + code), salt, exp: Date.now() + 10 * 60e3, tries: 0, sentAt: now, phone };
       store.save(); return json(res, 200, { sent: true, phone: phone.slice(0, 6) + '****' + phone.slice(-2), ...(SMS.provider === 'dev' && SMS.dev ? { devCode: code } : {}) }), true;
     }
     if (p === '/api/auth/phone/verify' && req.method === 'POST') {
@@ -244,7 +246,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
           { ok: Boolean(C.serverKey), label: 'מפתח OpenAI של המערכת', env: 'OPENAI_API_KEY', help: 'נדרש למסלול 149 ולניסיון החינמי. אין API חינמי של OpenAI: פותחים חשבון ב-platform.openai.com, מטעינים יתרה קטנה ויוצרים מפתח. בלי זה עובדת רק ההדגמה.' },
           { ok: has('SUPABASE_URL') && has('SUPABASE_SERVICE_KEY'), label: 'אחסון קבוע ללקוחות (Supabase)', env: 'SUPABASE_URL, SUPABASE_SERVICE_KEY', help: 'בלי זה הלקוחות נמחקים בכל הפעלה מחדש של השרת, אלא אם יש דיסק קבוע.' },
           { ok: Boolean(GOOGLE_ID), label: 'הרשמה עם Google (Client ID)', env: 'GOOGLE_CLIENT_ID', help: 'ב-Google Cloud Console: APIs & Services, Credentials, OAuth client ID מסוג Web. ב-Authorized JavaScript origins מוסיפים את הכתובת של האתר (למשל https://crew-saas.onrender.com ו-https://as-biz.com). בלי זה אין שער הרשמה והדגמה פתוחה.' },
-          { ok: smsReady(SMS) && SMS.provider !== 'dev', label: 'שליחת SMS לאימות נייד', env: 'SMS_PROVIDER + פרטי הספק', help: 'sms4free (SMS4FREE_USER, SMS4FREE_PASS, SMS4FREE_KEY), twilio (SMS_TWILIO_SID, SMS_TWILIO_TOKEN, SMS_TWILIO_FROM או SMS_TWILIO_SERVICE) או webhook (SMS_WEBHOOK_URL). לבדיקה שלחי הודעת ניסיון למעלה. כל SMS עולה כסף. בלי זה הלקוחות לא יוכלו להשלים אימות.' },
+          { ok: smsReady(SMS) && SMS.provider !== 'dev', label: 'שליחת SMS לאימות נייד', env: 'SMS_PROVIDER + פרטי הספק', help: 'sms019 (SMS019_USERNAME, SMS019_TOKEN, SMS019_SOURCE), sms4free (SMS4FREE_USER, SMS4FREE_PASS, SMS4FREE_KEY), twilio (SMS_TWILIO_SID, SMS_TWILIO_TOKEN, SMS_TWILIO_FROM או SMS_TWILIO_SERVICE) או webhook (SMS_WEBHOOK_URL). לבדיקה שלחי הודעת ניסיון למעלה. כל SMS עולה כסף. בלי זה הלקוחות לא יוכלו להשלים אימות.' },
           { ok: Boolean(C.publicUrl), label: 'כתובת ציבורית של השרת', env: 'PUBLIC_URL', help: 'נכנסת לקישורי החזרה מהתשלום ול-webhook.' },
           { ok: Boolean(g.userId && g.apiKey), label: 'חשבון GROW (userId ו-apiKey)', env: 'GROW_USER_ID, GROW_API_KEY', help: 'מתקבלים מ-GROW אחרי שפותחים חשבון סולק.' },
           { ok: Boolean(g.pages.own), label: 'דף תשלום חוזר ב-GROW: 99 ₪ (מפתח עצמי)', env: 'GROW_PAGECODE_OWN', help: 'יוצרים ב-GROW דף תשלום עם הוראת קבע חודשית ומעתיקים את ה-pageCode.' },
@@ -258,7 +260,7 @@ module.exports = function createSaas({ env, Engine, streamRun, io }) {
         const b = await readJson(req, 2000) || {}, phone = normalizePhone(b.phone);
         if (!smsReady(SMS)) return json(res, 200, { ok: false, error: 'ספק ה-SMS לא הוגדר (SMS_PROVIDER ופרטי הספק).' }), true;
         if (!phone) return json(res, 200, { ok: false, error: 'מספר לא תקין.' }), true;
-        try { await sendSms(SMS, phone, `בדיקת שליחה מ-${env.BRAND_NAME || 'Agent Crew'}. אם קיבלת את ההודעה הזו, ה-SMS עובד.`); store.event('sms_test', { phone: phone.slice(0, 6) + '****' }); return json(res, 200, { ok: true }), true; }
+        try { await sendOtp(SMS, phone, `בדיקת שליחה מ-${env.BRAND_NAME || 'Agent Crew'}. קוד הבדיקה: [code]`, '000000', { validMinutes: 1, maxTries: 3 }); store.event('sms_test', { phone: phone.slice(0, 6) + '****' }); return json(res, 200, { ok: true }), true; }
         catch (e) { store.event('sms_error', { message: String(e.message).slice(0, 300) }); return json(res, 200, { ok: false, error: String(e.message).slice(0, 300) }), true; }
       }
       if (p === '/api/admin/check-openai' && !C.serverKey) return json(res, 200, { results: [{ name: 'מפתח OpenAI של המערכת', ok: false, detail: 'לא הוגדר OPENAI_API_KEY בשרת (ב-Render: Environment).' }] }), true;
