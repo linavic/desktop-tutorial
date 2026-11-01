@@ -34,5 +34,9 @@
  "2026-10-31": {
   "status": "telegram",
   "link": "{\"telegram\": \"https://t.me/newsnetanya/21\"}"
+ },
+ "2026-11-01": {
+  "status": "telegram",
+  "link": "{\"telegram\": \"https://t.me/newsnetanya/25\"}"
  }
 }
