@@ -50,5 +50,9 @@
  "2026-11-08": {
   "status": "telegram",
   "link": "{\"telegram\": \"https://t.me/newsnetanya/31\"}"
+ },
+ "2026-11-14": {
+  "status": "skipped",
+  "link": ""
  }
 }
