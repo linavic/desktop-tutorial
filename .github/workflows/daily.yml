@@ -47,7 +47,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             python -m netanya_news.main ${{ inputs.force && '--force' || '' }}
           else
-            python -m netanya_news.main --not-before-hour 20
+            python -m netanya_news.main --not-before-hour 20 --catchup-until-hour 8
           fi
       - name: Save state
         if: always()
