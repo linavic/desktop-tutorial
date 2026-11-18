@@ -102,6 +102,7 @@ def run(args):
                 raise ValueError(f"unknown target '{t}'")
         except Exception as e:
             errors[t] = str(e)[:300]
+            print(f"[publish] {t} failed: {e}", file=sys.stderr)
     if not targets:
         headline = "📝 הסיכום היומי מוכן (מצב טיוטה). מפרסמים ידנית: התמונה כאן, הטקסט בהודעה הבאה."
     else:
