@@ -89,6 +89,9 @@ def run(args):
     targets = [t.strip() for t in os.environ.get("PUBLISH_TARGETS", "").split(",") if t.strip()]
     links, errors = {}, {}
     for t in targets:  # each platform fails independently
+        if t == "asbiz" and not os.environ.get("ASBIZ_WEBHOOK_URL"):
+            print("[publish] asbiz target ignored: ASBIZ_WEBHOOK_URL is not set")
+            continue
         try:
             if t == "telegram":
                 links[t] = notify.post_to_channel(image, result["telegram_html"]) or "ערוץ טלגרם"
