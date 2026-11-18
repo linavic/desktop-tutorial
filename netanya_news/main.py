@@ -4,7 +4,7 @@ import json
 import os
 import sys
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from . import card, collect, compose, notify, video
@@ -37,8 +37,14 @@ def alert(text):
 def run(args):
     now = datetime.now(TZ)
     if args.not_before_hour is not None and now.hour < args.not_before_hour:
-        print(f"Israel time is {now:%H:%M}, before {args.not_before_hour}:00 - skipping (cron slot fired early).")
-        return 0
+        yday = now - timedelta(days=1)
+        late = (args.catchup_until_hour is not None and now.hour < args.catchup_until_hour
+                and f"{yday:%Y-%m-%d}" not in _posted())
+        if not late:
+            print(f"Israel time is {now:%H:%M}, before {args.not_before_hour}:00 - skipping (cron slot fired early).")
+            return 0
+        print(f"Israel time is {now:%H:%M}: catching up the missed post for {yday:%Y-%m-%d}.")
+        now = yday  # a slot GitHub delayed past midnight: post the day that was missed
     day = f"{now:%Y-%m-%d}"
     if day in _posted() and not (args.force or args.demo):
         print(f"{day} already handled - skipping (use --force to override).")
@@ -96,6 +102,7 @@ def run(args):
                 raise ValueError(f"unknown target '{t}'")
         except Exception as e:
             errors[t] = str(e)[:300]
+            print(f"[publish] {t} failed: {e}", file=sys.stderr)
     if not targets:
         headline = "📝 הסיכום היומי מוכן (מצב טיוטה). מפרסמים ידנית: התמונה כאן, הטקסט בהודעה הבאה."
     else:
@@ -127,6 +134,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--demo", action="store_true", help="sample data, no network, writes to out/")
     p.add_argument("--dry-run", action="store_true", help="collect+summarise+card, no publish/alert")
+    p.add_argument("--catchup-until-hour", type=int, help="a run before this Israel-time hour posts the previous day if it was never posted")
     p.add_argument("--force", action="store_true")
     p.add_argument("--not-before-hour", type=int, help="skip if the Israel-time hour is earlier (GitHub cron may fire late but never early; already-posted days are skipped via state)")
     args = p.parse_args()

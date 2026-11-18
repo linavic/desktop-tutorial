@@ -11,13 +11,20 @@ def whatsapp(items, date_label):
     return "\n".join(out).strip()
 
 
-def telegram_html(items, date_label):
-    out = [f"<b>חדשות נתניה – סיכום יומי</b>\n{html.escape(date_label)}\n"]
+def telegram_html(items, date_label, limit=3500):
+    """Returns a list of HTML messages, each under `limit` characters, split only between items."""
+    head = f"<b>חדשות נתניה – סיכום יומי</b>\n{html.escape(date_label)}\n"
+    parts, cur = [], head
     for i in items:
         src = html.escape(i.get("source") or "למקור")
-        out.append(f"• <b>{html.escape(i['title'])}</b>\n{html.escape(i.get('summary', ''))}\n"
-                   f"<a href=\"{html.escape(i['url'], quote=True)}\">מקור: {src}</a>\n")
-    return "\n".join(out).strip()
+        block = (f"• <b>{html.escape(i['title'])}</b>\n{html.escape(i.get('summary', ''))}\n"
+                 f"<a href=\"{html.escape(i['url'], quote=True)}\">מקור: {src}</a>\n")
+        if len(cur) + len(block) + 1 > limit and cur != head:
+            parts.append(cur.strip())
+            cur = ""
+        cur += "\n" + block if cur else block
+    parts.append(cur.strip())
+    return parts
 
 
 def instagram(items, date_label):
