@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מפת פנים לשאלון</title>
+<style>
+  /* שנו את הצבעים כאן כדי להתאים למותג של הקליניקה */
+  :root{
+    --accent:#b8756a;
+    --accent-soft:rgba(184,117,106,.22);
+    --accent-strong:rgba(184,117,106,.62);
+    --skin:#f6e3d8;
+    --skin-line:#c99a8b;
+    --hair:#d9c3b5;
+    --ink:#3a2e2b;
+    --muted:#7d6d68;
+    --bg:#fffaf7;
+    --chip:#f3e4dd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Heebo","Assistant",system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  .face-map{max-width:880px;margin:0 auto;padding:20px 16px 28px;display:grid;gap:20px;grid-template-columns:minmax(0,360px) minmax(0,1fr);align-items:start}
+  @media (max-width:700px){.face-map{grid-template-columns:1fr}}
+  h2{margin:0 0 6px;font-size:1.25rem;font-weight:600}
+  .hint{margin:0 0 14px;color:var(--muted);font-size:.95rem;line-height:1.5}
+  svg{width:100%;height:auto;display:block;touch-action:manipulation}
+  .zone{cursor:pointer;outline:none}
+  .zone .area{fill:transparent;stroke:transparent;stroke-width:1.5;transition:fill .15s,stroke .15s}
+  .zone:hover .area,.zone:focus-visible .area{fill:var(--accent-soft);stroke:var(--accent)}
+  .zone[aria-checked="true"] .area{fill:var(--accent-strong);stroke:var(--accent)}
+  .zone:focus-visible .area{stroke-width:3}
+  .current{min-height:1.6em;margin:6px 0 0;text-align:center;color:var(--accent);font-weight:600;font-size:.95rem}
+  .panel h3{margin:0 0 10px;font-size:1rem;font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;margin:0 0 14px;padding:0;list-style:none}
+  .chips li{background:var(--chip);border-radius:999px;padding:6px 14px;font-size:.92rem}
+  .empty{color:var(--muted);font-size:.92rem}
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:0 0 16px}
+  .list button{font:inherit;font-size:.92rem;padding:9px 10px;border:1px solid var(--skin-line);background:#fff;color:var(--ink);border-radius:10px;cursor:pointer;text-align:center}
+  .list button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .clear{font:inherit;background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;padding:4px 0}
+  .note{margin-top:14px;font-size:.8rem;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<form class="face-map" onsubmit="return false">
+  <div>
+    <h2>באילו אזורים תרצי לטפל?</h2>
+    <p class="hint">לחצי על האזורים בפנים שמעניינים אותך. אפשר לבחור כמה אזורים.</p>
+
+    <svg viewBox="0 0 400 560" role="group" aria-label="איור פנים לבחירת אזורי טיפול">
+      <!-- שיער ברקע -->
+      <path d="M200 22C72 22 50 180 62 300c4 60 18 100 34 120l14-120C90 180 120 70 200 62c80 8 110 118 90 238l14 120c16-20 30-60 34-120 12-120-10-278-138-278Z" fill="var(--hair)"/>
+      <!-- צוואר -->
+      <path d="M158 440 150 530h100l-8-90Q200 480 158 440Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+      <path d="M0 560Q10 520 120 508Q150 500 150 520H250Q250 500 280 508Q390 520 400 560Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+      <!-- פנים -->
+      <path d="M200 40c85 0 122 70 122 180 0 110-32 220-122 258C110 440 78 330 78 220 78 110 115 40 200 40Z" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+      <!-- אוזניים -->
+      <path d="M79 205c-14 0-18 28-8 46 4 8 10 10 14 8" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+      <path d="M321 205c14 0 18 28 8 46-4 8-10 10-14 8" fill="var(--skin)" stroke="var(--skin-line)" stroke-width="1.5"/>
+      <!-- גבות -->
+      <path d="M110 170q38-22 76-6" fill="none" stroke="#9a7a6b" stroke-width="5" stroke-linecap="round"/>
+      <path d="M290 170q-38-22-76-6" fill="none" stroke="#9a7a6b" stroke-width="5" stroke-linecap="round"/>
+      <!-- עיניים -->
+      <g fill="none" stroke="#6d5249" stroke-linecap="round">
+        <path d="M118 200q30-22 60 0q-30 16-60 0Z" fill="#fff" stroke-width="2"/>
+        <path d="M282 200q-30-22-60 0q30 16 60 0Z" fill="#fff" stroke-width="2"/>
+        <circle cx="148" cy="201" r="7" fill="#7a5a4c" stroke="none"/>
+        <circle cx="252" cy="201" r="7" fill="#7a5a4c" stroke="none"/>
+        <path d="M114 198q34-28 68 0M286 198q-34-28-68 0" stroke-width="3"/>
+      </g>
+      <!-- אף -->
+      <path d="M200 190c-2 30-4 60-14 84q-8 12 6 18 8 4 8 0 0 4 8 0 14-6 6-18c-10-24-12-54-14-84" fill="none" stroke="var(--skin-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- שפתיים -->
+      <path d="M160 368q20-14 40-6q20-8 40 6q-20 22-40 22t-40-22Z" fill="#d9847c" stroke="#b9615b" stroke-width="1.5"/>
+      <path d="M160 368q40 8 80 0" fill="none" stroke="#b9615b" stroke-width="1.5"/>
+
+      <!-- אזורי טיפול (לחיצים) -->
+      <g id="zones">
+        <g class="zone" data-id="forehead" data-label="מצח" tabindex="0" role="checkbox" aria-checked="false" aria-label="מצח">
+          <path class="area" d="M104 118Q200 64 296 118L292 148Q200 128 108 148Z"/>
+        </g>
+        <g class="zone" data-id="glabella" data-label="בין הגבות" tabindex="0" role="checkbox" aria-checked="false" aria-label="בין הגבות">
+          <ellipse class="area" cx="200" cy="168" rx="22" ry="15"/>
+        </g>
+        <g class="zone" data-id="eyes" data-label="אזור העיניים" tabindex="0" role="checkbox" aria-checked="false" aria-label="אזור העיניים">
+          <ellipse class="area" cx="148" cy="204" rx="42" ry="26"/>
+          <ellipse class="area" cx="252" cy="204" rx="42" ry="26"/>
+        </g>
+        <g class="zone" data-id="cheeks" data-label="לחיים" tabindex="0" role="checkbox" aria-checked="false" aria-label="לחיים">
+          <ellipse class="area" cx="118" cy="272" rx="36" ry="44"/>
+          <ellipse class="area" cx="282" cy="272" rx="36" ry="44"/>
+        </g>
+        <g class="zone" data-id="nasolabial" data-label="קמטי חיוך" tabindex="0" role="checkbox" aria-checked="false" aria-label="קמטי חיוך">
+          <ellipse class="area" cx="158" cy="338" rx="9" ry="30" transform="rotate(18 158 338)"/>
+          <ellipse class="area" cx="242" cy="338" rx="9" ry="30" transform="rotate(-18 242 338)"/>
+        </g>
+        <g class="zone" data-id="lips" data-label="שפתיים" tabindex="0" role="checkbox" aria-checked="false" aria-label="שפתיים">
+          <ellipse class="area" cx="200" cy="372" rx="52" ry="24"/>
+        </g>
+        <g class="zone" data-id="chin" data-label="סנטר" tabindex="0" role="checkbox" aria-checked="false" aria-label="סנטר">
+          <ellipse class="area" cx="200" cy="432" rx="36" ry="24"/>
+        </g>
+        <g class="zone" data-id="jawline" data-label="קו הלסת" tabindex="0" role="checkbox" aria-checked="false" aria-label="קו הלסת">
+          <path class="area" d="M84 300Q96 400 160 452L170 436Q116 390 104 300Z"/>
+          <path class="area" d="M316 300Q304 400 240 452L230 436Q284 390 296 300Z"/>
+        </g>
+        <g class="zone" data-id="neck" data-label="צוואר" tabindex="0" role="checkbox" aria-checked="false" aria-label="צוואר">
+          <path class="area" d="M164 470 158 518h84l-6-48Q200 492 164 470Z"/>
+        </g>
+      </g>
+    </svg>
+    <p class="current" id="current" aria-live="polite"></p>
+  </div>
+
+  <div class="panel">
+    <h3>האזורים שבחרת</h3>
+    <ul class="chips" id="chips"><li class="empty">עדיין לא נבחרו אזורים</li></ul>
+
+    <h3>או בחרי מהרשימה</h3>
+    <div class="list" id="list"></div>
+
+    <input type="hidden" name="face_zones" id="face_zones" value="">
+    <button type="button" class="clear" id="clear">נקה בחירה</button>
+    <p class="note">האיור להמחשה בלבד ואינו מהווה אבחנה או המלצה רפואית. ההתאמה לטיפול תיעשה בייעוץ אישי.</p>
+  </div>
+</form>
+
+<script>
+(function(){
+  var zones = Array.prototype.slice.call(document.querySelectorAll('.zone'));
+  var chips = document.getElementById('chips');
+  var list = document.getElementById('list');
+  var field = document.getElementById('face_zones');
+  var current = document.getElementById('current');
+  var selected = {};
+
+  // כפתורי רשימה (חלופה נגישה ללחיצה על האיור)
+  zones.forEach(function(z){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = z.dataset.label;
+    b.setAttribute('aria-pressed','false');
+    b.dataset.id = z.dataset.id;
+    b.addEventListener('click', function(){ toggle(z.dataset.id); });
+    list.appendChild(b);
+
+    z.addEventListener('click', function(){ toggle(z.dataset.id); });
+    z.addEventListener('keydown', function(e){
+      if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(z.dataset.id); }
+    });
+    z.addEventListener('mouseenter', function(){ current.textContent = z.dataset.label; });
+    z.addEventListener('focus', function(){ current.textContent = z.dataset.label; });
+    z.addEventListener('mouseleave', function(){ current.textContent = ''; });
+    z.addEventListener('blur', function(){ current.textContent = ''; });
+  });
+
+  document.getElementById('clear').addEventListener('click', function(){
+    selected = {}; render();
+  });
+
+  function toggle(id){
+    if(selected[id]) delete selected[id]; else selected[id] = true;
+    render();
+  }
+
+  function render(){
+    var ids = [], labels = [];
+    zones.forEach(function(z){
+      var on = !!selected[z.dataset.id];
+      z.setAttribute('aria-checked', on);
+      if(on){ ids.push(z.dataset.id); labels.push(z.dataset.label); }
+    });
+    Array.prototype.forEach.call(list.children, function(b){
+      b.setAttribute('aria-pressed', !!selected[b.dataset.id]);
+    });
+    chips.innerHTML = '';
+    if(!labels.length){
+      var li = document.createElement('li'); li.className = 'empty';
+      li.textContent = 'עדיין לא נבחרו אזורים'; chips.appendChild(li);
+    } else {
+      labels.forEach(function(t){
+        var li = document.createElement('li'); li.textContent = t; chips.appendChild(li);
+      });
+    }
+    // הערך לשליחה עם השאלון: מזהים באנגלית מופרדים בפסיק
+    field.value = ids.join(',');
+    var detail = { ids: ids, labels: labels };
+    document.dispatchEvent(new CustomEvent('etel:zones', { detail: detail }));
+    // כשהעמוד מוטמע ב-iframe, שולח את הבחירה לעמוד האב
+    if(window.parent !== window){ window.parent.postMessage({ type:'etel:zones', ids:ids, labels:labels }, '*'); }
+  }
+  render();
+})();
+</script>
+</body>
+</html>
