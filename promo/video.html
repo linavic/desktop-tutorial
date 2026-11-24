@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ETEL CLINIC – promo</title>
+<style>
+  @font-face{font-family:Heebo;font-weight:400;src:url(assets/heebo-400.ttf)}
+  @font-face{font-family:Heebo;font-weight:600;src:url(assets/heebo-600.ttf)}
+  @font-face{font-family:Heebo;font-weight:800;src:url(assets/heebo-800.ttf)}
+  :root{--ivory:#FAF8F5;--champ:#F2ECE4;--sand:#E5DCCF;--espresso:#2C2623;--taupe:#6E655F;--gold:#B89768;--gold-deep:#A17F4E;--wa:#25D366;--wa-deep:#128C7E}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ivory)}
+  body{font-family:Heebo,"Liberation Sans",sans-serif;color:var(--espresso);position:relative}
+  #stage{position:absolute;inset:0;background:radial-gradient(900px 700px at 50% 22%,#fff 0%,rgba(255,255,255,0) 70%),linear-gradient(180deg,var(--ivory),var(--champ))}
+  .abs{position:absolute;left:0;right:0;text-align:center}
+  /* brand */
+  #brand{top:96px}
+  #brand .name{font-family:"Liberation Serif",Georgia,serif;font-size:60px;letter-spacing:.34em;font-weight:700;padding-inline-start:.34em}
+  #brand .sub{font-size:28px;color:var(--taupe);margin-top:6px;letter-spacing:.04em}
+  #brand .line{width:120px;height:3px;background:var(--gold);margin:18px auto 0;border-radius:3px}
+  /* headline */
+  .head{top:250px;padding:0 70px}
+  .head h1{font-size:76px;line-height:1.12;font-weight:800}
+  .head h1 em{font-style:normal;color:var(--gold-deep)}
+  .head p{font-size:36px;color:var(--taupe);margin-top:18px;font-weight:400}
+  /* face card */
+  #card{position:absolute;left:148px;top:470px;width:784px;height:980px;border-radius:44px;overflow:hidden;box-shadow:0 50px 90px -40px rgba(44,38,35,.55);background:#ddd}
+  #card svg{display:block;width:100%;height:100%}
+  .fz{fill:rgba(184,151,104,0);stroke:rgba(255,255,255,0);stroke-width:4}
+  .pulse{transform-box:fill-box;transform-origin:center}
+  #chip{top:1478px;display:flex;justify-content:center}
+  #chip span{display:inline-flex;align-items:center;gap:16px;background:#fff;border:2px solid var(--sand);border-radius:999px;padding:20px 44px;font-size:44px;font-weight:600;box-shadow:0 14px 30px -18px rgba(44,38,35,.5)}
+  #chip i{width:20px;height:20px;border-radius:50%;background:var(--gold-deep);display:inline-block}
+  #count{position:absolute;top:500px;right:176px;background:rgba(44,38,35,.82);color:#fff;font-size:34px;padding:12px 28px;border-radius:999px;font-weight:600}
+  /* steps */
+  #steps{top:560px;padding:0 110px}
+  #steps .row{display:flex;align-items:center;gap:30px;background:#fff;border:2px solid var(--sand);border-radius:30px;padding:30px 36px;margin-bottom:26px;font-size:46px;font-weight:600;box-shadow:0 18px 36px -24px rgba(44,38,35,.45)}
+  #steps .num{flex:none;width:76px;height:76px;border-radius:50%;background:var(--espresso);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800}
+  #steps .row.last .num{background:var(--wa);color:#fff}
+  /* cta */
+  #cta{top:640px;padding:0 90px}
+  #cta h2{font-size:80px;line-height:1.1;font-weight:800}
+  #cta h2 em{font-style:normal;color:var(--gold-deep)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:24px;border-radius:999px;font-weight:800;margin:0 auto}
+  #waBtn{margin-top:90px;width:860px;height:150px;background:var(--wa);color:#fff;font-size:62px;box-shadow:0 30px 50px -26px rgba(18,140,126,.9)}
+  #waBtn svg{width:78px;height:78px}
+  #webBtn{margin-top:34px;width:860px;height:130px;background:var(--espresso);color:var(--ivory);font-size:48px;letter-spacing:.01em}
+  #webBtn small{color:var(--gold);font-size:38px;font-weight:600}
+  #bio{margin-top:44px;font-size:40px;color:var(--taupe);font-weight:600}
+  #addr{margin-top:20px;font-size:32px;color:var(--taupe);font-weight:400}
+  #disc{bottom:360px;font-size:26px;color:#8b807a;padding:0 90px;line-height:1.4}
+  .gold-ring{position:absolute;border-radius:50%;border:3px solid var(--gold);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="brand" class="abs">
+  <div class="name">ETEL CLINIC</div>
+  <div class="sub">אטל קליניקה לאסתטיקה · נתניה</div>
+  <div class="line"></div>
+</div>
+
+<div id="h1" class="abs head"><h1>איפה היית רוצה<br><em>לרענן?</em></h1></div>
+<div id="h2" class="abs head"><h1>סמני את האזורים<br><em>שחשובים לך</em></h1></div>
+
+<div id="card"></div>
+<div id="count">אזורים שנבחרו: 0</div>
+<div id="chip" class="abs"><span><i></i><b id="chipTxt">—</b></span></div>
+
+<div id="h3" class="abs head" style="top:250px"><h1>אבחון אישי<br><em>ב-5 צעדים קצרים</em></h1></div>
+<div id="steps" class="abs"></div>
+
+<div id="cta" class="abs">
+  <h2>רוצה לדעת<br>מה <em>מתאים לך?</em></h2>
+  <div id="waBtn" class="btn">
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#fff"/><path d="M16 6.5a9.5 9.5 0 0 0-8.2 14.3L6.6 25.4l4.7-1.2A9.5 9.5 0 1 0 16 6.5Z" fill="#25D366"/><path d="M12.6 11.6c.3-.6.6-.6.9-.6h.6c.2 0 .4.1.5.4l.8 1.9c.1.2 0 .4-.1.6l-.6.7c-.1.1-.2.3-.1.5.5 1 1.6 2.2 3 2.8.2.1.4 0 .5-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.3.3.3.5-.1 1-.7 1.7-1.7 1.9-1.6.3-4.2-.7-6.2-3-1.7-1.9-2.2-3.5-1.7-4.8Z" fill="#fff"/></svg>
+    <span dir="ltr">055-7717525</span>
+  </div>
+  <div id="webBtn" class="btn"><span dir="ltr">etel-clinic.com/book.html</span></div>
+  <div id="bio">או בלחיצה על הקישור בביו ✨</div>
+  <div id="addr">מתחם SOHO, רחוב מפי 5, נתניה · מול IKEA</div>
+</div>
+<div id="disc" class="abs">להמחשה בלבד · אינו מהווה ייעוץ רפואי או התחייבות לתוצאה · התמונה נוצרה ב-AI</div>
+
+<script>
+const PHOTO = "assets/face.jpg";
+const ZONES = [
+  {label:'מצח ואזור עיניים', cx:455, cy:300, r:'<ellipse cx="455" cy="250" rx="185" ry="68"/><ellipse cx="350" cy="410" rx="88" ry="50"/><ellipse cx="558" cy="410" rx="88" ry="50"/>'},
+  {label:'לחיים ומרכז פנים', cx:310, cy:545, r:'<ellipse cx="310" cy="545" rx="68" ry="82"/><ellipse cx="600" cy="545" rx="68" ry="82"/>'},
+  {label:'שפתיים', cx:456, cy:652, r:'<ellipse cx="456" cy="652" rx="100" ry="42"/>'},
+  {label:'קו לסת וסנטר', cx:456, cy:748, r:'<ellipse cx="456" cy="748" rx="72" ry="42"/><path d="M268 610Q284 716 410 788L414 764Q322 708 302 610Z"/><path d="M642 610Q626 716 500 788L496 764Q588 708 608 610Z"/>'},
+  {label:'צוואר', cx:456, cy:905, r:'<path d="M308 840L290 975H622L604 840Q456 892 308 840Z"/>'},
+  {label:'איכות עור וזוהר', cx:625, cy:320, r:'<path d="M455 150C600 150 670 260 668 430C666 600 600 760 455 800C310 760 244 600 242 430C240 260 310 150 455 150Z"/>'}
+];
+const STEPS = ['בחירת אזורים','המטרה האסתטית','סגנון אישי וניסיון','מתי להתקדם','פרטים + WhatsApp מוכן'];
+
+// build face svg
+const card = document.getElementById('card');
+card.innerHTML = `<svg viewBox="0 0 896 1120"><image href="${PHOTO}" width="896" height="1120" preserveAspectRatio="xMidYMid slice"/>`+
+  ZONES.map((z,i)=>`<g id="z${i}"><g class="fz" id="fz${i}">${z.r}</g>
+    <circle id="ring${i}" class="pulse" cx="${z.cx}" cy="${z.cy}" r="27" fill="#B89768" opacity="0"/>
+    <circle id="dot${i}" cx="${z.cx}" cy="${z.cy}" r="19" fill="#fff" stroke="#B89768" stroke-width="4" opacity="0"/>
+    <circle id="core${i}" cx="${z.cx}" cy="${z.cy}" r="8" fill="#B89768" opacity="0"/></g>`).join('')+`</svg>`;
+
+// steps rows
+const stepsEl = document.getElementById('steps');
+stepsEl.innerHTML = STEPS.map((s,i)=>`<div class="row${i==4?' last':''}" id="row${i}"><div class="num">${i+1}</div><div>${s}</div></div>`).join('');
+
+const $ = id => document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease=x=>1-Math.pow(1-clamp(x),3);
+const ramp=(t,a,b)=>ease((t-a)/(b-a));
+// visibility with fade in at a, fade out at b
+const win=(t,a,b,f=.45)=>Math.min(ramp(t,a,a+f),1-ramp(t,b-f,b));
+const show=(el,o,y=0,s=1)=>{el.style.opacity=o;el.style.transform=`translateY(${y}px) scale(${s})`;};
+
+const T_ZONE0=2.9, T_STEP=0.85;
+function render(t){
+  // brand always on
+  show($('brand'),ramp(t,0,.6),(1-ramp(t,0,.6))*-20);
+  // headlines
+  show($('h1'),win(t,.3,2.7),(1-ramp(t,.3,.8))*30);
+  show($('h2'),win(t,2.6,9.2),(1-ramp(t,2.6,3.1))*30);
+  // card
+  const cardIn=ramp(t,.6,1.4), cardOut=ramp(t,9.0,9.7);
+  show($('card'),cardIn*(1-cardOut),(1-cardIn)*60+cardOut*-40,1-cardOut*.06);
+  // zones
+  let shown=0,current=-1;
+  ZONES.forEach((z,i)=>{
+    const t0=T_ZONE0+i*T_STEP;
+    const dotO=ramp(t,1.5+i*.12,2.0+i*.12);           // dots appear early
+    const act=ramp(t,t0,t0+.4);
+    if(t>=t0){shown++;current=i;}
+    $('dot'+i).setAttribute('opacity',dotO);
+    $('core'+i).setAttribute('opacity',dotO);
+    const ringO=act>0? (.55*(1-((t*1.2)%1))) : .45*(.5+.5*Math.sin(t*4+i));
+    const ring=$('ring'+i);
+    ring.setAttribute('opacity',dotO*ringO);
+    ring.style.transform=`scale(${1+((t*1.2+i*.2)%1)*1.4})`;
+    $('dot'+i).setAttribute('fill',act>.5?'#A17F4E':'#fff');
+    $('core'+i).setAttribute('fill',act>.5?'#fff':'#B89768');
+    const fz=$('fz'+i);
+    fz.style.fill=`rgba(184,151,104,${(i===5?.14:.46)*act})`;
+    fz.style.stroke=`rgba(255,255,255,${.95*act})`;
+  });
+  // chip + counter
+  const chipO=ramp(t,T_ZONE0-.2,T_ZONE0+.2)*(1-cardOut);
+  show($('chip'),chipO,0);
+  if(current>=0){$('chipTxt').textContent=ZONES[current].label;}
+  const lastT=T_ZONE0+(ZONES.length-1)*T_STEP;
+  show($('count'),chipO,0);
+  $('count').textContent='אזורים שנבחרו: '+shown;
+  // steps scene
+  show($('h3'),win(t,9.4,12.9),(1-ramp(t,9.4,9.9))*30);
+  STEPS.forEach((s,i)=>{
+    const a=9.9+i*.42;
+    const o=ramp(t,a,a+.4)*(1-ramp(t,12.5,13.0));
+    show($('row'+i),o,(1-ramp(t,a,a+.4))*40);
+  });
+  show($('steps'),1,0);
+  // cta
+  const ctaO=ramp(t,13.1,13.8);
+  show($('cta'),ctaO,(1-ctaO)*40);
+  const wa=$('waBtn');
+  wa.style.transform=`scale(${1+(t>14.4?0.025*Math.sin((t-14.4)*6):0)})`;
+  show($('disc'),ctaO*.9,0);
+  // hide headline gap fix: h2 dims
+}
+window.__start=()=>{const s=performance.now();const loop=()=>{render((performance.now()-s)/1000);requestAnimationFrame(loop)};loop();window.__t0=s};
+render(0);
+// static debug: ?t=seconds
+const q=new URLSearchParams(location.search).get('t');
+if(q!==null){render(parseFloat(q));}
+</script>
+</body>
+</html>
