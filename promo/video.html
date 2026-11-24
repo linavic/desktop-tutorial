@@ -115,15 +115,15 @@ const ramp=(t,a,b)=>ease((t-a)/(b-a));
 const win=(t,a,b,f=.45)=>Math.min(ramp(t,a,a+f),1-ramp(t,b-f,b));
 const show=(el,o,y=0,s=1)=>{el.style.opacity=o;el.style.transform=`translateY(${y}px) scale(${s})`;};
 
-const T_ZONE0=2.9, T_STEP=0.85;
+const T_ZONE0=3.6, T_STEP=1.0;
 function render(t){
   // brand always on
   show($('brand'),ramp(t,0,.6),(1-ramp(t,0,.6))*-20);
   // headlines
-  show($('h1'),win(t,.3,2.7),(1-ramp(t,.3,.8))*30);
-  show($('h2'),win(t,2.6,9.2),(1-ramp(t,2.6,3.1))*30);
+  show($('h1'),win(t,.3,3.5),(1-ramp(t,.3,.8))*30);
+  show($('h2'),win(t,3.3,12.2),(1-ramp(t,3.3,3.8))*30);
   // card
-  const cardIn=ramp(t,.6,1.4), cardOut=ramp(t,9.0,9.7);
+  const cardIn=ramp(t,.6,1.4), cardOut=ramp(t,11.8,12.5);
   show($('card'),cardIn*(1-cardOut),(1-cardIn)*60+cardOut*-40,1-cardOut*.06);
   // zones
   let shown=0,current=-1;
@@ -152,18 +152,18 @@ function render(t){
   show($('count'),chipO,0);
   $('count').textContent='אזורים שנבחרו: '+shown;
   // steps scene
-  show($('h3'),win(t,9.4,12.9),(1-ramp(t,9.4,9.9))*30);
+  show($('h3'),win(t,12.3,17.9),(1-ramp(t,12.3,12.8))*30);
   STEPS.forEach((s,i)=>{
-    const a=9.9+i*.42;
-    const o=ramp(t,a,a+.4)*(1-ramp(t,12.5,13.0));
+    const a=12.9+i*.62;
+    const o=ramp(t,a,a+.4)*(1-ramp(t,17.4,17.9));
     show($('row'+i),o,(1-ramp(t,a,a+.4))*40);
   });
   show($('steps'),1,0);
   // cta
-  const ctaO=ramp(t,13.1,13.8);
+  const ctaO=ramp(t,18.0,18.8);
   show($('cta'),ctaO,(1-ctaO)*40);
   const wa=$('waBtn');
-  wa.style.transform=`scale(${1+(t>14.4?0.025*Math.sin((t-14.4)*6):0)})`;
+  wa.style.transform=`scale(${1+(t>19.6?0.025*Math.sin((t-19.6)*6):0)})`;
   show($('disc'),ctaO*.9,0);
   // hide headline gap fix: h2 dims
 }
